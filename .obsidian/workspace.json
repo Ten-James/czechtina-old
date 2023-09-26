@@ -148,16 +148,16 @@
   },
   "active": "33dc0471a61fef18",
   "lastOpenFiles": [
+    "test/t2.c",
+    "test/t1 copy.c",
+    "build/t1",
+    "test/t1.c",
+    "test",
     "src/boolean/main.czh",
     "src/boolean",
     "src/core/operators.czh",
     "src/core/include.czh",
     "src/core/types.czh",
-    "src/boloean/main.czh",
-    "src/boloean",
-    "src/core/keywords.czh",
-    "src/core/podminky.czh",
-    "src/core",
-    "src/libs/stdio.czh"
+    "src/boloean/main.czh"
   ]
 }

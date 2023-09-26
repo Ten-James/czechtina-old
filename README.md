@@ -11,7 +11,7 @@ czechtina is completly valid to write in c.
 #include "czechtina.h"
 
 cele zacatek bal pak
-    vypisaj zabal "Hello World!" rozbal kafe
+    vypisaj rozbal "Hello World!" zabal kafe
     finito
 potom
 
