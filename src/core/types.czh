@@ -1,2 +1,9 @@
 @ cele int
 @ desetinne float
+@ znak char
+@ ukazovatko *
+
+
+@ structura struct
+@ vycet enum
+@ unie union

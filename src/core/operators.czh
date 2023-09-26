@@ -1,8 +1,11 @@
 @ je =
 @ jepresne ==
 @ jepresnevetsi >=
+@ jevetsi >
 @ jepresnemensi <=
+@ jemensi <
 @ odecti -=
+@ pricti +=
 
 @ krat *
 @ plus +

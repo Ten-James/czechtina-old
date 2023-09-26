@@ -4,12 +4,33 @@
 
 @ opakuj for
 
+@ delej do
 @ dokud while
 @ veget break
+@ pokracuj continue
+@ zeby case
+@ vyber switch
+@ vychozi default
+@ vrat return
+
+@ velikost sizeof
+
+@ bezznamenkove unsigned
+@ znamenkove signed
+
+@ dlouhe long
+@ kratke short
+
+@ vnejsi extern
+@ staticky static
+@ konstantni const
+
+@ definuj typedef
+
 
 @ bal ()
-@ zabal (
-@ rozbal )
+@ rozbal (
+@ zabal )
 @ potom {
 @ pak }
 
