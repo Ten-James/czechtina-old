@@ -1,0 +1,14 @@
+#ifndef CESTINA
+@ CESTINA
+
+@ zacatek main
+@ finito return 0;
+@ kafe ;
+
+@include "libs/stdio.czh"
+
+@include "core/include.czh"
+
+@include "boolean/main.czh"
+
+#endif

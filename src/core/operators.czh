@@ -1,0 +1,8 @@
+@ je =
+@ jepresne ==
+@ jepresnevetsi >=
+@ jepresnemensi <=
+@ odecti -=
+
+@ krat *
+@ plus +
