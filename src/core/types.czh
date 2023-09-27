@@ -1,4 +1,7 @@
-@ cele int
+@ int
+- cele
+- cela
+
 @ desetinne float
 @ znak char
 @ ukazovatko *

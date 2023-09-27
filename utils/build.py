@@ -7,6 +7,22 @@ BUILD_FILE = f"{BUILD_FOLDER}/czechtina.h"
 
 
 content= ""
+defined=""
+
+def proccessInclude(line, path):
+    arg = line.split(" ")[1].strip().replace("\"", "").split("/")
+    newPath = "/".join(arg[:-1])
+    if newPath != "":
+        newPath = f"/{newPath}"
+    addFileToContent(path+newPath, arg[-1])
+
+def proccessDefine(line, singleLine=True):
+    global content, defined
+    if singleLine:
+        content += line.replace("@", "#define", 1)
+    else:
+        defined = line.split(" ")[1].strip()
+
 
 def addFileToContent(path, name):
     global content
@@ -14,20 +30,16 @@ def addFileToContent(path, name):
     newcontent = [line for line in newcontent if not line.startswith("//")]
     if DEBUG:
         content = f"{content}\n//DEBUG - {path}/{name}"
-    content = content + "\n"
+    content += "\n"
     for line in newcontent:
         if (line.startswith("@include")):
-            arg = line.split(" ")[1].strip().replace("\"", "").split("/")
-            newPath = "/".join(arg[:-1])
-            if newPath != "":
-                newPath = f"/{newPath}"
-            addFileToContent(path+newPath, arg[-1])
-            continue
-        if (line.startswith("@")):
-            content = content + line.replace("@", "#define", 1)
-            continue
-        
-        content = content + line
+            proccessInclude(line, path)
+        elif (line.startswith("@ ")):
+            proccessDefine(line, len(line.split(" ")) == 3)
+        elif (line.startswith("- ")):
+            content += line.replace("-", "#define", 1).replace("\n","") + f" {defined}\n"
+        else:
+            content += line
 
 
 
