@@ -1,5 +1,10 @@
-@ pokud if
+@ if
+- pokud
+- kdyz
+- kdyby
+
 @ nebokdyby else if
+@ nebokdyz else if
 @ nebo else
 
 @ opakuj for
@@ -23,7 +28,11 @@
 
 @ vnejsi extern
 @ staticky static
-@ konstantni const
+
+@ const
+- konstantni
+- konstanta
+- napevno
 
 @ definuj typedef
 

@@ -2,9 +2,14 @@
 - cele
 - cela
 
-@ desetinne float
+@ float
+- desetinne
+- desetinna
+
 @ znak char
-@ ukazovatko *
+@ *
+- ukazovatko
+- ukazatel
 
 
 @ structura struct
