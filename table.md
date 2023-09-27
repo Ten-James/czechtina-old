@@ -1,7 +1,8 @@
 | Anglický název | Český název |
 | ----------- | -------------- |
+|  | a |
 | ! | neguj, negace, ne |
-| !! | nebo |
+| !! | anebo |
 | % | zbytkac |
 | && | azaroven |
 | ( | rozbal |
@@ -27,7 +28,7 @@
 | continue | pokracuj |
 | default | vychozi |
 | do | delej |
-| else | nebo |
+| else | nebokdyby, nebokdyz, nebo |
 | enum | vycet |
 | extern | vnejsi |
 | float | desetinne, desetinna |
@@ -37,7 +38,7 @@
 | long | dlouhe |
 | main | zacatek |
 | printf | vypisaj, vypis, napis |
-| return | vrat |
+| return | finito, vrat |
 | short | kratke |
 | signed | znamenkove |
 | sizeof | velikost |
