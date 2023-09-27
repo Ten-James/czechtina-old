@@ -2,7 +2,6 @@
 | ----------- | -------------- |
 |  | a |
 | ! | neguj, negace, ne |
-| !! | anebo |
 | % | zbytkac |
 | && | azaroven |
 | ( | rozbal |
@@ -28,7 +27,7 @@
 | continue | pokracuj |
 | default | vychozi |
 | do | delej |
-| else | nebokdyby, nebokdyz, nebo |
+| else | nebokdyby, nebokdyz, nebo, jinak |
 | enum | vycet |
 | extern | vnejsi |
 | float | desetinne, desetinna |
@@ -50,4 +49,5 @@
 | unsigned | bezznamenkove |
 | while | dokud |
 | { | potom |
+| || | anebo |
 | } | pak |
