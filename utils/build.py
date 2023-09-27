@@ -18,12 +18,12 @@ def proccessInclude(line, path):
         newPath = f"/{newPath}"
     addFileToContent(path+newPath, arg[-1])
 
-def proccessDefine(line, singleLine=True):
+def proccessDefine(line, multiLine=True):
     global content, defined
-    if singleLine:
-        content += line.replace("@", "#define", 1)
-    else:
+    if multiLine:
         defined = line.split(" ")[1].strip()
+    else:
+        content += line.replace("@", "#define", 1)
 
 
 def addFileToContent(path, name):
@@ -37,7 +37,7 @@ def addFileToContent(path, name):
         if (line.startswith("@include")):
             proccessInclude(line, path)
         elif (line.startswith("@ ")):
-            proccessDefine(line, len(line.split(" ")) == 3)
+            proccessDefine(line, len(line.split(" ")) == 2)
         elif (line.startswith("- ")):
             content += line.replace("-", "#define", 1).replace("\n","") + f" {defined}\n"
         else:

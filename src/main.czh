@@ -4,6 +4,7 @@
 @ zacatek main
 @ finito return 0;
 @ kafe ;
+@ a  
 
 @include "libs/stdio.czh"
 
