@@ -5,7 +5,10 @@
 
 @ nebokdyby else if
 @ nebokdyz else if
-@ nebo else
+
+@ else
+- nebo
+- jinak
 
 @ opakuj for
 
