@@ -1,9 +1,25 @@
 @ je =
-@ jepresne ==
-@ jepresnevetsi >=
-@ jevetsi >
-@ jepresnemensi <=
-@ jemensi <
+
+@ ==
+- jepresne
+- presneje
+
+@ >=
+- jepresnevetsi
+- presnevetsije
+
+@ >
+- jevetsi
+- vetsije
+
+@ <=
+- jepresnemensi
+- presnemensije
+
+@ <
+- jemensi
+- mensije
+
 @ odecti -=
 @ pricti +=
 

@@ -1,7 +1,15 @@
-@ cele int
-@ desetinne float
+@ int
+- cele
+- cela
+
+@ float
+- desetinne
+- desetinna
+
 @ znak char
-@ ukazovatko *
+@ *
+- ukazovatko
+- ukazatel
 
 
 @ structura struct
