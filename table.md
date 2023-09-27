@@ -2,6 +2,7 @@
 | ----------- | -------------- |
 | ! | neguj, negace, ne |
 | !! | nebo |
+| % | zbytkac |
 | && | azaroven |
 | ( | rozbal |
 | () | bal |
@@ -9,7 +10,9 @@
 | * | ukazovatko, ukazatel, krat |
 | + | plus |
 | += | pricti |
+| - | minus |
 | -= | odecti |
+| / | deleno |
 | ; | kafe |
 | < | jemensi, mensije |
 | <= | jepresnemensi, presnemensije |
