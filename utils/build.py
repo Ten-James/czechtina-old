@@ -52,10 +52,12 @@ def writeTable():
     for line in content.split("\n"):
         if line.startswith("#define"):
             line = line.split(" ")
-            if line[2] in dic:
-                dic[line[2]].append(line[1])
+            value = line[1]
+            key = " ".join(line[2:])
+            if key in dic:
+                dic[key].append(value)
             else:
-                dic[line[2]] = [line[1]]
+                dic[key] = [value]
     # sort dictionary
     dic = {k: v for k, v in sorted(dic.items(), key=lambda item: item[0])}
     # write to file
