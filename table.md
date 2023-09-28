@@ -1,55 +1,55 @@
 | Anglický název | Český název |
 | ----------- | -------------- |
-|   | a |
-| ! | neguj, negace, ne |
-| % | zbytkac |
-| && | azaroven |
-| ( | rozbal |
-| () | bal |
-| ) | zabal |
-| * | ukazovatko, ukazatel, krat |
-| + | plus |
-| += | pricti |
-| - | minus |
-| -= | odecti |
-| / | deleno |
+| main | zacatek |
+| return 0; | finito |
 | ; | kafe |
-| < | jemensi, mensije |
-| <= | jepresnemensi, presnemensije |
+|  | a |
+| printf | vypisaj, vypis, napis |
+| if | pokud, kdyz, kdyby |
+| else if | nebokdyby, nebokdyz |
+| else | nebo, jinak |
+| for | opakuj |
+| do | delej |
+| while | dokud |
+| break | veget |
+| continue | pokracuj |
+| case | zeby |
+| switch | vyber |
+| default | vychozi |
+| return | vrat |
+| sizeof | velikost |
+| unsigned | bezznamenkove |
+| signed | znamenkove |
+| long | dlouhe |
+| short | kratke |
+| extern | vnejsi |
+| static | staticky |
+| const | konstantni, konstanta, napevno |
+| typedef | definuj |
+| () | bal |
+| ( | rozbal |
+| ) | zabal |
+| { | potom |
+| } | pak |
+| int | cele, cela |
+| float | desetinne, desetinna |
+| char | znak |
+| * | ukazovatko, ukazatel, krat |
+| struct | structura |
+| enum | vycet |
+| union | unie |
 | = | je |
 | == | jepresne, presneje |
-| > | jevetsi, vetsije |
 | >= | jepresnevetsi, presnevetsije |
-| break | veget |
-| case | zeby |
-| char | znak |
-| const | konstantni, konstanta, napevno |
-| continue | pokracuj |
-| default | vychozi |
-| do | delej |
-| else | nebo, jinak |
-| else if | nebokdyby, nebokdyz |
-| enum | vycet |
-| extern | vnejsi |
-| float | desetinne, desetinna |
-| for | opakuj |
-| if | pokud, kdyz, kdyby |
-| int | cele, cela |
-| long | dlouhe |
-| main | zacatek |
-| printf | vypisaj, vypis, napis |
-| return | vrat |
-| return 0; | finito |
-| short | kratke |
-| signed | znamenkove |
-| sizeof | velikost |
-| static | staticky |
-| struct | structura |
-| switch | vyber |
-| typedef | definuj |
-| union | unie |
-| unsigned | bezznamenkove |
-| while | dokud |
-| { | potom |
+| > | jevetsi, vetsije |
+| <= | jepresnemensi, presnemensije |
+| < | jemensi, mensije |
+| -= | odecti |
+| += | pricti |
+| + | plus |
+| - | minus |
+| % | zbytkac |
+| / | deleno |
+| && | azaroven |
 | || | anebo |
-| } | pak |
+| ! | neguj, negace, ne |
