@@ -1,15 +1,18 @@
-@ int
+@@ int
 - cele
 - cela
 
-@ float
+@@ float
 - desetinne
 - desetinna
 
 @ znak char
-@ *
+
+@@ *
 - ukazovatko
 - ukazatel
+i had to done this shit xd
+- krat
 
 
 @ structura struct

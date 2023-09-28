@@ -1,29 +1,28 @@
 @ je =
 
-@ ==
+@@ ==
 - jepresne
 - presneje
 
-@ >=
+@@ >=
 - jepresnevetsi
 - presnevetsije
 
-@ >
+@@ >
 - jevetsi
 - vetsije
 
-@ <=
+@@ <=
 - jepresnemensi
 - presnemensije
 
-@ <
+@@ <
 - jemensi
 - mensije
 
 @ odecti -=
 @ pricti +=
 
-@ krat *
 @ plus +
 @ minus -
 @ zbytkac %

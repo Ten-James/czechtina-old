@@ -1,12 +1,13 @@
-@ if
+@@ if
 - pokud
 - kdyz
 - kdyby
 
-@ nebokdyby else if
-@ nebokdyz else if
+@@ else if
+- nebokdyby 
+- nebokdyz
 
-@ else
+@@ else
 - nebo
 - jinak
 
@@ -32,7 +33,7 @@
 @ vnejsi extern
 @ staticky static
 
-@ const
+@@ const
 - konstantni
 - konstanta
 - napevno
