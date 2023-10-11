@@ -25,7 +25,6 @@ fun main(args: Array<String>) {
     var withoutExtension = file.substring(0, file.length - 3)
     val code = File(file).readText()
 
-    println(code)
 
     val czechtina = czechtinaLesana()
     val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
