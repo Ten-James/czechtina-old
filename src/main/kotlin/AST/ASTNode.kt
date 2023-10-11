@@ -1,13 +1,6 @@
 package AST
 
-open class ASTNode {
-    var type:String
+open abstract class ASTNode {
 
-    constructor(type:String) {
-        this.type = type
-    }
-
-    override fun toString(): String {
-        return "\nNode ('$type')"
-    }
+    abstract fun toC(): String
 }

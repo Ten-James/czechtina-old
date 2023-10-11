@@ -2,65 +2,66 @@ import AST.*
 import cz.j_jzk.klang.input.InputFactory
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.r_expression
+import cz.j_jzk.klang.prales.useful.list
+import czechtina.*
+import czechtina.lesana.czechtinaLesana
+import java.io.BufferedReader
+import java.io.File
+import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
 
-    val code = """main {
-            char a;
-            a = 't' + 1 + 2 * 3 / 1 - 4;
+    if (args.any() { it == "--help" })
+        return println("""Usage: java -jar czechtina.jar [input file].cz [options]
+            |Options:
+            |   --help          Show this help
+            |   --no-compile    Do not compile the output C code, it will be created in the same directory as the input file
+            |   --show-tree     Show the AST tree
+            |   --fpeterek      Uses macros from old czechtina.h file
+        """.trimMargin())
+
+    //create file with name of input file in current directory
+    val file = args.firstOrNull() ?: return println("No input file specified")
+    var withoutExtension = file.substring(0, file.length - 3)
+    val code = File(file).readText()
+
+    println(code)
+
+    val czechtina = czechtinaLesana()
+    val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
+
+    if (args.any() { it == "--show-tree" }) {
+        println(tree.toString())
+    }
+
+    val cCode = tree.toC()
+
+    File("$withoutExtension.c").writeText(cCode)
+    if (args.any() { it == "--no-compile" }) {
+        return
+    }
+
+
+
+
+    val command = "gcc $withoutExtension.c -o $withoutExtension.exe"
+
+    try {
+        val process = ProcessBuilder()
+            .command("bash", "-c", command)
+            .redirectErrorStream(true)
+            .start()
+
+        val reader = BufferedReader(InputStreamReader(process.inputStream))
+        var line: String?
+
+        while (reader.readLine().also { line = it } != null) {
+            println(line)
         }
-        """.trimMargin()
 
-    val czechtinaLesana = lesana<Any> {
-        val types = NodeID<ASTUnaryNode>("types")
-        val variables = NodeID<ASTUnaryNode>("variables")
-        val operands = NodeID<String>("operands")
-        val endOfLine = re(";")
-        val program = NodeID<ASTNode>("program")
-        val programLines = NodeID<ASTProgramLines>("programLines")
-        val line = NodeID<ASTNode>("line")
-        val r_expression = include(r_expression(variables))
-
-        types to def(re("int|void|char|float|double")) { ASTUnaryNode("type", it.v1) }
-
-        operands to def(re("=|\\+=|-=|/=|\\*=|%=")) { it.v1 }
-
-        line to def(
-            types,
-            variables,
-            endOfLine
-        ) { (t, v) -> ASTBinaryNode("var_definition", t, v) }
-
-        line to def(
-            types,
-            variables,
-            operands,
-            r_expression,
-            endOfLine
-        ) { (t, v, o, l) -> ASTOperandNode(o, ASTBinaryNode("var_definition", t, v), l) }
-
-        line to def(
-            variables,
-            operands,
-            r_expression,
-            endOfLine
-        ) { (v, o, l) -> ASTOperandNode(o, v, l) }
-
-        programLines to def(line, programLines) { ASTProgramLines(listOf(it.v1) + it.v2.programLines) }
-        programLines to def(line) { ASTProgramLines(listOf(it.v1)) }
-
-        program to def(re("main"), re("{"), programLines, re("}")) { ASTUnaryNode("program", it.v3) }
-
-        setTopNode(program)
-        variables to def(re("[a-zA-Z][a-zA-Z0-9]*")) { ASTUnaryNode("variable", it.v1) }
-
-        ignoreRegexes("[ \t\n]")
-
-        onUnexpectedToken { err ->
-            println(err)
-        }
-    }.getLesana()
-
-    println(czechtinaLesana.parse(InputFactory.fromString(code, "code")))
+        val exitCode = process.waitFor()
+        println("Exited with error code $exitCode")
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
