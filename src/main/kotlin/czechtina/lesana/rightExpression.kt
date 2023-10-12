@@ -33,6 +33,9 @@ fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana<ASTNode> {
     exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2) }
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2) }
 
+
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2) }
+
     functionCalling to def(variables, variables) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
     functionCalling to def(variables, exp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
     functionCalling to def(variables, listexp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }

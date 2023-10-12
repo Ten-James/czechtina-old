@@ -9,7 +9,7 @@ class ASTProgramLines : ASTNode {
 
 
     override fun toString(): String {
-        return "\nLines:\n" + programLines.joinToString("").replace("\n", "\n\t")
+        return "Lines:\n${programLines.joinToString("").replace("\n", "\n\t")}\n"
     }
 
     override fun toC(): String = programLines.joinToString(";\n") { it.toC() }+";"

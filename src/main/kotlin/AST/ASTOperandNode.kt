@@ -11,7 +11,7 @@ class ASTOperandNode : ASTBinaryNode {
     }
 
     override fun toString(): String {
-        return "\n'$operand', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}"
+        return "'$operand', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}\n"
     }
 
     override fun toC(): String = when (operand) {

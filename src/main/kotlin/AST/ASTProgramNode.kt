@@ -23,7 +23,7 @@ class ASTProgramNode : ASTNode {
     }
 
     override fun toString(): String {
-        return "\nImports:\n" + imports.joinToString("\n") +"Functions:\n" + functions.joinToString("\n") + "\n-----------------\nMain:\n" + main.toString()
+        return "Imports:\n" + imports.joinToString("\n") +"\nFunctions:\n" + functions.joinToString("\n") + "\n-----------------\nMain:\n" + main.toString()
 
     }
 
