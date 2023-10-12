@@ -86,20 +86,27 @@ fce1 cele x je cele x krat 2;
 
 [Table here](table.md)
 
-## Building header file
-
-```bash
-python utils/build.py
-```
-
 ## building compiler
 
 TODO - use intelij xd
 
+## Using Compiler
+
+```bash
+java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-dir build
+```
+
+- **arg[0]** - Path to file with main function
+- **--help** - Show this help
+- **--no-compile** - Do not compile the output C code, it will be created in the same directory as the input file
+- **--show-tree** - Show the AST tree
+- **--fpeterek** - Uses macros from old czechtina.h file
+- **--friendly** - Generate valid C without macros in comment bellow code
+- **--set-dir** - Set dir for file creation
+
 ## TODO
 
 - Loops
-- fpeterek 
 - Writing \n
 - linking files
 - std lib

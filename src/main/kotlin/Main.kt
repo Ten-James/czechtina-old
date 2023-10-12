@@ -1,9 +1,11 @@
 import AST.*
+import compiler.Compiler
 import cz.j_jzk.klang.input.InputFactory
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import cz.j_jzk.klang.prales.useful.list
 import czechtina.*
+import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import java.io.BufferedReader
 import java.io.File
@@ -18,7 +20,18 @@ fun main(args: Array<String>) {
             |   --no-compile    Do not compile the output C code, it will be created in the same directory as the input file
             |   --show-tree     Show the AST tree
             |   --fpeterek      Uses macros from old czechtina.h file
+            |   --friendly      Generate valid C without macros in comment bellow code
+            |   --set-dir       Set dir for file creation
         """.trimMargin())
+
+    if (args.any(){it == "--fpeterek"}) {
+        Compiler.setToCZ()
+    }
+
+    val setDirIndex = args.indexOf("--set-dir")
+    if (setDirIndex != -1 && setDirIndex != args.size -1) {
+        Compiler.buildPath= args[setDirIndex+1] + "/"
+    }
 
     //create file with name of input file in current directory
     val file = args.firstOrNull() ?: return println("No input file specified")
@@ -33,9 +46,22 @@ fun main(args: Array<String>) {
         println(tree.toString())
     }
 
-    val cCode = tree.toC()
+    var cCode = tree.toC()
 
-    File("$withoutExtension.c").writeText(cCode)
+    if (Compiler.compilingTo == "CZ") {
+        cCode = "#define \"czechtina.h\"\n$cCode"
+        createCzechtinaDefineFile()
+    }
+
+    if (args.any { it == "--friendly" }) {
+        if (Compiler.compilingTo != "C") {
+            Compiler.setToC()
+            cCode += "\n/*\n ${tree.toC()} \n*/"
+        }
+    }
+
+
+    File("${Compiler.buildPath}$withoutExtension.c").writeText(cCode)
     if (args.any() { it == "--no-compile" }) {
         return
     }
@@ -43,7 +69,7 @@ fun main(args: Array<String>) {
 
 
 
-    val command = "gcc $withoutExtension.c -o $withoutExtension.exe"
+    val command = "gcc ${Compiler.buildPath}$withoutExtension.c -o ${Compiler.buildPath}$withoutExtension"
 
     try {
         val process = ProcessBuilder()

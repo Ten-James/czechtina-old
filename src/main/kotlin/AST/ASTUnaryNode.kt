@@ -1,5 +1,6 @@
 package AST
 
+import compiler.Compiler
 import czechtina.C
 import czechtina.GrammarToken
 import czechtina.cTypeFromCzechtina
@@ -32,8 +33,8 @@ class ASTUnaryNode : ASTNode {
     override fun toC(): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
-        ASTUnaryTypes.TYPE -> cTypeFromCzechtina(data.toString())
-        ASTUnaryTypes.RETURN -> "${C[GrammarToken.KEYWORD_RETURN]} ${(data as ASTNode).toC()}"
+        ASTUnaryTypes.TYPE -> Compiler.typeFromCzechtina(data.toString())
+        ASTUnaryTypes.RETURN -> "${Compiler.grammar[GrammarToken.KEYWORD_RETURN]} ${(data as ASTNode).toC()}"
         ASTUnaryTypes.IMPORT -> "//xd ${data.toString()}"
         ASTUnaryTypes.IMPORT_C -> "#include \"${data.toString()}.h\""
         ASTUnaryTypes.BRACKET -> "(${(data as ASTNode).toC()})"

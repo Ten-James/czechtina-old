@@ -108,9 +108,60 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
 
+
+val CZ = mapOf<GrammarToken,String>(
+    GrammarToken.TYPE_VOID to "void",
+    GrammarToken.TYPE_INTEGER to "cele",
+    GrammarToken.TYPE_DECIMAL to "desetinne",
+    GrammarToken.TYPE_BOOLEAN to "bool",
+    GrammarToken.TYPE_CHAR to "znak",
+    GrammarToken.TYPE_POINTER to "ukazatel",
+    GrammarToken.OPERATOR_PLUS to "plus",
+    GrammarToken.OPERATOR_MINUS to "minus",
+    GrammarToken.OPERATOR_MULTIPLY to "krat",
+    GrammarToken.OPERATOR_DIVIDE to "deleno",
+    GrammarToken.OPERATOR_MODULO to "zbytkac",
+    GrammarToken.OPERATOR_ASSIGN to "je",
+    GrammarToken.OPERATOR_EQUAL to "jepresne",
+    GrammarToken.OPERATOR_NOT_EQUAL to "nenipresne",
+    GrammarToken.OPERATOR_LESS to "jemensi",
+    GrammarToken.OPERATOR_LESS_OR_EQUAL to "jepresnemensi",
+    GrammarToken.OPERATOR_GREATER to "jevetsi",
+    GrammarToken.OPERATOR_GREATER_OR_EQUAL to "jepresnevetsi",
+    GrammarToken.OPERATOR_AND to "azaroven",
+    GrammarToken.OPERATOR_OR to "anebo",
+    GrammarToken.OPERATOR_NOT to "ne",
+    GrammarToken.KEYWORD_IF to "pokud",
+    GrammarToken.KEYWORD_ELSE to "nebo",
+    GrammarToken.KEYWORD_WHILE to "dokud",
+    GrammarToken.KEYWORD_FOR to "opakuj",
+    GrammarToken.KEYWORD_RETURN to "vrat",
+    GrammarToken.KEYWORD_BREAK to "veget",
+    GrammarToken.KEYWORD_CONTINUE to "pokracuj",
+    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+)
+
 fun cTypeFromCzechtina (czechType: String): String {
     for (type in GrammarToken.values()) {
+        if (type == GrammarToken.VARIABLE)
+            continue
         var cValue = C.entries.find { it.key == type }?.value ?: ""
+        cValue = cValue.replace("\\", "")
+        if (Regex(czechtina[type]!!).matches(czechType))
+            return cValue
+
+        if (czechType == cValue)
+            return cValue
+    }
+    return ""
+}
+
+
+fun czTypeFromCzechtina (czechType: String): String {
+    for (type in GrammarToken.values()) {
+        if (type == GrammarToken.VARIABLE)
+            continue
+        var cValue = CZ.entries.find { it.key == type }?.value ?: ""
         cValue = cValue.replace("\\", "")
         if (Regex(czechtina[type]!!).matches(czechType))
             return cValue

@@ -1,5 +1,6 @@
 package AST
 
+import compiler.Compiler
 import czechtina.cTypeFromCzechtina
 
 class ASTOperandNode : ASTBinaryNode {
@@ -14,6 +15,6 @@ class ASTOperandNode : ASTBinaryNode {
     }
 
     override fun toC(): String = when (operand) {
-        else -> "${left?.toC()} ${cTypeFromCzechtina(operand)} ${right?.toC()}"
+        else -> "${left?.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
     }
 }
