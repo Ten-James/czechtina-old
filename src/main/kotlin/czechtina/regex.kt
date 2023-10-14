@@ -1,7 +1,5 @@
 package czechtina
 
-import cz.j_jzk.klang.prales.useful.list
-
 enum class GrammarToken {
     TYPE_VOID,
     TYPE_INTEGER,
@@ -10,7 +8,7 @@ enum class GrammarToken {
     TYPE_CHAR,
     TYPE_POINTER,
     TYPE_ADDRESS,
-    TYPE_POLE,
+    TYPE_ARRAY,
     OPERATOR_PLUS,
     OPERATOR_MINUS,
     OPERATOR_MULTIPLY,
@@ -68,7 +66,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.TYPE_CHAR to "znak",
     GrammarToken.TYPE_POINTER to "ukazatel",
     GrammarToken.TYPE_ADDRESS to "adresa",
-    GrammarToken.TYPE_POLE to "pole",
+    GrammarToken.TYPE_ARRAY to "pole",
     GrammarToken.OPERATOR_PLUS to "plus",
     GrammarToken.OPERATOR_MINUS to "minus",
     GrammarToken.OPERATOR_MULTIPLY to "krat",

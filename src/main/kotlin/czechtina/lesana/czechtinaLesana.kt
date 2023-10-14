@@ -16,7 +16,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val blockCode = NodeID<ASTUnaryNode>("blockCode")
     val programLines = NodeID<ASTProgramLines>("programLines")
     val line = NodeID<ASTNode>("line")
-    val varDefinition = NodeID<ASTBinaryNode>("varDefinition")
+    val varDefinition = NodeID<ASTNode>("varDefinition")
     val listableDefinition = include(listAble(listOf(varDefinition)))
     val import = NodeID<ASTUnaryNode>("import")
     val r_expression = include(rightExpression(variables))
@@ -46,6 +46,27 @@ fun czechtinaLesana() = lesana<ASTNode> {
         blockCode
     )
     { (_, v, _, t, _, min, def, max, block) -> ASTForNode(v, t, min, def, max, block) }
+
+
+    varDefinition to def(
+        variables,
+        re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
+        re(czechtina[GrammarToken.TYPE_ARRAY]!!),
+        re("<"),
+        types,
+        re(">")
+    ) { (v, _,_,_, t,_) -> ASTStaticArrayDefinitionNode(t, v, "") }
+
+    varDefinition to def(
+        variables,
+        re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
+        re(czechtina[GrammarToken.TYPE_ARRAY]!!),
+        re("<"),
+        types,
+        re(","),
+        re("[0-9]+"),
+        re(">")
+    ) { (v, _,_,_, t,_, s, _) -> ASTStaticArrayDefinitionNode(t, v, s) }
 
 
     varDefinition to def(
