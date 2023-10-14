@@ -1,10 +1,15 @@
 # Czechtina
 
-czechtina is precompiled language for C
+Czechtina is programming language based on C and czech language.
+
+Compiler is written in Kotlin using [Klang](https://github.com/j-jzk/klang) Library
+## Good to know
+
+Czechtina started as preprocesor language for C. I had to renamed it to czecheader.
 
 ## Example
 
-czechtina is completly valid to write in c.
+czecheader is completly valid to write in c.
 
 ```c
 #include <stdio.h>
@@ -67,7 +72,10 @@ int main() {
 
 ### Function Definition
 
-normal function definition
+main function has to exist for file to compile.
+
+Normal way
+
 ```cz
 fce1 cele x { cele
     y je x plus 2 kafe
@@ -75,31 +83,79 @@ fce1 cele x { cele
 }
 ```
 
-inline function definition
+Inline way
+
 ```cz
 fce1 cele x je cele x krat 2;
 ```
 
+Syntax:
+`<FUNC_NAME> ...params { <FUNC_RET_TYPE> ...lines }`
+`<FUNC_NAME> ...params je <FUNC_RET_TYPE> expression`
 
-For Loops
+### Function calling
+
+Without param 
+`zavolej <FUNC_NAME>`
+
+With param
+`<FUNC_NAME> ...paramas`
+
+Nested Calling
+`<FUNC_NAME> (<FUNC_NAME> ...params) ...params`
+
+
+
+### For Loops
 
 ```cz
 
 opakuj i:cele -> 1 az 10 {
+	//will be executed 0,1,2,3...8,9,10
+}
+
+opakuj i:cele -> 1 do 10 {
+	//will be executed 0,1,2,3...7,8,9
 }
 
 opakuj i:cele je 0; i < 10; i je i + 1 {
+	// like c
 }
 
 
 ```
 
+### Dump Types 
 
-## Table for czechtina.h
+#### Pointers
+
+Definition:
+`VAR_NAME: ukazatel<TYP>`
+To get address of variable use virtual Function adresa
+`adresa VAR_NAME` => `&VAR_NAME`
+
+#### Arrays
+`VAR_NAME: pole<TYP>`
+`VAR_NAME: pole<TYP, count>`
+
+### Importing 
+
+#### Importing C header files
+
+`pripoj c NAME`
+
+- NAME without .h extension
+- Import **lines must be on top of the file**
+#### Importing czechtina files
+*Preprocessor like link*
+
+TODO
+
+## Old Table for czecheader (czechtina.h)
 
 [Table here](table.md)
 
-## building compiler
+## Building compiler
 
 TODO - use intelij xd
 
@@ -126,10 +182,13 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - std lib
 - string anotation
 - structures
+- boolean operators
 - dynamic typing
 - range definition
+- preprocesor
 
 
 ## Credits
 
 Jonatan Lepik - assisstance on keywords **veget** and **bal**
+Jirka Ježek - Klang developer
