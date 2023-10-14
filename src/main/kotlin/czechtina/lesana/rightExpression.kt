@@ -19,6 +19,8 @@ fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana {
     val sentence = NodeID<ASTNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
+
+    exp1 to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTBinaryNode(ASTBinaryTypes.ARRAY_ACCESS, v, e) }
     exp1 to def(literals) { it.v1 }
 
     exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp1) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }

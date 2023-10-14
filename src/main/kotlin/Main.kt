@@ -36,7 +36,17 @@ fun main(args: Array<String>) {
     //create file with name of input file in current directory
     val file = args.firstOrNull() ?: return println("No input file specified")
     var withoutExtension = file.substring(0, file.length - 3)
-    val code = File(file).readText()
+    var code = File(file).readText()
+
+    val splitedCode = code.split("\"").toMutableList()
+
+    for (i in 0 until splitedCode.size) {
+        if (i % 2 == 0) continue
+        splitedCode[i] = splitedCode[i].replace("\\n", "\\\\n")
+        splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
+        splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
+    }
+    code = splitedCode.joinToString("\"")
 
 
     val czechtina = czechtinaLesana()
@@ -60,6 +70,7 @@ fun main(args: Array<String>) {
         }
     }
 
+    cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
 
     File("${Compiler.buildPath}$withoutExtension.c").writeText(cCode)
     if (args.any() { it == "--no-compile" }) {

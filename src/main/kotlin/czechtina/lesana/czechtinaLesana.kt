@@ -94,6 +94,11 @@ fun czechtinaLesana() = lesana<ASTNode> {
     ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, it.v2)) }
 
     line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
+        endOfLine
+    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, ASTUnaryNode(ASTUnaryTypes.LITERAL, ""))) }
+
+    line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,
         blockCode
