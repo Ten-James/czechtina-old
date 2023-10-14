@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.fos": "cpp",
+        "*.c": "c",
+        "czechtina.h": "c"
+    }
+}

@@ -1,9 +1,0 @@
-@<stdio.h>
-
-
-cele zacatek bal potom
-    vypisaj rozbal "Ahoj svete!\n" zabal kafe
-    pokud rozbal x jepresne 2 zabal
-        vypisaj rozbal "x je 2\n" zabal kafe
-    finito
-pak

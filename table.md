@@ -1,3 +1,7 @@
+
+This table is no longer valid,
+few things have been changed.
+
 | Anglický název | Český název |
 | ----------- | -------------- |
 | main | zacatek |
