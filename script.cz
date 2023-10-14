@@ -17,7 +17,7 @@ main {
         zavolej test;
     }
 
-    x:ukazatel<cele> je [ 0,1,2,3];
+    x:pole<cele> je [ 0,1,2,3];
     printf "%d", (adresa x) kafe
     vrat 0 kafe
 }
