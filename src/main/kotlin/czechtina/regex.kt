@@ -1,5 +1,7 @@
 package czechtina
 
+import cz.j_jzk.klang.prales.useful.list
+
 enum class GrammarToken {
     TYPE_VOID,
     TYPE_INTEGER,
@@ -24,16 +26,19 @@ enum class GrammarToken {
     OPERATOR_AND,
     OPERATOR_OR,
     OPERATOR_NOT,
+    OPERATOR_ITERATE,
     KEYWORD_IF,
     KEYWORD_ELSE,
     KEYWORD_WHILE,
     KEYWORD_FOR,
+    KEYWORD_FUNCTION_CALL,
     KEYWORD_RETURN,
     KEYWORD_BREAK,
     KEYWORD_CONTINUE,
     KEYWORD_VAR_DEFINITION,
     KEYWORD_IMPORT,
     KEYWORD_IMPORT_C,
+    KEYWORD_RANGE_DEFINITION,
     VARIABLE,
 }
 
@@ -44,6 +49,16 @@ val Alltypes = listOf(
     GrammarToken.TYPE_BOOLEAN,
     GrammarToken.TYPE_CHAR,
 )
+
+val AllComparation = listOf(
+    GrammarToken.OPERATOR_EQUAL,
+    GrammarToken.OPERATOR_NOT_EQUAL,
+    GrammarToken.OPERATOR_LESS,
+    GrammarToken.OPERATOR_LESS_OR_EQUAL,
+    GrammarToken.OPERATOR_GREATER,
+    GrammarToken.OPERATOR_GREATER_OR_EQUAL,
+)
+
 
 val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.TYPE_VOID to "void",
@@ -69,6 +84,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.OPERATOR_AND to "azaroven",
     GrammarToken.OPERATOR_OR to "anebo",
     GrammarToken.OPERATOR_NOT to "neni|ne",
+    GrammarToken.OPERATOR_ITERATE to "->",
     GrammarToken.KEYWORD_IF to "kdyz|pokud",
     GrammarToken.KEYWORD_ELSE to "jinak|nebo",
     GrammarToken.KEYWORD_WHILE to "dokud",
@@ -79,6 +95,8 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.KEYWORD_VAR_DEFINITION to ":",
     GrammarToken.KEYWORD_IMPORT to "pripoj cz",
     GrammarToken.KEYWORD_IMPORT_C to "pripoj c",
+    GrammarToken.KEYWORD_FUNCTION_CALL to "zavolej",
+    GrammarToken.KEYWORD_RANGE_DEFINITION to "do|az",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
 

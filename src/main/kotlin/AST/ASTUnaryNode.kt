@@ -14,10 +14,14 @@ enum class ASTUnaryTypes {
     IMPORT,
     IMPORT_C,
     BRACKET,
+    CURLY,
     SEMICOLON,
     JUST_C,
     ARRAY,
-    STRING
+    STRING,
+    IF,
+    ELSE,
+    NO_PARAM_CALL
 }
 class ASTUnaryNode : ASTNode {
     var type:ASTUnaryTypes? = null
@@ -42,9 +46,13 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.IMPORT_C -> "#include \"${data.toString()}.h\""
         ASTUnaryTypes.BRACKET -> "(${(data as ASTNode).toC()})"
         ASTUnaryTypes.ARRAY -> "{${(data as ASTNode).toC()}}"
+        ASTUnaryTypes.CURLY -> "{\n\t${(data as ASTNode).toC().replace("\n","\n\t")}\n}"
         ASTUnaryTypes.SEMICOLON -> "${(data as ASTNode).toC()};"
         ASTUnaryTypes.JUST_C -> (data as ASTNode).toC()
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
+        ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
+        ASTUnaryTypes.ELSE -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]}"
+        ASTUnaryTypes.NO_PARAM_CALL -> "${(data as ASTNode).toC()}()"
         else -> ""
     }
 }

@@ -13,6 +13,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val endOfLine = re(";|kafe")
     val main = NodeID<ASTFunctionNode>("main")
     val tFunction = NodeID<ASTFunctionNode>("function")
+    val blockCode = NodeID<ASTUnaryNode>("blockCode")
     val programLines = NodeID<ASTProgramLines>("programLines")
     val line = NodeID<ASTNode>("line")
     val varDefinition = NodeID<ASTBinaryNode>("varDefinition")
@@ -33,52 +34,78 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 
+    line to def (
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        variables,
+        re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
+        types,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        r_expression,
+        re(czechtina[GrammarToken.KEYWORD_RANGE_DEFINITION]!!),
+        r_expression,
+        blockCode
+    )
+    { (_, v, _, t, _, min, def, max, block) -> ASTForNode(v, t, min, def, max, block) }
+
+
     varDefinition to def(
         variables,
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
         types
     ) { (v, _, t) -> ASTBinaryNode(ASTBinaryTypes.VAR_DEFINITION, t, v) }
 
-
-
     line to def(
         varDefinition,
         endOfLine
-    ) { (v, _) -> v }
+    ) { (v, _) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, v) }
 
     line to def(
         varDefinition,
         operands,
         r_expression,
         endOfLine
-    ) { (v, o, l) -> ASTOperandNode(o, v, l) }
+    ) { (v, o, l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTOperandNode(o, v, l)) }
 
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
         r_expression,
         endOfLine
-    ) { ASTUnaryNode(ASTUnaryTypes.RETURN, it.v2) }
+    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, it.v2)) }
 
     line to def(
-        variables,
-        operands,
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,
-        endOfLine
-    ) { (v, o, l) -> ASTOperandNode(o, v, l) }
+        blockCode
+    ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.IF,exp), block) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        line,
+        r_expression,
+        endOfLine,
+        r_expression,
+        blockCode
+    ) {(_, begin,cond,_,step, block) -> ASTForNode(begin, cond, step, block) }
 
     line to def(
         r_expression,
         endOfLine
-    ) { (l) -> l }
+    ) { (l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, l) }
+
+
+    blockCode to def(re("{"), programLines, re("}")) {
+        ASTUnaryNode(ASTUnaryTypes.CURLY, it.v2)
+    }
+
 
     // MAIN FUNCTION
     main to def(
-        re("main"), re("{"), programLines, re("}")
+        re("main"), blockCode
     )
     {
         ASTFunctionNode(
             ASTUnaryNode(ASTUnaryTypes.TYPE, "cele"), it.v1,
-            emptyList(), it.v3
+            emptyList(), it.v2
         )
     }
 
@@ -95,7 +122,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     { (funName, varDef, _, retType, lines, _) ->
         ASTFunctionNode(
             retType, funName,
-            listOf(varDef), lines
+            listOf(varDef), ASTUnaryNode(ASTUnaryTypes.CURLY, lines)
         )
     }
     tFunction to def(
@@ -109,7 +136,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     { (funName, varDefs, _, retType, lines, _) ->
         ASTFunctionNode(
             retType, funName,
-            varDefs.nodes, lines
+            varDefs.nodes,  ASTUnaryNode(ASTUnaryTypes.CURLY, lines)
         )
     }
 
@@ -126,7 +153,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             listOf(varDef),
-            ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line))
+            ASTUnaryNode(ASTUnaryTypes.SEMICOLON,  ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
     tFunction to def(
@@ -141,7 +168,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             varDefs.nodes,
-            ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line))
+            ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -164,6 +191,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
     program to def(program, tFunction) { (program, func) -> program.appendFunction(func) }
 
     program to def(main) { ASTProgramNode(listOf(), listOf(), it.v1) }
+
+    line to def (blockCode) { it.v1 }
 
     setTopNode(program)
     ignoreRegexes("\\s")

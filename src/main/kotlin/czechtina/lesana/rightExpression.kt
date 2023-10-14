@@ -3,16 +3,19 @@ package czechtina.lesana
 import AST.*
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import cz.j_jzk.klang.prales.useful.list
+import czechtina.AllComparation
 import czechtina.GrammarToken
 import czechtina.cAndCzechtinaRegex
+import czechtina.czechtina
 
-fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana<ASTNode> {
+fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana {
     val literals = include(literals())
     val exp1 = NodeID<ASTNode>("expressions")
     val exp2 = NodeID<ASTNode>("expressions")
     val exp3 = NodeID<ASTNode>("expressions")
     val functionCalling = NodeID<ASTNode>("functionCalling")
+    var para1 = NodeID<ASTNode>("paragraph")
+    var para3 = NodeID<ASTNode>("paragraph")
     val sentence = NodeID<ASTNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
@@ -36,6 +39,8 @@ fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana<ASTNode> {
 
     exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2) }
 
+
+    functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTUnaryNode(ASTUnaryTypes.NO_PARAM_CALL, it.v2) }
     functionCalling to def(variables, variables) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
     functionCalling to def(variables, exp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
     functionCalling to def(variables, listexp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
@@ -44,6 +49,27 @@ fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana<ASTNode> {
     sentence to def(functionCalling) { it.v1 }
     sentence to def(exp3) { it.v1 }
     sentence to def(variables) { it.v1 }
+
+    para1 to def(para1, re(cAndCzechtinaRegex(AllComparation)), para1 )
+    {
+        (e1, o, e2) ->
+            if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+            else if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+            else
+                ASTOperandNode(o, e1, e2)
+    }
+    para1 to def(sentence) {it.v1}
+
+
+    para3 to def(para3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para3)
+    {
+        ASTOperandNode(it.v2, it.v1, it.v3)
+    }
+
+    para3 to def(para1) {it.v1}
+
     inheritIgnoredREs()
-    setTopNode(sentence)
+    setTopNode(para3)
 }

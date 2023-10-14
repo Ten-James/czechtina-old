@@ -12,5 +12,5 @@ class ASTProgramLines : ASTNode {
         return "Lines:\n${programLines.joinToString("").replace("\n", "\n\t")}\n"
     }
 
-    override fun toC(): String = programLines.joinToString(";\n") { it.toC() }+";"
+    override fun toC(): String = programLines.joinToString("\n") { it.toC() }
 }

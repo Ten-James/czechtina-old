@@ -7,6 +7,7 @@ import czechtina.czechtina
 enum class ASTBinaryTypes {
     VAR_DEFINITION,
     FUNCTION_CALL,
+    FLOW_CONTROL,
 }
 
 open class ASTBinaryNode : ASTNode {
@@ -27,6 +28,7 @@ open class ASTBinaryNode : ASTNode {
     override fun toC(): String = when (type) {
         ASTBinaryTypes.VAR_DEFINITION -> "${left?.toC()} ${right?.toC()}"
         ASTBinaryTypes.FUNCTION_CALL -> if (left?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!)) "&${right?.toC()}" else "${left?.toC()}(${right?.toC()})"
+        ASTBinaryTypes.FLOW_CONTROL -> "${left?.toC()} ${right?.toC()}"
         else -> ""
     }
 }

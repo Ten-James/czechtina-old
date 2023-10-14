@@ -17,5 +17,5 @@ class ASTFunctionNode : ASTNode {
         return "Function '$name' : '$type', \nparameters=${parameters.joinToString("").replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }}) {\n${body?.toC()}\n}"
+    override fun toC(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
 }

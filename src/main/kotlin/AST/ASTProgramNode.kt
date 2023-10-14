@@ -27,5 +27,5 @@ class ASTProgramNode : ASTNode {
 
     }
 
-    override fun toC(): String = imports.joinToString("\n") { it.toC() } + "\n"+functions.joinToString("\n") { it.toC() } + "\n" + main?.toC()
+    override fun toC(): String = imports.joinToString("\n\n") { it.toC() } + "\n\n"+functions.joinToString("\n\n") { it.toC() } + "\n\n" + main?.toC()
 }

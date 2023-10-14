@@ -81,6 +81,19 @@ fce1 cele x je cele x krat 2;
 ```
 
 
+For Loops
+
+```cz
+
+opakuj i:cele -> 1 az 10 {
+}
+
+opakuj i:cele je 0; i < 10; i je i + 1 {
+}
+
+
+```
+
 
 ## Table for czechtina.h
 
@@ -106,14 +119,17 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 
 ## TODO
 
-- Loops
-- Writing \n
+- Loops, if, else
+- invalidate "1 je 3"
+- Writing \n in strings
 - linking files
 - std lib
 - string anotation
 - structures
+- dynamic typing
+- range definition
 
 
 ## Credits
 
-Jonatan Lepik - assisstance on key words **veget** and **bal**
+Jonatan Lepik - assisstance on keywords **veget** and **bal**
