@@ -128,6 +128,16 @@
                 "file": "README.md"
               }
             }
+          },
+          {
+            "id": "bdd9216f44eda133",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency"
+              }
+            }
           }
         ]
       }
