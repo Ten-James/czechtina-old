@@ -175,17 +175,14 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 
 ## TODO
 
-- Loops, if, else
 - invalidate "1 je 3"
-- Writing \n in strings
-- linking files
 - std lib
 - string anotation
 - structures
-- boolean operators
 - dynamic typing
 - range definition
 - preprocesor
+  - linking files
 
 
 ## Credits

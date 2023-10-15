@@ -1,5 +1,6 @@
 package AST
 
+import compiler.Compiler
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -9,6 +10,7 @@ enum class ASTBinaryTypes {
     FUNCTION_CALL,
     FLOW_CONTROL,
     ARRAY_ACCESS,
+    TYPE_DEFINITION,
 }
 
 open class ASTBinaryNode : ASTNode {
@@ -35,6 +37,7 @@ open class ASTBinaryNode : ASTNode {
         }
         ASTBinaryTypes.FLOW_CONTROL -> "${left?.toC()} ${right?.toC()}"
         ASTBinaryTypes.ARRAY_ACCESS -> "${left?.toC()}[${right?.toC()}]"
+        ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left?.toC()} ${right?.toC()};"
         else -> ""
     }
 }

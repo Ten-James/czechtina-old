@@ -16,13 +16,22 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val blockCode = NodeID<ASTUnaryNode>("blockCode")
     val programLines = NodeID<ASTProgramLines>("programLines")
     val line = NodeID<ASTNode>("line")
+    val typeDefinition = NodeID<ASTBinaryNode>("typeDefinition")
     val varDefinition = NodeID<ASTNode>("varDefinition")
     val listableDefinition = include(listAble(listOf(varDefinition)))
     val import = NodeID<ASTUnaryNode>("import")
-    val r_expression = include(rightExpression(variables))
+    val r_expression = include(expression(variables))
     val program = NodeID<ASTProgramNode>("program")
 
 
+
+    typeDefinition to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_TYPE_DEFINITION))),
+        variables,
+        re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
+        types,
+        endOfLine
+    ) { (_, v,_, t,_) -> ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v) }
 
     types to def(re(czechtina[GrammarToken.TYPE_POINTER]!!),
         re("<"),
@@ -75,6 +84,13 @@ fun czechtinaLesana() = lesana<ASTNode> {
         types
     ) { (v, _, t) -> ASTBinaryNode(ASTBinaryTypes.VAR_DEFINITION, t, v) }
 
+
+    varDefinition to def(
+        variables,
+        re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
+        variables
+    ) { (v, _, t) -> throw Exception("Variable ${t.toC()} is not defined as an type") }
+
     line to def(
         varDefinition,
         endOfLine
@@ -102,7 +118,19 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,
         blockCode
-    ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.IF,exp), block) }
+    ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.IF,exp), block)}
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
+        r_expression,
+        blockCode
+    ) { (_,_,exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.ELSE_IF, exp), block) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
+        blockCode
+    ) { (_, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.ELSE, ""), block) }
 
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -212,7 +240,10 @@ fun czechtinaLesana() = lesana<ASTNode> {
     }
     variables to def(re("[a-zA-Z][a-zA-Z0-9]*")) { ASTUnaryNode(ASTUnaryTypes.VARIABLE, it.v1) }
 
+
     program to def(import, program) { (import, program) -> program.appendImport(import) }
+    program to def(typeDefinition, program) { (typ, program) -> program.appendTypeDefinition(typ) }
+    program to def(program, typeDefinition) { (program, typ) -> program.appendTypeDefinition(typ) }
     program to def(tFunction, program) { (func, program) -> program.appendFunction(func) }
     program to def(program, tFunction) { (program, func) -> program.appendFunction(func) }
 

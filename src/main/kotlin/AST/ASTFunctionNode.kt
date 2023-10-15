@@ -18,4 +18,6 @@ class ASTFunctionNode : ASTNode {
     }
 
     override fun toC(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
+
+    fun toCDeclaration(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }});"
 }

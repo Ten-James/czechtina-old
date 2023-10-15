@@ -38,6 +38,7 @@ enum class GrammarToken {
     KEYWORD_IMPORT,
     KEYWORD_IMPORT_C,
     KEYWORD_RANGE_DEFINITION,
+    KEYWORD_TYPE_DEFINITION,
     VARIABLE,
 }
 
@@ -97,6 +98,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.KEYWORD_IMPORT_C to "pripoj c",
     GrammarToken.KEYWORD_FUNCTION_CALL to "zavolej",
     GrammarToken.KEYWORD_RANGE_DEFINITION to "do|az",
+    GrammarToken.KEYWORD_TYPE_DEFINITION to "typ",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
 
@@ -120,7 +122,7 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.OPERATOR_GREATER to ">",
     GrammarToken.OPERATOR_GREATER_OR_EQUAL to ">=",
     GrammarToken.OPERATOR_AND to "&&",
-    GrammarToken.OPERATOR_OR to "||",
+    GrammarToken.OPERATOR_OR to "\\|\\|",
     GrammarToken.OPERATOR_NOT to "!",
     GrammarToken.KEYWORD_IF to "if",
     GrammarToken.KEYWORD_ELSE to "else",
@@ -128,6 +130,7 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_FOR to "for",
     GrammarToken.KEYWORD_RETURN to "return",
     GrammarToken.KEYWORD_BREAK to "break",
+    GrammarToken.KEYWORD_TYPE_DEFINITION to "typedef",
     GrammarToken.KEYWORD_CONTINUE to "continue",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
@@ -161,6 +164,7 @@ val CZ = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_FOR to "opakuj",
     GrammarToken.KEYWORD_RETURN to "vrat",
     GrammarToken.KEYWORD_BREAK to "veget",
+    GrammarToken.KEYWORD_TYPE_DEFINITION to "zadejtyp",
     GrammarToken.KEYWORD_CONTINUE to "pokracuj",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )

@@ -8,14 +8,16 @@ import czechtina.GrammarToken
 import czechtina.cAndCzechtinaRegex
 import czechtina.czechtina
 
-fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana {
+fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
     val literals = include(literals())
     val exp1 = NodeID<ASTNode>("expressions")
     val exp2 = NodeID<ASTNode>("expressions")
     val exp3 = NodeID<ASTNode>("expressions")
     val functionCalling = NodeID<ASTNode>("functionCalling")
     var para1 = NodeID<ASTNode>("paragraph")
+    var para2 = NodeID<ASTNode>("paragraph")
     var para3 = NodeID<ASTNode>("paragraph")
+    var para4 = NodeID<ASTNode>("paragraph")
     val sentence = NodeID<ASTNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
@@ -64,14 +66,19 @@ fun rightExpression(variables: NodeID<ASTUnaryNode>) = lesana {
     }
     para1 to def(sentence) {it.v1}
 
+    para2 to def(para2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_AND))), para2) { ASTOperandNode(it.v2, it.v1, it.v3) }
+    para2 to def(para1) {it.v1}
 
-    para3 to def(para3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para3)
+    para3 to def(para3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_OR))), para3) { ASTOperandNode(it.v2, it.v1, it.v3) }
+    para3 to def(para2) {it.v1}
+
+    para4 to def(para4, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
     {
         ASTOperandNode(it.v2, it.v1, it.v3)
     }
 
-    para3 to def(para1) {it.v1}
+    para4 to def(para3) {it.v1}
 
     inheritIgnoredREs()
-    setTopNode(para3)
+    setTopNode(para4)
 }

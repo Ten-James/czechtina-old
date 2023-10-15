@@ -21,6 +21,7 @@ enum class ASTUnaryTypes {
     STRING,
     IF,
     ELSE,
+    ELSE_IF,
     NO_PARAM_CALL
 }
 class ASTUnaryNode : ASTNode {
@@ -52,6 +53,7 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
         ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.ELSE -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]}"
+        ASTUnaryTypes.ELSE_IF -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]} ${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.NO_PARAM_CALL -> "${(data as ASTNode).toC()}()"
         else -> ""
     }
