@@ -10,15 +10,15 @@ import czechtina.czechtina
 
 fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
     val literals = include(literals())
-    val exp1 = NodeID<ASTNode>("expressions")
-    val exp2 = NodeID<ASTNode>("expressions")
-    val exp3 = NodeID<ASTNode>("expressions")
-    val functionCalling = NodeID<ASTNode>("functionCalling")
-    var para1 = NodeID<ASTNode>("paragraph")
-    var para2 = NodeID<ASTNode>("paragraph")
-    var para3 = NodeID<ASTNode>("paragraph")
-    var para4 = NodeID<ASTNode>("paragraph")
-    val sentence = NodeID<ASTNode>("sentence")
+    val exp1 = NodeID<ASTTypedNode>("expressions")
+    val exp2 = NodeID<ASTTypedNode>("expressions")
+    val exp3 = NodeID<ASTTypedNode>("expressions")
+    val functionCalling = NodeID<ASTTypedNode>("functionCalling")
+    var para1 = NodeID<ASTTypedNode>("paragraph")
+    var para2 = NodeID<ASTTypedNode>("paragraph")
+    var para3 = NodeID<ASTTypedNode>("paragraph")
+    var para4 = NodeID<ASTTypedNode>("paragraph")
+    val sentence = NodeID<ASTTypedNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
@@ -37,17 +37,17 @@ fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
     exp3 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
     exp3 to def(exp2) { it.v1 }
 
-    exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2) }
-    exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2) }
+    exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.expType) }
+    exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.expType) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2) }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, "array-${it.v2.getType()}${it.v2.nodes.size}") }
 
 
-    functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTUnaryNode(ASTUnaryTypes.NO_PARAM_CALL, it.v2) }
-    functionCalling to def(variables, variables) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
-    functionCalling to def(variables, exp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
-    functionCalling to def(variables, listexp3) { (v, e) -> ASTBinaryNode(ASTBinaryTypes.FUNCTION_CALL, v, e) }
+    functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
+    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, listexp3) { (v, e) -> ASTFunctionCallNode( v, e) }
 
 
     sentence to def(functionCalling) { it.v1 }

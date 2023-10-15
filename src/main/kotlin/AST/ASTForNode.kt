@@ -16,8 +16,8 @@ class ASTForNode : ASTNode {
         this.body = body
     }
 
-    constructor(variable: ASTNode, type: ASTNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) {
-        this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, ASTBinaryNode(ASTBinaryTypes.VAR_DEFINITION, type, variable), min))
+    constructor(variable: ASTUnaryNode, type: ASTUnaryNode, min: ASTTypedNode, rangeComparation: String , max: ASTTypedNode, body: ASTNode) {
+        this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, ASTVarDefinitionNode(type, variable), min), "none")
 
         val operand = when (rangeComparation) {
             "az" -> czechtina[GrammarToken.OPERATOR_LESS_OR_EQUAL]!!
@@ -26,7 +26,7 @@ class ASTForNode : ASTNode {
         }
 
         this.condition = ASTOperandNode(operand, variable, max)
-        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1)))
+        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1, "int")))
         this.body = body
     }
 

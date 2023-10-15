@@ -24,11 +24,11 @@ enum class ASTUnaryTypes {
     ELSE_IF,
     NO_PARAM_CALL
 }
-class ASTUnaryNode : ASTNode {
+class ASTUnaryNode : ASTTypedNode {
     var type:ASTUnaryTypes? = null
     var data:Any? = null
 
-    constructor(type:ASTUnaryTypes, data:Any) {
+    constructor(type:ASTUnaryTypes, data:Any, expressionType: String = "none") : super(expressionType) {
         this.type = type
         this.data = data
     }
