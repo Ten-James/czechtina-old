@@ -4,6 +4,7 @@ import czechtina.*
 
 object Compiler {
     var compilingTo = "C"
+    var definedTypes = mutableListOf<String>()
     var grammar: Map<GrammarToken,String> = C
     var buildPath:String = ""
 
@@ -17,6 +18,8 @@ object Compiler {
         compilingTo = "C"
         grammar = C
     }
+
+    fun addToDefinedTypes(type: String) = definedTypes.add(type)
 
     fun setToCZ() {
         compilingTo = "CZ"

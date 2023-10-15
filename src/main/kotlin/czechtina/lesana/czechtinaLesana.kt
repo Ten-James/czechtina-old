@@ -1,6 +1,7 @@
 package czechtina.lesana
 
 import AST.*
+import compiler.Compiler
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.*
@@ -31,7 +32,14 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
         types,
         endOfLine
-    ) { (_, v,_, t,_) -> ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v) }
+    ) { (_, v,_, t,_) ->
+        if (Compiler.definedTypes.contains(v.toC()))
+            throw Exception("Type ${v.toC()} is already defined")
+        else if (Compiler.addToDefinedTypes(v.toC()))
+            ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v)
+        else
+            throw Exception("Error")
+    }
 
     types to def(re(czechtina[GrammarToken.TYPE_POINTER]!!),
         re("<"),
@@ -89,7 +97,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
         variables,
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
         variables
-    ) { (v, _, t) -> throw Exception("Variable ${t.toC()} is not defined as an type") }
+    ) { (v, _, t) -> if (Compiler.definedTypes.contains(t.toC())) ASTBinaryNode(ASTBinaryTypes.VAR_DEFINITION, t, v) else throw Exception("Variable ${t.toC()} is not defined as an type") }
 
     line to def(
         varDefinition,
@@ -254,6 +262,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
     setTopNode(program)
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
+        println(err.got)
+        println(err.expectedIDs)
         println(err)
     }
 }.getLesana()

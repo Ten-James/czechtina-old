@@ -5,8 +5,11 @@ fce1 x : cele, y: cele { cele
     vrat y kafe
 }
 
+typ b je int;
+
 
 main {
+    a:b;
     x:ukazatel<cele> kafe
     opakuj i:cele je 3; i mensi nebo rovno 5; i = i plus 1 {
         x je 't' plus (1 plus 2) krat 3 deleno 1 minus 4;

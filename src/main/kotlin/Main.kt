@@ -50,6 +50,13 @@ fun main(args: Array<String>) {
 
 
     val czechtina = czechtinaLesana()
+    try {
+
+    } catch (e: Exception)
+    {
+        e.printStackTrace()
+        return
+    }
     val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
 
     if (args.any() { it == "--show-tree" }) {
