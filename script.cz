@@ -1,28 +1,8 @@
 pripoj c stdio
 
-fce1 x : cele, y: cele { cele
-    y je x plus 2 kafe
-    vrat y kafe
-}
-
-typ b je int;
-
-
 main {
-    a:b;
-    x:ukazatel<cele> kafe
-    opakuj i:cele je 3; i mensi nebo rovno 5; i = i plus 1 {
-        x je 't' plus (1 plus 2) krat 3 deleno 1 minus 4;
-        x je timesTwo x kafe
+    histo = [0,0,0,0,0,0,0]
+    for x:cele -> 0 do n + 8 {
+        printf "%d", x
     }
-
-    opakuj i:cele -> 0 az 10 {
-        zavolej test;
-    }
-
-    x:pole<cele> je [ 0,1,2,3];
-    printf "%d", (adresa x) kafe
-    vrat 0 kafe
 }
-
-timesTwo x : cele je cele x krat 2;

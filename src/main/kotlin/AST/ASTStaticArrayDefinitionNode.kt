@@ -1,11 +1,11 @@
 package AST
 
-class ASTStaticArrayDefinitionNode : ASTNode {
+class ASTStaticArrayDefinitionNode : ASTTypedNode {
     var type: ASTNode
     var variable: ASTNode
     var size: String
 
-    constructor(type: ASTNode, variable: ASTNode, size: String) {
+    constructor(type: ASTNode, variable: ASTNode, size: String): super("array-$type-$size") {
         this.type = type
         this.variable = variable
         this.size = size

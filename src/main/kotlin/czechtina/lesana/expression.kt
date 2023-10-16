@@ -8,7 +8,7 @@ import czechtina.GrammarToken
 import czechtina.cAndCzechtinaRegex
 import czechtina.czechtina
 
-fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
+fun expression(variables: NodeID<ASTVariableNode>) = lesana {
     val literals = include(literals())
     val exp1 = NodeID<ASTTypedNode>("expressions")
     val exp2 = NodeID<ASTTypedNode>("expressions")
@@ -37,11 +37,11 @@ fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
     exp3 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
     exp3 to def(exp2) { it.v1 }
 
-    exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.expType) }
-    exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.expType) }
+    exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.getType()) }
+    exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, "array-${it.v2.getType()}${it.v2.nodes.size}") }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, "array-${it.v2.getType()}-${it.v2.nodes.size}") }
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
@@ -52,7 +52,6 @@ fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
 
     sentence to def(functionCalling) { it.v1 }
     sentence to def(exp3) { it.v1 }
-    sentence to def(variables) { it.v1 }
 
     para1 to def(para1, re(cAndCzechtinaRegex(AllComparation)), para1 )
     {
@@ -71,6 +70,16 @@ fun expression(variables: NodeID<ASTUnaryNode>) = lesana {
 
     para3 to def(para3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_OR))), para3) { ASTOperandNode(it.v2, it.v1, it.v3) }
     para3 to def(para2) {it.v1}
+
+    para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
+    {
+        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+    }
+
+    para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), variables)
+    {
+        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+    }
 
     para4 to def(para4, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
     {

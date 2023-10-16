@@ -1,5 +1,7 @@
 package AST
 
+import compiler.Compiler
+
 class ASTFunctionNode : ASTNode {
     var type:ASTUnaryNode
     var name:String? = null
@@ -17,7 +19,13 @@ class ASTFunctionNode : ASTNode {
         return "Function '$name' : '$type', \nparameters=${parameters.joinToString("").replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
+    override fun toC(): String  {
+        Compiler.localVariable.clear()
+        return "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
+    }
 
-    fun toCDeclaration(): String = "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }});"
+    fun toCDeclaration(): String {
+        Compiler.localVariable.clear()
+        return "${type.toC()} ${name}(${parameters.joinToString(", ") { it.toC() }});"
+    }
 }

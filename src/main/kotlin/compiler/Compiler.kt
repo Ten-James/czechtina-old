@@ -7,7 +7,9 @@ import czechtina.*
 object Compiler {
     var compilingTo = "C"
     var definedTypes = mutableListOf<String>()
-    var definedFunctions = mapOf<String, String>()
+    var definedFunctions = mutableMapOf<String, String>()
+    var globalVariables = mutableMapOf<String, String>()
+    var localVariable = mutableMapOf<String,String>()
     var grammar: Map<GrammarToken,String> = C
     var buildPath:String = ""
 
@@ -24,6 +26,34 @@ object Compiler {
 
     fun addToDefinedTypes(type: String) = definedTypes.add(type)
 
+    fun controlDefinedVariables(varName: String): Boolean {
+        if (localVariable.containsKey(varName))
+            throw Exception("Variable $varName is defined in local scope")
+        if (globalVariables.containsKey(varName))
+            throw Exception("Variable $varName is defined in global scope")
+        if (definedFunctions.containsKey(varName))
+            throw Exception("Variable $varName is defined as function")
+        return true
+    }
+
+    fun getVariableType(varName: String): String {
+        if (localVariable.containsKey(varName))
+            return localVariable[varName]!!
+        if (globalVariables.containsKey(varName))
+            return globalVariables[varName]!!
+        return ""
+    }
+
+    fun isDefined(varName: String) : Boolean {
+        if (localVariable.containsKey(varName))
+            return true
+        if (globalVariables.containsKey(varName))
+            return true
+        if (definedFunctions.containsKey(varName))
+            return true
+        return false
+    }
+
     fun setToCZ() {
         compilingTo = "CZ"
         grammar = CZ
@@ -36,12 +66,16 @@ object Compiler {
         "float" -> 3
         "int" -> 2
         "char" -> 1
+        "bool" -> 1
         else -> if (type.contains("array")) 0 else throw Exception("Unhandled Type $type")
     }
 
     fun calcBinaryType(left: ASTTypedNode,  right: ASTTypedNode, operand: String): String {
-        val leftWeight = calcTypePriority(left.expType)
-        val rightWeight = calcTypePriority(right.expType)
+        if (operand == "=")
+            return right.getType()
+
+        val leftWeight = calcTypePriority(left.getType())
+        val rightWeight = calcTypePriority(right.getType())
         val maxW = maxOf(leftWeight, rightWeight)
         val minW = minOf(leftWeight, rightWeight)
 
@@ -51,8 +85,11 @@ object Compiler {
         if (operand == "%" && listOf(leftWeight, rightWeight).any { it == 3 || it == 4 })
             throw Exception("Modulo cant be made with floating point number")
 
+        if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
+            return "bool";
+
         if (leftWeight > rightWeight)
-            return left.expType
-        return right.expType
+            return left.getType()
+        return right.getType()
     }
 }

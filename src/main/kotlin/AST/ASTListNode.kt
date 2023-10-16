@@ -8,7 +8,7 @@ class ASTListNode : ASTNode {
     }
 
     fun getType():String {
-        val types = nodes.map { it.expType }
+        val types = nodes.map { it.getType() }
         val type = types[0]
         for (t in types) {
             if (t != type)

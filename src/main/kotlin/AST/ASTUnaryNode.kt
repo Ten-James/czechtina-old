@@ -33,6 +33,7 @@ class ASTUnaryNode : ASTTypedNode {
         this.data = data
     }
 
+
     override fun toString(): String {
         return "'$type', data=$data"
     }

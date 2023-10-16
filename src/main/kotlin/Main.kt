@@ -48,6 +48,23 @@ fun main(args: Array<String>) {
     }
     code = splitedCode.joinToString("\"")
 
+    val bylines = code.split("\n").toMutableList()
+
+    var blocklevel = 0
+    for (i in 0 until bylines.size) {
+        if (bylines[i].isBlank())
+            continue
+        if (bylines[i].contains("{"))
+            blocklevel += 1
+        else if (bylines[i].contains("}"))
+            blocklevel -= 1
+        else if (!bylines[i].endsWith("\\") && blocklevel >0)
+            bylines[i] = "${bylines[i]};".replace(";;",";")
+    }
+
+    code = bylines.joinToString("\n")
+
+    println(code)
 
     val czechtina = czechtinaLesana()
     try {
@@ -62,6 +79,8 @@ fun main(args: Array<String>) {
     if (args.any() { it == "--show-tree" }) {
         println(tree.toString())
     }
+
+    Compiler.localVariable.clear()
 
     var cCode = tree.toC()
 
@@ -83,8 +102,6 @@ fun main(args: Array<String>) {
     if (args.any() { it == "--no-compile" }) {
         return
     }
-
-
 
 
     val command = "gcc ${Compiler.buildPath}$withoutExtension.c -o ${Compiler.buildPath}$withoutExtension"

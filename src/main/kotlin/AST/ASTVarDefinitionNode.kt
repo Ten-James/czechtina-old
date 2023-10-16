@@ -5,20 +5,22 @@ import czechtina.GrammarToken
 import czechtina.czechtina
 
 class ASTVarDefinitionNode : ASTTypedNode {
-    var variable:ASTNode
+    var variable:ASTVariableNode
     var type:ASTTypedNode
 
 
 
-    constructor(variable:ASTNode, type : ASTTypedNode): super(type.expType) {
+    constructor(variable:ASTVariableNode, type : ASTTypedNode): super(type.getType()) {
         this.type = type
         this.variable = variable
 
+        if (variable.isLocal)
+            Compiler.localVariable += mapOf(variable.data to getType())
     }
 
     override fun toString(): String {
-        return "Var def for $variable with $expType"
+        return "Var def for $variable with ${getType()}"
     }
 
-    override fun toC(): String = "$type $variable"
+    override fun toC(): String = if (Compiler.controlDefinedVariables(variable.data)) variable.toDefineC() else ""
 }
