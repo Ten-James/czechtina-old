@@ -27,8 +27,8 @@ class ASTFunctionCallNode : ASTTypedNode {
     }
 
     override fun toC(): String = when {
-        function?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!) -> "&${params?.toC()}"
-        function?.toC().equals(czechtina[GrammarToken.TYPE_VALUE]!!) -> "*(${params?.toC()})"
-        else -> "${params?.toC()}(${params?.toC()})"
-    }
+            function?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!) -> "&${params?.toC()}"
+            function?.toC().equals(czechtina[GrammarToken.TYPE_VALUE]!!) -> "*(${params?.toC()})"
+            else -> "${function?.toC()}(${params?.toC()})"
+        }
 }

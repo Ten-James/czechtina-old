@@ -18,11 +18,13 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
     var para2 = NodeID<ASTTypedNode>("paragraph")
     var para3 = NodeID<ASTTypedNode>("paragraph")
     var para4 = NodeID<ASTTypedNode>("paragraph")
+    var para5 = NodeID<ASTTypedNode>("paragraph")
     val sentence = NodeID<ASTTypedNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
-    exp1 to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTBinaryNode(ASTBinaryTypes.ARRAY_ACCESS, v, e) }
+    exp1 to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    exp1 to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     exp1 to def(literals) { it.v1 }
 
     exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp1) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
@@ -63,6 +65,29 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
             else
                 ASTOperandNode(o, e1, e2)
     }
+    para1 to def(para1, re(cAndCzechtinaRegex(AllComparation)), variables )
+    {
+            (e1, o, e2) ->
+        if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+        else
+            ASTOperandNode(o, e1, e2)
+    }
+    para1 to def(variables, re(cAndCzechtinaRegex(AllComparation)), para1 )
+    {
+            (e1, o, e2) ->
+        if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+        else
+            ASTOperandNode(o, e1, e2)
+    }
+    para1 to def(variables, re(cAndCzechtinaRegex(AllComparation)), variables )
+    {
+            (e1, o, e2) ->
+            ASTOperandNode(o, e1, e2)
+    }
+
+
     para1 to def(sentence) {it.v1}
 
     para2 to def(para2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_AND))), para2) { ASTOperandNode(it.v2, it.v1, it.v3) }
@@ -88,6 +113,9 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
 
     para4 to def(para3) {it.v1}
 
+    para5 to def(para4) {it.v1}
+    para5 to def(variables) {it.v1}
+
     inheritIgnoredREs()
-    setTopNode(para4)
+    setTopNode(para5)
 }

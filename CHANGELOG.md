@@ -2,12 +2,21 @@
 
 ### v 0.1.4
 
+- dynamic typing (on compile time)
+- no longer semicolon needed
+- inline for loop with dynamic type
+```
+opakuj i -> 0 do 10 ->
+    s += i
+```
+- inline function support with dynamic type
+```
+timesTwo x:cele -> x * 2
+```
 - type definition support
-
 ```
-typ b je int
+typ b je cele
 ```
-
 - else statement, else if statement
 - boolean support
 - function declaration for compiling C

@@ -8,8 +8,6 @@ class ASTVarDefinitionNode : ASTTypedNode {
     var variable:ASTVariableNode
     var type:ASTTypedNode
 
-
-
     constructor(variable:ASTVariableNode, type : ASTTypedNode): super(type.getType()) {
         this.type = type
         this.variable = variable

@@ -45,11 +45,13 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re("<"),
         types,
         re(">"))
-    { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, "pointer") }
+    { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, "pointer-${t2.getType()}") }
 
     types to def(re(cAndCzechtinaRegex(Alltypes))) { ASTUnaryNode(ASTUnaryTypes.TYPE, it.v1, cTypeFromCzechtina(it.v1)) }
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
+
+    // FOR LOOP
 
     line to def (
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -62,7 +64,65 @@ fun czechtinaLesana() = lesana<ASTNode> {
         r_expression,
         blockCode
     )
-    { (_, v, _, t, _, min, def, max, block) -> ASTForNode(v.addType(t.getType()), t, min, def, max, block) }
+    { (_, v, _, t, _, min, def, max, block) -> ASTForNode(v, t, min, def, max, block) }
+
+    line to def (
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        variables,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        r_expression,
+        re(czechtina[GrammarToken.KEYWORD_RANGE_DEFINITION]!!),
+        r_expression,
+        blockCode
+    )
+    { (_, v, _, min, def, max, block) -> ASTForNode(v, ASTUnaryNode(ASTUnaryTypes.TYPE, min.getType(), min.getType()), min, def, max, block) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        line,
+        r_expression,
+        endOfLine,
+        r_expression,
+        blockCode
+    ) {(_, begin,cond,_,step, block) -> ASTForNode(begin, cond, step, block) }
+
+    // inline for
+
+    line to def (
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        variables,
+        re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
+        types,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        r_expression,
+        re(czechtina[GrammarToken.KEYWORD_RANGE_DEFINITION]!!),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    )
+    { (_, v, _, t, _, min, def, max, _,block) -> ASTForNode(v, t, min, def, max, ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)) }
+
+    line to def (
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        variables,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        r_expression,
+        re(czechtina[GrammarToken.KEYWORD_RANGE_DEFINITION]!!),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    )
+    { (_, v, _, min, def, max, _,block) -> ASTForNode(v, ASTUnaryNode(ASTUnaryTypes.TYPE, min.getType(), min.getType()), min, def, max, ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
+        line,
+        r_expression,
+        endOfLine,
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    ) {(_, begin,cond,_,step,_, block) -> ASTForNode(begin, cond, step,ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)) }
 
 
     varDefinition to def(
@@ -122,11 +182,22 @@ fun czechtinaLesana() = lesana<ASTNode> {
         endOfLine
     ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, ASTUnaryNode(ASTUnaryTypes.LITERAL, ""))) }
 
+    // IF
+
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,
         blockCode
     ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.IF,exp), block)}
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    ) { (_, exp,_, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.IF,exp), ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block) )}
+
+    // ELSE IF
 
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
@@ -137,22 +208,33 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    ) { (_,_,exp,_, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.ELSE_IF, exp), ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)) }
+
+    // ELSE
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
         blockCode
     ) { (_, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.ELSE, ""), block) }
 
     line to def(
-        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
-        line,
-        r_expression,
-        endOfLine,
-        r_expression,
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
         blockCode
-    ) {(_, begin,cond,_,step, block) -> ASTForNode(begin, cond, step, block) }
+    ) { (_, _, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.ELSE, ""), ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)) }
+
+
 
     line to def(
         r_expression,
         endOfLine
     ) { (l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, l) }
+
+
 
 
     blockCode to def(re("{"), programLines, re("}")) {
@@ -206,7 +288,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     tFunction to def(
         re("[a-zA-Z][a-zA-Z0-9]*"),
         varDefinition,
-        re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
         types,
         r_expression,
     )
@@ -215,7 +297,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             listOf(varDef),
-            ASTUnaryNode(ASTUnaryTypes.SEMICOLON,  ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -223,7 +305,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     tFunction to def(
         re("[a-zA-Z][a-zA-Z0-9]*"),
         varDefinition,
-        re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
         r_expression,
     )
     { (funName, varDef, _, line) ->
@@ -231,10 +313,11 @@ fun czechtinaLesana() = lesana<ASTNode> {
             ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
             funName,
             listOf(varDef),
-            ASTUnaryNode(ASTUnaryTypes.SEMICOLON,  ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
+    // multiple params
     tFunction to def(
         re("[a-zA-Z][a-zA-Z0-9]*"),
         listableDefinition,
@@ -247,9 +330,56 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             varDefs.nodes,
-            ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
+
+    tFunction to def(
+        re("[a-zA-Z][a-zA-Z0-9]*"),
+        listableDefinition,
+        re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
+        r_expression,
+    )
+    { (funName, varDefs, _, line) ->
+        ASTFunctionNode(
+            ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
+            funName,
+            varDefs.nodes,
+            ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+        )
+    }
+
+    // no params
+    tFunction to def(
+        re("[a-zA-Z][a-zA-Z0-9]*"),
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        types,
+        r_expression,
+    )
+    { (funName, _, retType, line) ->
+        ASTFunctionNode(
+            retType,
+            funName,
+            listOf(),
+            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+        )
+    }
+
+    // without type
+    tFunction to def(
+        re("[a-zA-Z][a-zA-Z0-9]*"),
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        r_expression,
+    )
+    { (funName, _, line) ->
+        ASTFunctionNode(
+            ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
+            funName,
+            listOf(),
+            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+        )
+    }
+
 
 
 
@@ -279,8 +409,9 @@ fun czechtinaLesana() = lesana<ASTNode> {
     setTopNode(program)
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
-        println(err.got)
-        println(err.expectedIDs)
+        println(err.got.toString())
+        println("excepted: " + err.expectedIDs)
+        println("------------------")
         println(err)
     }
 }.getLesana()

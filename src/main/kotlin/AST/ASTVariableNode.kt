@@ -37,6 +37,10 @@ class ASTVariableNode : ASTTypedNode {
             val s = getType().split("-")
             return "${s[1]} $data[${s[2]}]"
         }
+        if (getType().contains("pointer")){
+            val s = getType().split("-")
+            return "${s[1]} *$data"
+        }
 
         return "${getType()} $data"
     }

@@ -7,7 +7,6 @@ import czechtina.czechtina
 
 enum class ASTBinaryTypes {
     FLOW_CONTROL,
-    ARRAY_ACCESS,
     TYPE_DEFINITION,
 }
 
@@ -30,7 +29,6 @@ open class ASTBinaryNode : ASTNode {
 
     override fun toC(): String = when (type) {
         ASTBinaryTypes.FLOW_CONTROL -> "${left?.toC()} ${right?.toC()}"
-        ASTBinaryTypes.ARRAY_ACCESS -> "${left?.toC()}[${right?.toC()}]"
         ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left?.toC()} ${right?.toC()};"
         else -> ""
     }
