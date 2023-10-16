@@ -15,13 +15,14 @@ fun literals() = lesana<ASTUnaryNode> {
     literals to def(include(integer(nonDecimal = false, underscoreSeparation = false))) {
         ASTUnaryNode(
             ASTUnaryTypes.LITERAL,
-            it.v1
+            it.v1,
+            "int"
         )
     }
-    literals to def(include(decimal(allowEmptyIntegerPart = false))) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1) }
-    literals to def(include(boolean())) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1) }
-    literals to def(re("'.'")) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1) }
-    literals to def(include(string())) { ASTUnaryNode(ASTUnaryTypes.STRING, it.v1) }
+    literals to def(include(decimal(allowEmptyIntegerPart = false))) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1, "double") }
+    literals to def(include(boolean())) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1, "bool") }
+    literals to def(re("'.'")) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1, "char") }
+    literals to def(include(string())) { ASTUnaryNode(ASTUnaryTypes.STRING, it.v1, "string") }
     inheritIgnoredREs()
     setTopNode(literals)
 }

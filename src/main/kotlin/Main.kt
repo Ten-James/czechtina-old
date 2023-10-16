@@ -19,6 +19,7 @@ fun main(args: Array<String>) {
             |   --help          Show this help
             |   --no-compile    Do not compile the output C code, it will be created in the same directory as the input file
             |   --show-tree     Show the AST tree
+            |   --write-code    Write Code in comment before C code
             |   --fpeterek      Uses macros from old czechtina.h file
             |   --friendly      Generate valid C without macros in comment bellow code
             |   --set-dir       Set dir for file creation
@@ -36,9 +37,9 @@ fun main(args: Array<String>) {
     //create file with name of input file in current directory
     val file = args.firstOrNull() ?: return println("No input file specified")
     var withoutExtension = file.substring(0, file.length - 3)
-    var code = File(file).readText()
+    var readCode = File(file).readText()
 
-    val splitedCode = code.split("\"").toMutableList()
+    val splitedCode = readCode.split("\"").toMutableList()
 
     for (i in 0 until splitedCode.size) {
         if (i % 2 == 0) continue
@@ -46,15 +47,42 @@ fun main(args: Array<String>) {
         splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
         splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
     }
-    code = splitedCode.joinToString("\"")
+    var code = splitedCode.joinToString("\"").trim()
+
+    val bylines = code.lines().toMutableList()
+
+    var blocklevel = 0
+    for (i in 0 until bylines.size) {
+        if (bylines[i].isBlank())
+            continue
+        else if (bylines[i].contains("{"))
+            blocklevel += 1
+        else if (bylines[i].contains("}"))
+            blocklevel -= 1
+        else if (bylines[i].endsWith("->"))
+            continue
+        else if (!bylines[i].endsWith("\\") && blocklevel >0)
+            bylines[i] = "${bylines[i]};".replace(";;",";")
+    }
+
+    code = bylines.joinToString("\n")
 
 
     val czechtina = czechtinaLesana()
+    try {
+
+    } catch (e: Exception)
+    {
+        e.printStackTrace()
+        return
+    }
     val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
 
     if (args.any() { it == "--show-tree" }) {
         println(tree.toString())
     }
+
+    Compiler.localVariable.clear()
 
     var cCode = tree.toC()
 
@@ -72,12 +100,17 @@ fun main(args: Array<String>) {
 
     cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
 
+    cCode= "// Czechtina ${Compiler.VERSION}\n$cCode"
+
+    if (args.any { it == "--write-code" }) {
+        cCode = "/*\n\t${readCode.replace("\n", "\n\t")}\n*/\n$cCode"
+    }
+
+
     File("${Compiler.buildPath}$withoutExtension.c").writeText(cCode)
     if (args.any() { it == "--no-compile" }) {
         return
     }
-
-
 
 
     val command = "gcc ${Compiler.buildPath}$withoutExtension.c -o ${Compiler.buildPath}$withoutExtension"

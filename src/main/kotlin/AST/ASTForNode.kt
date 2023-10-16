@@ -1,5 +1,6 @@
 package AST
 
+import compiler.Compiler
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -16,8 +17,9 @@ class ASTForNode : ASTNode {
         this.body = body
     }
 
-    constructor(variable: ASTNode, type: ASTNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) {
-        this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, ASTBinaryNode(ASTBinaryTypes.VAR_DEFINITION, type, variable), min))
+    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTTypedNode, rangeComparation: String , max: ASTTypedNode, body: ASTNode) {
+        this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable.addType(type.getType()), min) )
+
 
         val operand = when (rangeComparation) {
             "az" -> czechtina[GrammarToken.OPERATOR_LESS_OR_EQUAL]!!
@@ -26,7 +28,7 @@ class ASTForNode : ASTNode {
         }
 
         this.condition = ASTOperandNode(operand, variable, max)
-        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1)))
+        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1, "int")))
         this.body = body
     }
 
@@ -34,5 +36,5 @@ class ASTForNode : ASTNode {
         return "For: \nbegin=${begin.toString().replace("\n","\n\t")}, \ncondition=${condition.toString().replace("\n","\n\t")}, \nstep=${step.toString().replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(): String = "for (${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
+    override fun toC() = "for (${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
 }

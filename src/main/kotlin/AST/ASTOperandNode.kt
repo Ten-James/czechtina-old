@@ -3,11 +3,15 @@ package AST
 import compiler.Compiler
 import czechtina.cTypeFromCzechtina
 
-class ASTOperandNode : ASTBinaryNode {
+class ASTOperandNode : ASTTypedNode {
     var operand:String
+    var left: ASTTypedNode
+    var right: ASTTypedNode
 
-    constructor(operand:String, left:ASTNode, right:ASTNode) : super(null, left, right) {
+    constructor(operand:String, left:ASTTypedNode, right:ASTTypedNode) : super(Compiler.calcBinaryType(left, right, operand)) {
         this.operand = operand
+        this.left = left
+        this.right = right
     }
 
     override fun toString(): String {

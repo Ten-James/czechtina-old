@@ -21,16 +21,19 @@ enum class ASTUnaryTypes {
     STRING,
     IF,
     ELSE,
+    ELSE_IF,
+    NEW_LINE,
     NO_PARAM_CALL
 }
-class ASTUnaryNode : ASTNode {
+class ASTUnaryNode : ASTTypedNode {
     var type:ASTUnaryTypes? = null
     var data:Any? = null
 
-    constructor(type:ASTUnaryTypes, data:Any) {
+    constructor(type:ASTUnaryTypes, data:Any, expressionType: String = "none") : super(expressionType) {
         this.type = type
         this.data = data
     }
+
 
     override fun toString(): String {
         return "'$type', data=$data"
@@ -52,6 +55,8 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
         ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.ELSE -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]}"
+        ASTUnaryTypes.ELSE_IF -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]} ${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
+        ASTUnaryTypes.NEW_LINE -> "\n\t${(data as ASTNode).toC().replace("\n","\n\t")}"
         ASTUnaryTypes.NO_PARAM_CALL -> "${(data as ASTNode).toC()}()"
         else -> ""
     }

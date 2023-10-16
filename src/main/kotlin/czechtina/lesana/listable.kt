@@ -2,11 +2,12 @@ package czechtina.lesana
 
 import AST.ASTListNode
 import AST.ASTNode
+import AST.ASTTypedNode
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 
 
-fun listAble (list: List<NodeID<ASTNode>>) = lesana<ASTListNode> {
+fun listAble (list: List<NodeID<ASTTypedNode>>) = lesana<ASTListNode> {
     val listAble = NodeID<ASTListNode>("listAble")
 
     for (i in list) {
