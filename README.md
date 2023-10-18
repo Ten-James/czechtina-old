@@ -1,6 +1,6 @@
 # Czechtina
 
-Current version: 0.1.4
+Current version: 0.1.5
 
 Czechtina is programming language based on C and czech language.
 Compiler is written in Kotlin using [Klang](https://github.com/j-jzk/klang) Library

@@ -1,5 +1,11 @@
 # CZECHTINA - CHANGELOG
 
+### v 0.1.5
+
+- preprocessor
+- file structure
+- including file (before compilation)
+
 ### v 0.1.4
 
 - dynamic typing (on compile time)

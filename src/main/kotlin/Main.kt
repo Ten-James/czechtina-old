@@ -1,5 +1,6 @@
 import AST.*
 import compiler.Compiler
+import compiler.Preprocessor
 import cz.j_jzk.klang.input.InputFactory
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
@@ -7,12 +8,12 @@ import cz.j_jzk.klang.prales.useful.list
 import czechtina.*
 import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
+import utils.RemoveFileExtension
 import java.io.BufferedReader
 import java.io.File
 import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
-
     if (args.any() { it == "--help" })
         return println("""Usage: java -jar czechtina.jar [input file].cz [options]
             |Options:
@@ -36,84 +37,15 @@ fun main(args: Array<String>) {
 
     //create file with name of input file in current directory
     val file = args.firstOrNull() ?: return println("No input file specified")
-    var withoutExtension = file.substring(0, file.length - 3)
-    var readCode = File(file).readText()
 
-    val splitedCode = readCode.split("\"").toMutableList()
+    Compiler.compileFile(file, args)
 
-    for (i in 0 until splitedCode.size) {
-        if (i % 2 == 0) continue
-        splitedCode[i] = splitedCode[i].replace("\\n", "\\\\n")
-        splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
-        splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
-    }
-    var code = splitedCode.joinToString("\"").trim()
-
-    val bylines = code.lines().toMutableList()
-
-    var blocklevel = 0
-    for (i in 0 until bylines.size) {
-        if (bylines[i].isBlank())
-            continue
-        else if (bylines[i].contains("{"))
-            blocklevel += 1
-        else if (bylines[i].contains("}"))
-            blocklevel -= 1
-        else if (bylines[i].endsWith("->"))
-            continue
-        else if (!bylines[i].endsWith("\\") && blocklevel >0)
-            bylines[i] = "${bylines[i]};".replace(";;",";")
-    }
-
-    code = bylines.joinToString("\n")
-
-
-    val czechtina = czechtinaLesana()
-    try {
-
-    } catch (e: Exception)
-    {
-        e.printStackTrace()
-        return
-    }
-    val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
-
-    if (args.any() { it == "--show-tree" }) {
-        println(tree.toString())
-    }
-
-    Compiler.localVariable.clear()
-
-    var cCode = tree.toC()
-
-    if (Compiler.compilingTo == "CZ") {
-        cCode = "#define \"czechtina.h\"\n$cCode"
-        createCzechtinaDefineFile()
-    }
-
-    if (args.any { it == "--friendly" }) {
-        if (Compiler.compilingTo != "C") {
-            Compiler.setToC()
-            cCode += "\n/*\n ${tree.toC()} \n*/"
-        }
-    }
-
-    cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
-
-    cCode= "// Czechtina ${Compiler.VERSION}\n$cCode"
-
-    if (args.any { it == "--write-code" }) {
-        cCode = "/*\n\t${readCode.replace("\n", "\n\t")}\n*/\n$cCode"
-    }
-
-
-    File("${Compiler.buildPath}$withoutExtension.c").writeText(cCode)
     if (args.any() { it == "--no-compile" }) {
         return
     }
 
 
-    val command = "gcc ${Compiler.buildPath}$withoutExtension.c -o ${Compiler.buildPath}$withoutExtension"
+    val command = "gcc ${Compiler.buildPath}${RemoveFileExtension(file)}.c -o ${Compiler.buildPath}${RemoveFileExtension(file)}"
 
     try {
         val process = ProcessBuilder()

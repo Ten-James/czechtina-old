@@ -2,10 +2,15 @@ package compiler
 
 import AST.ASTNode
 import AST.ASTTypedNode
+import com.ibm.dtfj.java.JavaVMInitArgs
+import cz.j_jzk.klang.input.InputFactory
 import czechtina.*
+import czechtina.header.createCzechtinaDefineFile
+import czechtina.lesana.czechtinaLesana
+import java.io.File
 
 object Compiler {
-    val VERSION = "0.1.4"
+    val VERSION = "0.1.5"
     var compilingTo = "C"
     var definedTypes = mutableListOf<String>()
     var definedFunctions = mutableMapOf<String, String>()
@@ -108,5 +113,43 @@ object Compiler {
 
     override fun toString(): String {
         return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, globalVariables=$globalVariables, localVariable=$localVariable)"
+    }
+
+
+    fun compileFile(path: String, args: Array<String>) {
+        val code = Preprocessor.preprocess(path)
+        var withoutExtension = path.substring(0, path.length - 3)
+        val czechtina = czechtinaLesana()
+
+        val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTNode
+
+        if (args.any() { it == "--show-tree" }) {
+            println(tree.toString())
+        }
+
+        Compiler.localVariable.clear()
+
+        var cCode = tree.toC()
+
+        if (Compiler.compilingTo == "CZ") {
+            cCode = "#define \"czechtina.h\"\n$cCode"
+            createCzechtinaDefineFile()
+        }
+
+        if (args.any { it == "--friendly" }) {
+            if (Compiler.compilingTo != "C") {
+                Compiler.setToC()
+                cCode += "\n/*\n ${tree.toC()} \n*/"
+            }
+        }
+
+        cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
+
+        cCode= "// Czechtina ${Compiler.VERSION}\n$cCode"
+
+        if (args.any { it == "--write-code" }) {
+            cCode = "/*\n\t${Preprocessor.lastReadFile.replace("\n", "\n\t")}\n*/\n$cCode"
+        }
+        File("$buildPath$withoutExtension.c").writeText(cCode)
     }
 }
