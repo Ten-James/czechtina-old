@@ -39,6 +39,7 @@ enum class GrammarToken {
     KEYWORD_IMPORT_C,
     KEYWORD_RANGE_DEFINITION,
     KEYWORD_TYPE_DEFINITION,
+    KEYWORD_AS,
     VARIABLE,
 }
 
@@ -99,6 +100,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.KEYWORD_FUNCTION_CALL to "zavolej",
     GrammarToken.KEYWORD_RANGE_DEFINITION to "do|az",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typ",
+    GrammarToken.KEYWORD_AS to "jako|as",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
 

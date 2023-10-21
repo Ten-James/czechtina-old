@@ -2,7 +2,6 @@ package compiler
 
 import AST.ASTNode
 import AST.ASTTypedNode
-import com.ibm.dtfj.java.JavaVMInitArgs
 import cz.j_jzk.klang.input.InputFactory
 import czechtina.*
 import czechtina.header.createCzechtinaDefineFile
@@ -13,9 +12,12 @@ object Compiler {
     val VERSION = "0.1.5"
     var compilingTo = "C"
     var definedTypes = mutableListOf<String>()
-    var definedFunctions = mutableMapOf<String, String>()
-    var globalVariables = mutableMapOf<String, String>()
-    var localVariable = mutableMapOf<String,String>()
+    var definedFunctions = mutableMapOf<String, DefinedType>(
+        "printf" to DefinedType("void", false),
+        "new" to DefinedType("dynamic-void", true),
+        "predej" to DefinedType("dynamic-void", true),
+    )
+    var variables = mutableListOf(mutableMapOf<String, DefinedType>())
     var grammar: Map<GrammarToken,String> = C
     var buildPath:String = ""
 
@@ -33,32 +35,47 @@ object Compiler {
     fun addToDefinedTypes(type: String) = definedTypes.add(type)
 
     fun controlDefinedVariables(varName: String): Boolean {
-        if (localVariable.containsKey(varName))
-            throw Exception("Variable $varName is defined in local scope")
-        if (globalVariables.containsKey(varName))
-            throw Exception("Variable $varName is defined in global scope")
+        if (definedTypes.any { it == varName })
+            throw Exception("Variable $varName is defined as type")
         if (definedFunctions.containsKey(varName))
             throw Exception("Variable $varName is defined as function")
         return true
     }
 
     fun getVariableType(varName: String): String {
-        if (localVariable.containsKey(varName))
-            return localVariable[varName]!!
-        if (globalVariables.containsKey(varName))
-            return globalVariables[varName]!!
+        for (variable in variables.reversed())
+            if (variable.containsKey(varName))
+                return variable[varName]!!.typeString
         return ""
     }
 
     fun isDefined(varName: String) : Boolean {
-        if (localVariable.containsKey(varName))
-            return true
-        if (globalVariables.containsKey(varName))
-            return true
         if (definedFunctions.containsKey(varName))
+            return true
+        if (variables.any{ it.containsKey(varName) })
             return true
         return false
     }
+
+    fun scopePush(): String {
+        variables.add(mutableMapOf())
+        return ""
+    }
+
+    fun scopePop(write:Boolean = false): String {
+        var retVal = "\n\t"
+        if (variables.size == 1)
+            throw Exception("Cant pop global scope")
+        variables[variables.size -1].forEach {
+            if (it.value.isHeap)
+                retVal += "free(${it.key});\n\t"
+        }
+        variables.removeAt(variables.size - 1)
+        if (!write)
+            return ""
+        return retVal.substringBeforeLast("\n")
+    }
+
 
     fun setToCZ() {
         compilingTo = "CZ"
@@ -68,6 +85,7 @@ object Compiler {
     private fun calcTypePriority(type: String) : Int = when (type) {
         "none" -> 100
         "pointer" -> 10
+        "dynamic" -> 10
         "string" -> 5
         "double" -> 4
         "float" -> 3
@@ -112,7 +130,7 @@ object Compiler {
     }
 
     override fun toString(): String {
-        return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, globalVariables=$globalVariables, localVariable=$localVariable)"
+        return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, variables=$variables,)"
     }
 
 
@@ -127,7 +145,8 @@ object Compiler {
             println(tree.toString())
         }
 
-        Compiler.localVariable.clear()
+        variables.clear()
+        variables.add(mutableMapOf())
 
         var cCode = tree.toC()
 

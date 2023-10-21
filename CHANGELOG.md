@@ -2,6 +2,9 @@
 
 ### v 0.1.5
 
+- `as` or `jako` keyword for type casting
+- `new` virtual function for allocating memory
+- automatical deallocation of memory (weak - garbage collector)
 - preprocessor
 - file structure
 - including file (before compilation)

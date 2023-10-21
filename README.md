@@ -94,7 +94,7 @@ fce1 x:cele { cele
 Inline way
 
 ```cz
-fce1 x:cele ->  x krat 2
+fce1 x:cele -> x krat 2
 ```
 
 Syntax:
@@ -141,9 +141,13 @@ Definition:
 `VAR_NAME: ukazatel<TYP>`
 To get address of variable use virtual Function adresa
 
+### VIRTUAL FUNCTIONS
+
 `adresa VAR_NAME` => `&VAR_NAME`
 
 `hodnota VAR_NAME` => `*VAR_NAME`
+
+`new COUNT` => `malloc(COUNT)`
 
 #### Arrays
 `VAR_NAME: pole<TYP>`
@@ -195,8 +199,8 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - rest of loop features.
 - structures
 - range definition
-- preprocesor
-  - linking files
+- data borrowing
+- fix garbage collector for functions with return value
 
 
 ## Credits

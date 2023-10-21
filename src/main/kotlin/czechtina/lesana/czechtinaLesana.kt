@@ -21,7 +21,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val varDefinition = NodeID<ASTTypedNode>("varDefinition")
     val listableDefinition = include(listAble(listOf(varDefinition)))
     val import = NodeID<ASTUnaryNode>("import")
-    val r_expression = include(expression(variables))
+    val r_expression = include(expression(variables, types))
     val program = NodeID<ASTProgramNode>("program")
 
 
@@ -40,6 +40,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
         else
             throw Exception("Error")
     }
+
+    types to def(re("&"),types) { (_, t) -> ASTUnaryNode(ASTUnaryTypes.TYPE,t.data!!,t.getType().replace("pointer","dynamic")) }
 
     types to def(re(czechtina[GrammarToken.TYPE_POINTER]!!),
         re("<"),
@@ -266,7 +268,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     { (funName, varDef, _, retType, lines, _) ->
         ASTFunctionNode(
             retType, funName,
-            listOf(varDef), ASTUnaryNode(ASTUnaryTypes.CURLY, lines)
+            listOf(varDef), ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE, lines)
         )
     }
     tFunction to def(
@@ -280,7 +282,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     { (funName, varDefs, _, retType, lines, _) ->
         ASTFunctionNode(
             retType, funName,
-            varDefs.nodes,  ASTUnaryNode(ASTUnaryTypes.CURLY, lines)
+            varDefs.nodes,  ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE, lines)
         )
     }
 
@@ -297,7 +299,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             listOf(varDef),
-            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -313,7 +315,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
             funName,
             listOf(varDef),
-            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -330,7 +332,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             varDefs.nodes,
-            ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -345,7 +347,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
             funName,
             varDefs.nodes,
-            ASTUnaryNode(ASTUnaryTypes.CURLY, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE, ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -361,7 +363,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             retType,
             funName,
             listOf(),
-            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 
@@ -376,7 +378,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
             ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
             funName,
             listOf(),
-            ASTUnaryNode(ASTUnaryTypes.CURLY,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
+            ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE,  ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, line)))
         )
     }
 

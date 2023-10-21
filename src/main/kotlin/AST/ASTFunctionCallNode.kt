@@ -16,8 +16,8 @@ class ASTFunctionCallNode : ASTTypedNode {
     }
 
     override fun getType(): String {
-        if (Compiler.definedFunctions.containsKey(function?.toC())) {
-            return Compiler.definedFunctions[function?.toC()]!!
+        if (Compiler.definedFunctions.containsKey(function.toC())) {
+            return Compiler.definedFunctions[function.toC()]!!.toString()
         }
         return "void"
     }
@@ -29,6 +29,11 @@ class ASTFunctionCallNode : ASTTypedNode {
     override fun toC(): String = when {
             function?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!) -> "&${params?.toC()}"
             function?.toC().equals(czechtina[GrammarToken.TYPE_VALUE]!!) -> "*(${params?.toC()})"
+            function?.toC().equals("new") -> "malloc(${params?.toC()})"
+            function?.toC().equals("predej") -> {
+                Compiler.variables[Compiler.variables.size-1][params?.toC()!!]!!.isHeap = false
+                "${params?.toC()}"
+            }
             else -> "${function?.toC()}(${params?.toC()})"
         }
 }

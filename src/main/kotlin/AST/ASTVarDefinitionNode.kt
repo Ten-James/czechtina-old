@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -13,7 +14,7 @@ class ASTVarDefinitionNode : ASTTypedNode {
         this.variable = variable
 
         if (variable.isLocal)
-            Compiler.localVariable += mapOf(variable.data to getType())
+            Compiler.variables[Compiler.variables.size-1] += mapOf(variable.data to DefinedType(getType(), false))
     }
 
     override fun toString(): String {

@@ -35,10 +35,11 @@ class ASTProgramNode : ASTNode {
 
     }
 
+    fun doubleNewLine(condition:Boolean) = if (condition) "\n\n" else ""
     override fun toC(): String =
-        imports.joinToString("\n\n") { it.toC() } +
-                "\n\n" + functions.joinToString("\n") { it.toCDeclaration() } +
-                "\n\n" + typeDefinition.joinToString("\n") { it.toC() } +
-                "\n\n" + functions.joinToString("\n\n") { it.toC() } +
-                "\n\n" + main?.toC()
+        imports.joinToString("\n") { it.toC() } +
+                doubleNewLine(imports.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +
+                doubleNewLine(functions.isNotEmpty()) + typeDefinition.joinToString("\n") { it.toC() } +
+                doubleNewLine(typeDefinition.isNotEmpty()) + functions.joinToString("\n\n") { it.toC() } +
+                doubleNewLine(functions.isNotEmpty()) + main?.toC()
 }

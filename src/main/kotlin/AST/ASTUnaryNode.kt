@@ -1,9 +1,7 @@
 package AST
 
 import compiler.Compiler
-import czechtina.C
 import czechtina.GrammarToken
-import czechtina.cTypeFromCzechtina
 
 enum class ASTUnaryTypes {
     LITERAL,
@@ -15,6 +13,7 @@ enum class ASTUnaryTypes {
     IMPORT_C,
     BRACKET,
     CURLY,
+    CURLY_UNSCOPE,
     SEMICOLON,
     JUST_C,
     ARRAY,
@@ -49,7 +48,22 @@ class ASTUnaryNode : ASTTypedNode {
         ASTUnaryTypes.IMPORT_C -> "#include \"${data.toString()}.h\""
         ASTUnaryTypes.BRACKET -> "(${(data as ASTNode).toC()})"
         ASTUnaryTypes.ARRAY -> "{${(data as ASTNode).toC()}}"
-        ASTUnaryTypes.CURLY -> "{\n\t${(data as ASTNode).toC().replace("\n","\n\t")}\n}"
+        ASTUnaryTypes.CURLY -> {
+            val body = (data as ASTNode).toC()
+            if (body.contains("return"))
+                "{${Compiler.scopePush()}}\n\t${body.replace("\n","\n\t").replace("return","${Compiler.scopePop(true)}return")}\n}"
+            else
+                "{${Compiler.scopePush()}\n\t${body.replace("\n","\n\t")}${Compiler.scopePop(true)}\n}"
+        }
+        ASTUnaryTypes.CURLY_UNSCOPE -> {
+            val body = (data as ASTNode).toC()
+            if (body.contains("return"))
+                "{\n\t${
+                    body.replace("\n", "\n\t").replace("return", "${Compiler.scopePop(true)}return")
+                }\n}"
+            else
+                "{\n\t${body.replace("\n", "\n\t")}${Compiler.scopePop(true)}\n}"
+        }
         ASTUnaryTypes.SEMICOLON -> "${(data as ASTNode).toC()};"
         ASTUnaryTypes.JUST_C -> (data as ASTNode).toC()
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
