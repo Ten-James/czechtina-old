@@ -1,5 +1,7 @@
 package AST
 
+import compiler.DefinedType
+
 class ASTProgramNode : ASTNode {
     var imports: List<ASTUnaryNode> = listOf<ASTUnaryNode>()
     var functions: List<ASTFunctionNode> = listOf<ASTFunctionNode>()
@@ -28,6 +30,19 @@ class ASTProgramNode : ASTNode {
         return this
     }
 
+    override fun retype(map: Map<String, DefinedType>) {
+        functions.forEach { it.retype(map) }
+        main?.retype(map)
+    }
+
+    override fun copy(): ASTProgramNode {
+        return ASTProgramNode(
+            functions.map { it.copy() },
+            imports.map { it.copy() },
+            main?.copy()
+        )
+    }
+
     override fun toString(): String {
         return "Imports:\n" + imports.joinToString("\n") + "\nType definitions:\n" + typeDefinition.joinToString("\n") + "\nFunctions:\n" + functions.joinToString(
             "\n"
@@ -35,10 +50,11 @@ class ASTProgramNode : ASTNode {
 
     }
 
+    fun doubleNewLine(condition:Boolean) = if (condition) "\n\n" else ""
     override fun toC(): String =
-        imports.joinToString("\n\n") { it.toC() } +
-                "\n\n" + functions.joinToString("\n") { it.toCDeclaration() } +
-                "\n\n" + typeDefinition.joinToString("\n") { it.toC() } +
-                "\n\n" + functions.joinToString("\n\n") { it.toC() } +
-                "\n\n" + main?.toC()
+        imports.joinToString("\n") { it.toC() } +
+                doubleNewLine(imports.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +
+                doubleNewLine(functions.isNotEmpty()) + typeDefinition.joinToString("\n") { it.toC() } +
+                doubleNewLine(typeDefinition.isNotEmpty()) + functions.joinToString("\n\n") { it.toC() } +
+                doubleNewLine(functions.isNotEmpty()) + main?.toC()
 }

@@ -1,16 +1,26 @@
 package AST
 
-class ASTArrayAccessNode: ASTTypedNode {
+import compiler.DefinedType
+
+class ASTArrayAccessNode: ASTVariableNode {
     var array:ASTVariableNode
     var index:ASTNode
 
-    constructor(array:ASTVariableNode, index:ASTNode): super("") {
+    constructor(array:ASTVariableNode, index:ASTNode): super("", DefinedType("")) {
         this.array = array
         this.index = index
     }
 
-    override fun getType(): String {
-        return array.getType().split("-")[1]
+    override fun getType(): DefinedType {
+        return DefinedType( array.getType().typeString.split("-")[1], array.getType().isHeap, array.getType().isConst)
+    }
+
+    override fun copy(): ASTArrayAccessNode {
+        return ASTArrayAccessNode(array.copy(), index.copy())
+    }
+    override fun retype(map: Map<String, DefinedType>) {
+        array.retype(map)
+        index.retype(map)
     }
 
     override fun toString(): String {

@@ -1,5 +1,7 @@
 package AST
 
+import compiler.DefinedType
+
 class ASTListNode : ASTNode {
     val nodes: List<ASTTypedNode>
 
@@ -7,7 +9,7 @@ class ASTListNode : ASTNode {
         this.nodes = nodes
     }
 
-    fun getType():String {
+    fun getType(): DefinedType {
         val types = nodes.map { it.getType() }
         val type = types[0]
         for (t in types) {
@@ -20,7 +22,15 @@ class ASTListNode : ASTNode {
     override fun toString(): String {
         return nodes.joinToString("\n")
     }
+    override fun copy(): ASTListNode {
+        return ASTListNode(
+            nodes.map { it.copy() }
+        )
+    }
 
+    override fun retype(map: Map<String, DefinedType>) {
+        nodes.forEach { it.retype(map) }
+    }
 
 
     override fun toC(): String = nodes.joinToString(",") { it.toC() }

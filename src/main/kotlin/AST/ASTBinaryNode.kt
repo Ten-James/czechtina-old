@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -11,16 +12,25 @@ enum class ASTBinaryTypes {
 }
 
 open class ASTBinaryNode : ASTNode {
-    var type:ASTBinaryTypes? = null
-    var left:ASTNode? = null
-    var right:ASTNode? = null
+    var type:ASTBinaryTypes
+    var left:ASTNode
+    var right:ASTNode
 
 
 
-    constructor(type:ASTBinaryTypes?,left:ASTNode, right:ASTNode) {
+    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) {
         this.type = type
         this.left = left
         this.right = right
+    }
+
+    override fun retype(map: Map<String, DefinedType>) {
+        left.retype(map)
+        right.retype(map)
+    }
+
+    override fun copy(): ASTBinaryNode {
+        return ASTBinaryNode(type, left.copy(), right.copy())
     }
 
     override fun toString(): String {
@@ -28,8 +38,7 @@ open class ASTBinaryNode : ASTNode {
     }
 
     override fun toC(): String = when (type) {
-        ASTBinaryTypes.FLOW_CONTROL -> "${left?.toC()} ${right?.toC()}"
-        ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left?.toC()} ${right?.toC()};"
-        else -> ""
+        ASTBinaryTypes.FLOW_CONTROL -> "${left.toC()} ${right.toC()}"
+        ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left.toC()} ${right.toC()};"
     }
 }

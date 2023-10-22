@@ -1,6 +1,7 @@
 package czechtina.lesana
 
 import AST.*
+import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.AllComparation
@@ -8,7 +9,7 @@ import czechtina.GrammarToken
 import czechtina.cAndCzechtinaRegex
 import czechtina.czechtina
 
-fun expression(variables: NodeID<ASTVariableNode>) = lesana {
+fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) = lesana {
     val literals = include(literals())
     val exp1 = NodeID<ASTTypedNode>("expressions")
     val exp2 = NodeID<ASTTypedNode>("expressions")
@@ -23,8 +24,10 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
-    exp1 to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
-    exp1 to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    variables to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
+    variables to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
+    variables to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    variables to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     exp1 to def(literals) { it.v1 }
 
     exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp1) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
@@ -39,16 +42,17 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
     exp3 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
     exp3 to def(exp2) { it.v1 }
 
-    exp1 to def (re("\\(") , sentence, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.getType()) }
+    exp1 to def (re("\\(") , para5, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.getType()) }
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, "array-${it.v2.getType()}-${it.v2.nodes.size}") }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType()}-${it.v2.nodes.size}")) }
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
-    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(variables, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, functionCalling) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(variables, listexp3) { (v, e) -> ASTFunctionCallNode( v, e) }
 
 
@@ -96,6 +100,13 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
     para3 to def(para3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_OR))), para3) { ASTOperandNode(it.v2, it.v1, it.v3) }
     para3 to def(para2) {it.v1}
 
+    para4 to def(para4, re(czechtina[GrammarToken.KEYWORD_AS]!!), types) {
+        ASTRetypeNode(it.v1, it.v3)
+    }
+    para4 to def(variables, re(czechtina[GrammarToken.KEYWORD_AS]!!), types) {
+        ASTRetypeNode(it.v1, it.v3)
+    }
+
     para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
     {
         ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
@@ -115,6 +126,7 @@ fun expression(variables: NodeID<ASTVariableNode>) = lesana {
 
     para5 to def(para4) {it.v1}
     para5 to def(variables) {it.v1}
+
 
     inheritIgnoredREs()
     setTopNode(para5)

@@ -1,0 +1,31 @@
+#IFNDEF CZECHTINA
+#DEFINE CZECHTINA
+#DEFINE void void
+#DEFINE cele int
+#DEFINE desetinne double
+#DEFINE bool bool
+#DEFINE znak char
+#DEFINE ukazatel *
+#DEFINE plus +
+#DEFINE minus -
+#DEFINE krat *
+#DEFINE deleno /
+#DEFINE zbytkac %
+#DEFINE je =
+#DEFINE jepresne ==
+#DEFINE nenipresne !=
+#DEFINE jemensi <
+#DEFINE jepresnemensi <=
+#DEFINE jevetsi >
+#DEFINE jepresnevetsi >=
+#DEFINE azaroven &&
+#DEFINE anebo ||
+#DEFINE ne !
+#DEFINE pokud if
+#DEFINE nebo else
+#DEFINE dokud while
+#DEFINE opakuj for
+#DEFINE vrat return
+#DEFINE veget break
+#DEFINE pokracuj continue
+#DEFINE zadejtyp typedef
