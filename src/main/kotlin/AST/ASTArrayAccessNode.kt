@@ -1,6 +1,6 @@
 package AST
 
-class ASTArrayAccessNode: ASTTypedNode {
+class ASTArrayAccessNode: ASTVariableNode {
     var array:ASTVariableNode
     var index:ASTNode
 
@@ -11,6 +11,14 @@ class ASTArrayAccessNode: ASTTypedNode {
 
     override fun getType(): String {
         return array.getType().split("-")[1]
+    }
+
+    override fun copy(): ASTArrayAccessNode {
+        return ASTArrayAccessNode(array.copy(), index.copy())
+    }
+    override fun retype(map: Map<String, String>) {
+        array.retype(map)
+        index.retype(map)
     }
 
     override fun toString(): String {

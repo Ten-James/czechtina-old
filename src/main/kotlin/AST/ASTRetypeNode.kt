@@ -22,6 +22,10 @@ class ASTRetypeNode: ASTTypedNode {
         return type
     }
 
+    override fun copy(): ASTRetypeNode {
+        return ASTRetypeNode(expression.copy(), type.copy())
+    }
+
     override fun toString(): String {
         return "Retype: ${expression.toString()} to ${type.toString()}"
     }

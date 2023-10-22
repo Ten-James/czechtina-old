@@ -1,7 +1,8 @@
 # CZECHTINA - CHANGELOG
 
 ### v 0.1.5
-
+- templating via T keyword
+- function overloading
 - `as` or `jako` keyword for type casting
 - `new` virtual function for allocating memory
 - automatical deallocation of memory (weak - garbage collector)
@@ -11,7 +12,7 @@
 
 ### v 0.1.4
 
-- dynamic typing (on compile time)
+- type deducing
 - no longer semicolon needed
 - inline for loop with dynamic type
 ```

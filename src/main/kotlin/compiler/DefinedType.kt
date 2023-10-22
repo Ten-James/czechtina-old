@@ -2,9 +2,10 @@ package compiler
 
 class DefinedType {
     val typeString: String
-    var isHeap:Boolean
+    val isHeap:Boolean
+    var dealocated: Boolean = false
 
-    constructor(typeString: String, isHeap: Boolean) {
+    constructor(typeString: String, isHeap: Boolean = false) {
         this.typeString = typeString
         this.isHeap = isHeap
     }

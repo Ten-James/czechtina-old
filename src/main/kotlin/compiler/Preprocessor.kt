@@ -41,6 +41,8 @@ object Preprocessor {
                 bylines[i] = File(GetFileLinkedFilePath(filePath, bylines[i].split(" ")[1])).readText()
             else if (!bylines[i].endsWith("\\") && blocklevel >0)
                 bylines[i] = "${bylines[i]};".replace(";;",";")
+            else if (!bylines[i].endsWith("\\"))
+                bylines[i] = "${bylines[i]} konec".replace(";;",";")
         }
 
         code = bylines.joinToString("\n")

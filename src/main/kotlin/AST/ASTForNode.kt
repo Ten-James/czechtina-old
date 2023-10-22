@@ -34,6 +34,17 @@ class ASTForNode : ASTNode {
         unscopeBody()
     }
 
+    override fun retype(map: Map<String, String>) {
+        begin.retype(map)
+        condition.retype(map)
+        step.retype(map)
+        body.retype(map)
+    }
+
+    override fun copy(): ASTForNode {
+        return ASTForNode(begin.copy(), condition.copy(), step.copy(), body.copy())
+    }
+
     fun unscopeBody(){
         if (body is ASTUnaryNode)
         {

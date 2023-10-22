@@ -15,5 +15,9 @@ class ASTStaticArrayDefinitionNode : ASTTypedNode {
         return "Static array definition: \ntype=${type.toString().replace("\n","\n\t")}, \nvariable=${variable.toString().replace("\n","\n\t")}, \nsize=${size}"
     }
 
+    override fun copy(): ASTStaticArrayDefinitionNode {
+        return ASTStaticArrayDefinitionNode(type.copy(), variable.copy(), size)
+    }
+
     override fun toC(): String = "${type.toC()} ${variable.toC()}[${size}]"
 }

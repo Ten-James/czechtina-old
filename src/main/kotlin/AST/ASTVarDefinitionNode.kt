@@ -9,6 +9,18 @@ class ASTVarDefinitionNode : ASTTypedNode {
     var variable:ASTVariableNode
     var type:ASTTypedNode
 
+
+    override fun retype(map: Map<String, String>) {
+        type.retype(map)
+        variable.retype(map)
+        for (m in map)
+            expType = expType.replace(m.key, m.value)
+    }
+
+    override fun copy(): ASTVarDefinitionNode {
+        return ASTVarDefinitionNode(variable.copy(), type.copy())
+    }
+
     constructor(variable:ASTVariableNode, type : ASTTypedNode): super(type.getType()) {
         this.type = type
         this.variable = variable

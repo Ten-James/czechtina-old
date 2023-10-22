@@ -17,10 +17,15 @@ class ASTFunctionNode : ASTNode {
     }
 
     fun unscopeBody(){
-        if (body is ASTUnaryNode)
-        {
+        if (body is ASTUnaryNode) {
             (body as ASTUnaryNode).type = ASTUnaryTypes.CURLY_UNSCOPE
         }
+    }
+
+    override fun retype(map: Map<String, String>) {
+        type.retype(map)
+        parameters.forEach { it.retype(map) }
+        body?.retype(map)
     }
 
 
@@ -29,10 +34,41 @@ class ASTFunctionNode : ASTNode {
     }
 
     override fun toC(): String  {
-        return "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
+        val paramsTypes = mutableListOf<String>()
+        for (param in parameters)
+            if (param is ASTTypedNode)
+                paramsTypes.add(param.getType())
+        if (paramsTypes.any{it.contains("*")})
+            return "//${name}_CZECHTINA ANCHOR\n"
+        return "//${name}_CZECHTINA ANCHOR\n${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
     }
 
+    override fun copy(): ASTFunctionNode {
+        return ASTFunctionNode(type.copy(), name!!, parameters.map { it.copy() }, body!!.copy())
+    }
+
+    fun toCNoSideEffect(): String = "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
+
+
+    fun toCDeclarationNoSideEffect(): String = "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}); ${Compiler.scopePop(false)}"
+
     fun toCDeclaration(): String {
-        return "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}); ${Compiler.scopePop(false)}"
+        println("DECLARING FUNCTION $name, $type")
+        val paramsTypes = mutableListOf<String>()
+        for (param in parameters)
+            if (param is ASTTypedNode)
+                paramsTypes.add(param.getType())
+
+        if (Compiler.definedFunctions.containsKey(name!!)) {
+            val newName = "${name}_v${Compiler.definedFunctions[name!!]!!.variants.size}"
+            Compiler.definedFunctions[name!!]!!.variants.add(compiler.DefinedFunctionVariant(newName, paramsTypes))
+            name = newName;
+        }
+        else
+            Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, compiler.DefinedType(type.toC()), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes)), virtual = false))
+        if (paramsTypes.any{it.contains("*")})
+            return "//${name}_Declaration_CZECHTINA ANCHOR\n"
+
+        return "//${name}_Declaration_CZECHTINA ANCHOR\n"+toCDeclarationNoSideEffect()
     }
 }

@@ -28,6 +28,19 @@ class ASTProgramNode : ASTNode {
         return this
     }
 
+    override fun retype(map: Map<String, String>) {
+        functions.forEach { it.retype(map) }
+        main?.retype(map)
+    }
+
+    override fun copy(): ASTProgramNode {
+        return ASTProgramNode(
+            functions.map { it.copy() },
+            imports.map { it.copy() },
+            main?.copy()
+        )
+    }
+
     override fun toString(): String {
         return "Imports:\n" + imports.joinToString("\n") + "\nType definitions:\n" + typeDefinition.joinToString("\n") + "\nFunctions:\n" + functions.joinToString(
             "\n"

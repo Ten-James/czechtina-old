@@ -16,6 +16,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.json:json:20230618")
     testImplementation(kotlin("test"))
 
     implementation("cz.j_jzk.klang:klang:1.0-rc2")

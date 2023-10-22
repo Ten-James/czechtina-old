@@ -20,7 +20,15 @@ class ASTListNode : ASTNode {
     override fun toString(): String {
         return nodes.joinToString("\n")
     }
+    override fun copy(): ASTListNode {
+        return ASTListNode(
+            nodes.map { it.copy() }
+        )
+    }
 
+    override fun retype(map: Map<String, String>) {
+        nodes.forEach { it.retype(map) }
+    }
 
 
     override fun toC(): String = nodes.joinToString(",") { it.toC() }

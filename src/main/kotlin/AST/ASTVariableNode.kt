@@ -4,7 +4,7 @@ import compiler.Compiler
 import compiler.DefinedType
 import czechtina.GrammarToken
 
-class ASTVariableNode : ASTTypedNode {
+open class ASTVariableNode : ASTTypedNode {
     val data: String
     val isLocal:Boolean
 
@@ -12,6 +12,15 @@ class ASTVariableNode : ASTTypedNode {
         this.data = data
         this.isLocal = isLocal
 
+    }
+
+    override fun retype(map: Map<String, String>) {
+        for (m in map)
+            expType = expType.replace(m.key, m.value)
+    }
+
+    override fun copy(): ASTVariableNode {
+        return ASTVariableNode(data, expType, isLocal)
     }
 
     fun addType(type: String ): ASTVariableNode {

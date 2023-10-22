@@ -23,8 +23,9 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
-    exp1 to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
-    exp1 to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    variables to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej"), e) }
+    variables to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    variables to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     exp1 to def(literals) { it.v1 }
 
     exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp1) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
@@ -47,8 +48,9 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
-    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(variables, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, functionCalling) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(variables, listexp3) { (v, e) -> ASTFunctionCallNode( v, e) }
 
 

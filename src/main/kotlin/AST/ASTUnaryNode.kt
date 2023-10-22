@@ -35,13 +35,28 @@ class ASTUnaryNode : ASTTypedNode {
 
 
     override fun toString(): String {
-        return "'$type', data=$data"
+        return "'$type', data=$data, exp=${getType()}"
     }
 
+    override fun retype(map: Map<String, String>) {
+        if (data is ASTNode)
+            (data as ASTNode).retype(map)
+        if (type == ASTUnaryTypes.TYPE){
+            for (m in map){
+                data = data.toString().replace(m.key, m.value)
+                expType = expType.replace(m.key, m.value)
+            }
+        }
+
+    }
+
+    override fun copy(): ASTUnaryNode {
+        return ASTUnaryNode(type!!, data!!, getType())
+    }
     override fun toC(): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
-        ASTUnaryTypes.TYPE -> Compiler.typeFromCzechtina(data.toString())
+        ASTUnaryTypes.TYPE -> if (getType().contains("*")) getType() else Compiler.typeFromCzechtina(data.toString())
         ASTUnaryTypes.TYPE_POINTER -> "${(data as ASTNode).toC()}*"
         ASTUnaryTypes.RETURN -> "${Compiler.grammar[GrammarToken.KEYWORD_RETURN]} ${(data as ASTNode).toC()}"
         ASTUnaryTypes.IMPORT -> "//xd ${data.toString()}"
@@ -49,17 +64,17 @@ class ASTUnaryNode : ASTTypedNode {
         ASTUnaryTypes.BRACKET -> "(${(data as ASTNode).toC()})"
         ASTUnaryTypes.ARRAY -> "{${(data as ASTNode).toC()}}"
         ASTUnaryTypes.CURLY -> {
-            val body = (data as ASTNode).toC()
+            val body = "${Compiler.scopePush()}${(data as ASTNode).toC()}"
             if (body.contains("return"))
-                "{${Compiler.scopePush()}}\n\t${body.replace("\n","\n\t").replace("return","${Compiler.scopePop(true)}return")}\n}"
+                "\n\t${body.replace("\n","\n\t").replace("return","${Compiler.scopePop(true,"", "")}return")}\n}"
             else
-                "{${Compiler.scopePush()}\n\t${body.replace("\n","\n\t")}${Compiler.scopePop(true)}\n}"
+                "{\n\t${body.replace("\n","\n\t")}${Compiler.scopePop(true)}\n}"
         }
         ASTUnaryTypes.CURLY_UNSCOPE -> {
             val body = (data as ASTNode).toC()
             if (body.contains("return"))
                 "{\n\t${
-                    body.replace("\n", "\n\t").replace("return", "${Compiler.scopePop(true)}return")
+                    body.replace("\n", "\n\t").replace("return", "${Compiler.scopePop(true,"","")}return")
                 }\n}"
             else
                 "{\n\t${body.replace("\n", "\n\t")}${Compiler.scopePop(true)}\n}"

@@ -67,7 +67,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.TYPE_DECIMAL to "desetinn[eay]",
     GrammarToken.TYPE_BOOLEAN to "bool",
     GrammarToken.TYPE_CHAR to "znak",
-    GrammarToken.TYPE_POINTER to "ukazatel",
+    GrammarToken.TYPE_POINTER to "ukazatel|pointer",
     GrammarToken.TYPE_ADDRESS to "adresa",
     GrammarToken.TYPE_VALUE to "hodnota",
     GrammarToken.TYPE_ARRAY to "pole",
