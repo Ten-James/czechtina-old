@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -10,14 +11,14 @@ class ASTFunctionCallNode : ASTVariableNode {
 
 
 
-    constructor(function:ASTTypedNode, params:ASTNode? = null): super("") {
+    constructor(function:ASTTypedNode, params:ASTNode? = null): super("", DefinedType("none")) {
         this.function = function
         this.params = params
     }
 
-    override fun getType(): String {
+    override fun getType(): DefinedType {
         if (Compiler.definedFunctions.containsKey(function.toC())) {
-            val paramsTypes = mutableListOf<String>()
+            val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
@@ -25,14 +26,16 @@ class ASTFunctionCallNode : ASTVariableNode {
                 paramsTypes.add((params as ASTTypedNode).getType())
 
             if (function.toC() == "predej")
-                return paramsTypes.first()
+                return (params!! as ASTVariableNode).getType().toDynamic()
+            if (function.toC() == "const")
+                return (params!! as ASTVariableNode).getType().toConst()
             if (Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes) != -1)
-                return Compiler.definedFunctions[function.toC()]!!.returnType.typeString
+                return Compiler.definedFunctions[function.toC()]!!.returnType
         }
-        return "void"
+        return DefinedType("none")
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         function.retype(map)
         params?.retype(map)
     }
@@ -53,12 +56,21 @@ class ASTFunctionCallNode : ASTVariableNode {
             return "*(${params?.toC()})"
 
         if (function?.toC().equals("predej")) {
+            val body = "${params?.toC()}"
             Compiler.variables[Compiler.variables.size-1][params?.toC()!!]!!.dealocated = true
-            return "${params?.toC()}"
+            return body
+        }
+        if (function?.toC().equals("const")) {
+            if (params is ASTVariableNode){
+                if (!(params as ASTVariableNode).getType().isPointer())
+                    throw Exception("Const can be applied only to objects")
+                return "${params?.toC()}"
+            }
+            throw Exception("Const can be applied only to variables")
         }
 
         if (Compiler.definedFunctions.containsKey(function.toC())) {
-            val paramsTypes = mutableListOf<String>()
+            val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())

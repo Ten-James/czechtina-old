@@ -38,7 +38,14 @@ fun main(args: Array<String>) {
     //create file with name of input file in current directory
     val file = args.firstOrNull() ?: return println("No input file specified")
 
-    Compiler.compileFile(file, args)
+    try {
+        Compiler.compileFile(file, args)
+    }
+    catch (e: Exception) {
+        println("Error: variables scope ${Compiler.variables}")
+        println("Error: ${e.message}")
+        throw e
+    }
 
     if (args.any() { it == "--no-compile" }) {
         return

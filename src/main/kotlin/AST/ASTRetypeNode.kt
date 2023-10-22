@@ -1,24 +1,26 @@
 package AST
 
+import compiler.DefinedType
+
 class ASTRetypeNode: ASTTypedNode {
     val expression: ASTTypedNode;
     val type: ASTTypedNode;
 
-    constructor(expression: ASTTypedNode, type: ASTTypedNode): super("") {
+    constructor(expression: ASTTypedNode, type: ASTTypedNode): super(DefinedType("")) {
         this.expression = expression;
         this.type = type;
     }
 
-    override fun getType(): String {
-        if (expression.getType().contains("-") && !type.getType().contains("-"))
+    override fun getType(): DefinedType {
+        if (expression.getType().typeString.contains("-") && !type.getType().typeString.contains("-"))
             throw Exception("Cannot retype pointer to non-pointer type")
-        if (type.getType().contains("arrau"))
+        if (type.getType().typeString.contains("arrau"))
             throw Exception("Cannot retype to array type")
 
         var type = type.getType();
+        if (expression.getType().isHeap)
+            type = type.toHeap()
 
-        if (expression.getType().contains("dynamic"))
-            type =type.replace("pointer", "dynamic")
         return type
     }
 
@@ -27,7 +29,7 @@ class ASTRetypeNode: ASTTypedNode {
     }
 
     override fun toString(): String {
-        return "Retype: ${expression.toString()} to ${type.toString()}"
+        return "Retype: ${expression} to ${type}"
     }
 
     override fun toC(): String {

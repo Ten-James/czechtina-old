@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.cTypeFromCzechtina
 
 class ASTOperandNode : ASTTypedNode {
@@ -14,7 +15,7 @@ class ASTOperandNode : ASTTypedNode {
         this.right = right
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         left.retype(map)
         right.retype(map)
         expType = Compiler.calcBinaryType(left, right, operand)

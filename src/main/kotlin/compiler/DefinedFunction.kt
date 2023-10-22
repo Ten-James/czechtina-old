@@ -7,14 +7,13 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
         this.variants.addAll(variants)
     }
 
-    fun validateParams(params: List<String>): Int {
-        println("$name: Validating params ${params.joinToString(",")}")
+    fun validateParams(params: List<DefinedType>): Int {
         for (variant in variants) {
             if (variant.params.size != params.size){
                 if (variant.enableArgs) {
                     var same = true
                     for (i in 0 until variant.params.size - 1)
-                        if (variant.params[i] != params[i])
+                        if (variant.params[i].typeString != params[i].typeString)
                             same = false
                     if (same) {
                         variant.timeUsed++
@@ -22,33 +21,34 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
                     }
                 }
             }
-            if (variant.params.zip(params).all { it.first == it.second }) {
+            if (variant.params.zip(params).all { it.first.typeString == it.second.typeString }) {
+                if (variant.params.zip(params).any{!it.first.isConst && it.second.isConst} ) {
+                    val newName = "${name}_v${variants.size}"
+                    variants.add(DefinedFunctionVariant(newName, variant.params.zip(params).map { DefinedType(it.first.typeString,it.first.isHeap, it.first.isConst || it.second.isConst) }, defined = false, virtual = true))
+                    variants.last().timeUsed++
+                }
+
                 variant.timeUsed++
                 return variants.indexOf(variant)
             }
         }
         for (variant in variants) {
-            val retypeMap = mutableMapOf<String, String>()
+            val retypeMap = mutableMapOf<String, DefinedType>()
             for (i in 0 until variant.params.size) {
                 val old = variant.params[i]
-                if (old.contains("pointer")){
-                    val newOld = old.replace("pointer", "dynamic")
-                    if (newOld == params[i]) {
-                        retypeMap[old] = newOld
+                if (old.isPointer()){
+                    if (old.typeString.replace("pointer","dynamic") == params[i].typeString) {
+                        retypeMap[old.typeString] = params[i]
                         continue
                     }
                 }
-                if (!old.contains("*"))
+                if (!old.isTemplate())
                     continue
-                if (old.contains("-"))
-                    retypeMap[old.split("-")[1]] = params[i]
-                else
-                    retypeMap[old] = params[i]
+                retypeMap[old.getTemplate()] = params[i]
             }
-            if (variant.params.zip(params).all { it.first == it.second || retypeMap.containsKey(it.first) && retypeMap[it.first] == it.second }) {
+            if (variant.params.zip(params).all { it.first.typeString == it.second.typeString || retypeMap.containsKey(it.first.typeString) && retypeMap[it.first.typeString]!!.typeString == it.second.typeString }) {
                 val newName = "${name}_v${variants.size}"
                 variants.add(DefinedFunctionVariant(newName, params, defined = false))
-                println("$name: added variant ${variants.last().params.joinToString(",")}")
                 variants.last().timeUsed++
                 return variants.size-1
             }
@@ -59,7 +59,7 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
     override fun toString(): String = "\n$name: $returnType $virtual (\n\t${variants.joinToString("\n\t")}\n)"
 }
 
-class DefinedFunctionVariant(val translatedName: String, val params: List<String>, var defined:Boolean = true, val enableArgs: Boolean = false) {
+class DefinedFunctionVariant(val translatedName: String, val params: List<DefinedType>, var defined:Boolean = true, val enableArgs: Boolean = false, val virtual: Boolean = false) {
     var timeUsed: Int = 0
 
     override fun toString(): String = "$translatedName(${params.joinToString(",")}): $timeUsed $defined"

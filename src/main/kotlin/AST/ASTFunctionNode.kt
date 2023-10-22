@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 
 class ASTFunctionNode : ASTNode {
     var type:ASTUnaryNode
@@ -22,7 +23,7 @@ class ASTFunctionNode : ASTNode {
         }
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         type.retype(map)
         parameters.forEach { it.retype(map) }
         body?.retype(map)
@@ -34,11 +35,11 @@ class ASTFunctionNode : ASTNode {
     }
 
     override fun toC(): String  {
-        val paramsTypes = mutableListOf<String>()
+        val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
             if (param is ASTTypedNode)
                 paramsTypes.add(param.getType())
-        if (paramsTypes.any{it.contains("*")})
+        if (paramsTypes.any{it.isTemplate()})
             return "//${name}_CZECHTINA ANCHOR\n"
         return "//${name}_CZECHTINA ANCHOR\n${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
     }
@@ -53,8 +54,7 @@ class ASTFunctionNode : ASTNode {
     fun toCDeclarationNoSideEffect(): String = "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}); ${Compiler.scopePop(false)}"
 
     fun toCDeclaration(): String {
-        println("DECLARING FUNCTION $name, $type")
-        val paramsTypes = mutableListOf<String>()
+        val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
             if (param is ASTTypedNode)
                 paramsTypes.add(param.getType())
@@ -66,7 +66,7 @@ class ASTFunctionNode : ASTNode {
         }
         else
             Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, compiler.DefinedType(type.toC()), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes)), virtual = false))
-        if (paramsTypes.any{it.contains("*")})
+        if (paramsTypes.any{it.isTemplate()})
             return "//${name}_Declaration_CZECHTINA ANCHOR\n"
 
         return "//${name}_Declaration_CZECHTINA ANCHOR\n"+toCDeclarationNoSideEffect()

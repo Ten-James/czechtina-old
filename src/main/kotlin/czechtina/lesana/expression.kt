@@ -1,6 +1,7 @@
 package czechtina.lesana
 
 import AST.*
+import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.AllComparation
@@ -23,7 +24,8 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
-    variables to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej"), e) }
+    variables to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
+    variables to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
     variables to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     variables to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     exp1 to def(literals) { it.v1 }
@@ -44,7 +46,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, "array-${it.v2.getType()}-${it.v2.nodes.size}") }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType()}-${it.v2.nodes.size}")) }
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }

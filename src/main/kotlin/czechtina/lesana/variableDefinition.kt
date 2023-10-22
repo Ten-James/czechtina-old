@@ -2,6 +2,7 @@ package czechtina.lesana
 
 import AST.*
 import compiler.Compiler
+import compiler.DefinedType
 import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.GrammarToken
@@ -19,7 +20,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re("<"),
         types,
         re(">")
-    ) { (v, _, _, _, t, _) -> ASTStaticArrayDefinitionNode(t, v.addType("array-${t.getType()}-"), "") }
+    ) { (v, _, _, _, t, _) -> ASTStaticArrayDefinitionNode(t, v.addType(DefinedType("array-${t.getType().typeString}-")), "") }
 
     varDefinition to def(
         variables,
@@ -30,7 +31,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re(","),
         re("[0-9]+"),
         re(">")
-    ) { (v, _, _, _, t, _, s, _) -> ASTStaticArrayDefinitionNode(t, v.addType("array-${t.getType()}-$s"), s) }
+    ) { (v, _, _, _, t, _, s, _) -> ASTStaticArrayDefinitionNode(t, v.addType(DefinedType("array-${t.getType().typeString}-$s")), s) }
 
 
     varDefinition to def(

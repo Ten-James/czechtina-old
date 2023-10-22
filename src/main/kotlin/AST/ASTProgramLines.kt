@@ -1,5 +1,7 @@
 package AST
 
+import compiler.DefinedType
+
 class ASTProgramLines : ASTNode {
     var programLines: List<ASTNode> = listOf<ASTNode>()
 
@@ -18,7 +20,7 @@ class ASTProgramLines : ASTNode {
         )
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         programLines.forEach { it.retype(map) }
     }
 

@@ -12,12 +12,20 @@ import java.io.File
 
 object Compiler {
     val VERSION = "0.1.5"
+    var isParsed = false
     var compilingTo = "C"
     var definedTypes = mutableListOf<String>()
     var definedFunctions = mutableMapOf<String, DefinedFunction>(
-        "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf("string"))), virtual = true),
-        "new" to DefinedFunction("new",DefinedType("dynamic-void", true), listOf(DefinedFunctionVariant("malloc", listOf("int"))), virtual = true),
-        "predej" to DefinedFunction("predej",DefinedType("dynamic-void"), listOf(DefinedFunctionVariant("", listOf("dynamic"))), virtual = true),
+        "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")))), virtual = true),
+        "new" to DefinedFunction("new",DefinedType("pointer-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
+            DefinedType("int")
+        ))), virtual = true),
+        "predej" to DefinedFunction("predej",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
+            DefinedType("pointer", isHeap = true)
+        ))), virtual = true),
+        "const" to DefinedFunction("const",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
+            DefinedType("pointer")
+        ))), virtual = true),
     )
     var variables = mutableListOf(mutableMapOf<String, DefinedType>())
     var grammar: Map<GrammarToken,String> = C
@@ -46,16 +54,18 @@ object Compiler {
         return true
     }
 
-    fun getVariableType(varName: String): String {
+    fun getVariableType(varName: String): DefinedType? {
         for (variable in variables.reversed())
             if (variable.containsKey(varName))
-                return variable[varName]!!.typeString
-        return ""
+                return variable[varName]!!
+        return null
     }
 
     fun isDefined(varName: String) : Boolean {
         if (definedFunctions.containsKey(varName))
             return true
+        if (variables.any{ it.containsKey(varName) && it[varName]!!.dealocated })
+            throw Exception("Variable $varName is dealocated")
         if (variables.any{ it.containsKey(varName) })
             return true
         return false
@@ -90,8 +100,8 @@ object Compiler {
 
     private fun calcTypePriority(type: String) : Int = when (type) {
         "none" -> 100
+        "dynamic" -> 15
         "pointer" -> 10
-        "dynamic" -> 10
         "string" -> 5
         "double" -> 4
         "float" -> 3
@@ -102,17 +112,20 @@ object Compiler {
         else -> if (type.contains("array")) 0 else throw Exception("Unhandled Type $type")
     }
 
-    fun calcBinaryType(left: ASTTypedNode,  right: ASTTypedNode, operand: String): String {
-        if (left.getType().contains("*"))
-            return left.getType()
-        if (right.getType().contains("*"))
-            return right.getType()
-        if (operand == "=")
-            return right.getType()
+    fun calcBinaryType(left: ASTTypedNode,  right: ASTTypedNode, operand: String): DefinedType {
+        if (left.getType().isTemplate())
+            return DefinedType(left.getType())
+        if (right.getType().isTemplate())
+            return DefinedType(right.getType())
+        if (operand == "=") {
+            if (left.getType().isConst && isParsed)
+                throw Exception("Cannot change const type of variable ${left}")
+            return DefinedType(right.getType())
+        }
 
         try {
-            val leftWeight = calcTypePriority(left.getType())
-            val rightWeight = calcTypePriority(right.getType())
+            val leftWeight = calcTypePriority(left.getType().typeString)
+            val rightWeight = calcTypePriority(right.getType().typeString)
             val maxW = maxOf(leftWeight, rightWeight)
             val minW = minOf(leftWeight, rightWeight)
 
@@ -123,11 +136,11 @@ object Compiler {
                 throw Exception("Modulo cant be made with floating point number")
 
             if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
-                return "bool";
+                return DefinedType("bool");
 
             if (leftWeight > rightWeight)
-                return left.getType()
-            return right.getType()
+                return DefinedType(left.getType())
+            return DefinedType(right.getType())
 
         } catch (e: Exception) {
             throw Exception("Error in calcBinaryType: ${e.message}")
@@ -150,8 +163,11 @@ object Compiler {
         var withoutExtension = path.substring(0, path.length - 3)
         val czechtina = czechtinaLesana()
 
+        isParsed = false
 
         val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
+
+        isParsed = true
 
         if (args.any() { it == "--show-tree" }) {
             println(tree.toString())
@@ -176,37 +192,44 @@ object Compiler {
                     Compiler.scopePush()
                     var functionAST = functionASTref.copy()
                     Compiler.scopePop()
-                    val paramsTypes = mutableListOf<String>()
+                    val paramsTypes = mutableListOf<DefinedType>()
                     for (param in functionAST.parameters)
                         if (param is ASTTypedNode)
                             paramsTypes.add(param.getType())
                     val abstractIndex = fce.validateParams(paramsTypes)
-                    var retypeMap = mutableMapOf<String,String>()
+                    var retypeMap = mutableMapOf<String,DefinedType>()
                     for (i in 0 until variant.params.size){
                         var old =fce.variants[abstractIndex].params[i]
-                        var new = variant.params[i]
+                        var new = DefinedType(variant.params[i])
 
-                        if (old.contains("pointer")){
-                            val newOld = old.replace("pointer", "dynamic")
-                            if (newOld == new) {
-                                retypeMap += mapOf(old to newOld)
+                        if (old.isPointer()){
+                            if (old.typeString.replace("pointer", "dynamic") == new.typeString) {
+                                retypeMap += mapOf(old.typeString to new)
+                                continue
+                            }
+                            if(!old.isConst && new.isConst) {
+                                retypeMap += mapOf(old.typeString to new)
                                 continue
                             }
                         }
 
 
-                        if (!old.contains("*"))
+                        if (!old.isTemplate())
                             continue
-                        if (old.contains("-"))
-                            old = old.split("-").find { it.contains("*") }!!
-
-
-                        retypeMap += mapOf(old to new)
+                        retypeMap += mapOf(old.getTemplate() to new)
                     }
+                    println(retypeMap)
                     functionAST.name = variant.translatedName
                     functionAST.retype(retypeMap)
-                    cCode = cCode.replace("//${function.key}_Declaration_CZECHTINA ANCHOR", "//${function.key}_Declaration_CZECHTINA ANCHOR\n${functionAST.toCDeclarationNoSideEffect()}")
-                    cCode = cCode.replace("//${function.key}_CZECHTINA ANCHOR", "//${function.key}_CZECHTINA ANCHOR\n${functionAST.toCNoSideEffect()}")
+
+                    if (!variant.virtual) {
+                        cCode = cCode.replace("//${function.key}_Declaration_CZECHTINA ANCHOR", "//${function.key}_Declaration_CZECHTINA ANCHOR\n${functionAST.toCDeclarationNoSideEffect()}")
+                        cCode = cCode.replace("//${function.key}_CZECHTINA ANCHOR", "//${function.key}_CZECHTINA ANCHOR\n${functionAST.toCNoSideEffect()}")
+                    }
+                    else {
+                        functionAST.toCNoSideEffect()
+                    }
+
                     variant.defined = true
                 }
             }

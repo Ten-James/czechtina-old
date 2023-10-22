@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.GrammarToken
 
 enum class ASTUnaryTypes {
@@ -28,7 +29,7 @@ class ASTUnaryNode : ASTTypedNode {
     var type:ASTUnaryTypes? = null
     var data:Any? = null
 
-    constructor(type:ASTUnaryTypes, data:Any, expressionType: String = "none") : super(expressionType) {
+    constructor(type:ASTUnaryTypes, data:Any, expressionType: DefinedType = DefinedType("none")) : super(expressionType) {
         this.type = type
         this.data = data
     }
@@ -38,25 +39,26 @@ class ASTUnaryNode : ASTTypedNode {
         return "'$type', data=$data, exp=${getType()}"
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         if (data is ASTNode)
             (data as ASTNode).retype(map)
         if (type == ASTUnaryTypes.TYPE){
             for (m in map){
-                data = data.toString().replace(m.key, m.value)
-                expType = expType.replace(m.key, m.value)
+                data = data.toString().replace(m.key, m.value.typeString)
+                if (expType.typeString == m.key)
+                    expType = m.value
             }
         }
 
     }
 
     override fun copy(): ASTUnaryNode {
-        return ASTUnaryNode(type!!, data!!, getType())
+        return ASTUnaryNode(type!!, data!!, expType)
     }
     override fun toC(): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
-        ASTUnaryTypes.TYPE -> if (getType().contains("*")) getType() else Compiler.typeFromCzechtina(data.toString())
+        ASTUnaryTypes.TYPE -> if (getType().isTemplate()) getType().typeString else Compiler.typeFromCzechtina(data.toString())
         ASTUnaryTypes.TYPE_POINTER -> "${(data as ASTNode).toC()}*"
         ASTUnaryTypes.RETURN -> "${Compiler.grammar[GrammarToken.KEYWORD_RETURN]} ${(data as ASTNode).toC()}"
         ASTUnaryTypes.IMPORT -> "//xd ${data.toString()}"

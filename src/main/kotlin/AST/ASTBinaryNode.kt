@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
@@ -23,7 +24,7 @@ open class ASTBinaryNode : ASTNode {
         this.right = right
     }
 
-    override fun retype(map: Map<String, String>) {
+    override fun retype(map: Map<String, DefinedType>) {
         left.retype(map)
         right.retype(map)
     }
@@ -39,6 +40,5 @@ open class ASTBinaryNode : ASTNode {
     override fun toC(): String = when (type) {
         ASTBinaryTypes.FLOW_CONTROL -> "${left.toC()} ${right.toC()}"
         ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left.toC()} ${right.toC()};"
-        else -> ""
     }
 }
