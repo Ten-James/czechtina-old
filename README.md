@@ -3,6 +3,8 @@
 Current version: 0.1.5
 
 Czechtina is programming language based on C and czech language.
+Czechtina should be faster to write than c and with additional features, easier to maintain.
+lot of features are still missing, but it is still in development.
 Compiler is written in Kotlin using [Klang](https://github.com/j-jzk/klang) Library
 For more information about language see [CHANGELOG.md](CHANGELOG.md)
 
@@ -12,7 +14,7 @@ Czechtina started as preprocesor language for C. I had to renamed it to czechead
 
 ## Example
 
-czecheader is completly valid to write in c.
+czecheader is completely valid to write in c.
 
 ```c
 #include <stdio.h>
@@ -25,7 +27,7 @@ potom
 
 ```
 
-Now you can also write in czechtina
+Now you can also write in czechtina, which is compiled to c.
 
 ```cz
 pripoj c stdio
@@ -78,6 +80,25 @@ int main() {
 
 ## Syntax
 
+### Variables
+
+#### Definition
+
+`VAR_NAME:<TYPE>`
+
+#### Assignment
+
+`VAR_NAME je <VALUE>`
+
+#### Type Casting
+
+`VAR_NAME je <VALUE> jako <TYPE>`
+`VAR_NAME je <VALUE> as <TYPE>`
+
+#### Type Deduction
+
+`VAR_NAME je <VALUE>`
+
 ### Function Definition
 
 main function has to exist for file to compile.
@@ -112,6 +133,49 @@ With param
 Nested Calling
 `<FUNC_NAME> (<FUNC_NAME> ...params) ...params`
 
+### Working with memory
+
+#### Allocating memory
+
+`VAR_NAME je new <SIZE>`
+
+#### Moving ownership of memory to function
+
+Setted as paramater in function via `&`
+
+```cz
+reduceArr x:&pointer<int>, size:int {
+    //do something with x
+    //x is deallocated after function ends
+}
+```
+
+Calling function with `&`, it creates variant of function with memory deallocation
+
+```cz
+another x:pointer<int> ....
+
+main {
+    arr je new 10 jako pointer<int>
+    another &arr, 10
+}
+
+```
+
+### Function Overloading
+
+```cz
+fce1 x:cele -> x krat 2
+fce1 x:pointer<cele> -> (hodnota x) krat 2
+```
+
+### Function Templating
+
+```cz
+fce1 x:T -> x krat 2
+fce1 x:T, y:T -> x krat y
+fce1 x:T, y:T1 -> x krat y
+```
 
 
 ### For Loops
@@ -129,8 +193,6 @@ opakuj i:cele -> 1 do 10 {
 opakuj i je 0; i < 10; i je i + 1 {
 	// like c
 }
-
-
 ```
 
 ### Dump Types 
@@ -139,7 +201,7 @@ opakuj i je 0; i < 10; i je i + 1 {
 
 Definition:
 `VAR_NAME: ukazatel<TYP>`
-To get address of variable use virtual Function adresa
+To get address of variable use virtual Function `adresa`
 
 ### VIRTUAL FUNCTIONS
 
@@ -164,7 +226,8 @@ To get address of variable use virtual Function adresa
 #### Importing czechtina files
 *Preprocessor like link*
 
-TODO
+`pripoj NAME` - links file *NAME.cz* to current file
+
 
 ## Old Table for czecheader (czechtina.h)
 
@@ -199,11 +262,9 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - rest of loop features.
 - structures
 - range definition
-- data borrowing
-- fix garbage collector for functions with return value
-
 
 ## Credits
 
-Jonatan Lepik - assisstance on keywords **veget** and **bal**
+Jonatan Lepik - assistance on keywords **veget** and **bal**
+
 Jirka Ježek - Klang developer
