@@ -1,9 +1,6 @@
 package compiler
 
-import AST.ASTListNode
-import AST.ASTNode
-import AST.ASTProgramNode
-import AST.ASTTypedNode
+import AST.*
 import cz.j_jzk.klang.input.InputFactory
 import czechtina.*
 import czechtina.header.createCzechtinaDefineFile
@@ -120,6 +117,8 @@ object Compiler {
         if (operand == "=") {
             if (left.getType().isConst && isParsed)
                 throw Exception("Cannot change const type of variable ${left}")
+            if (left is ASTVariableNode)
+                left.addType(right.getType())
             return DefinedType(right.getType())
         }
 
@@ -177,7 +176,6 @@ object Compiler {
         variables.add(mutableMapOf())
 
         var cCode = tree.toC()
-
 
 
         while (isAnyUsedFunctionUndefined()) {

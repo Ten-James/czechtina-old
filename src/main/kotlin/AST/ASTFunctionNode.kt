@@ -61,11 +61,11 @@ class ASTFunctionNode : ASTNode {
 
         if (Compiler.definedFunctions.containsKey(name!!)) {
             val newName = "${name}_v${Compiler.definedFunctions[name!!]!!.variants.size}"
-            Compiler.definedFunctions[name!!]!!.variants.add(compiler.DefinedFunctionVariant(newName, paramsTypes))
+            Compiler.definedFunctions[name!!]!!.variants.add(compiler.DefinedFunctionVariant(newName, paramsTypes, returnType = type.getType()))
             name = newName;
         }
         else
-            Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, compiler.DefinedType(type.toC()), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes)), virtual = false))
+            Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, type.getType(), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes, returnType = type.getType())), virtual = false))
         if (paramsTypes.any{it.isTemplate()})
             return "//${name}_Declaration_CZECHTINA ANCHOR\n"
 

@@ -29,7 +29,8 @@ class ASTOperandNode : ASTTypedNode {
         return ASTOperandNode(operand, left.copy(), right.copy())
     }
 
-    override fun toC(): String = when (operand) {
-        else -> "${left?.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
+    override fun toC(): String {
+        expType = Compiler.calcBinaryType(left, right, operand)
+        return "${left?.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
     }
 }

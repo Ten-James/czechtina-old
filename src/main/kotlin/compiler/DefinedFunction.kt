@@ -7,6 +7,10 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
         this.variants.addAll(variants)
     }
 
+    fun getReturnType(variantIndex : Int): DefinedType {
+        return variants[variantIndex].returnType ?: returnType
+    }
+
     fun validateParams(params: List<DefinedType>): Int {
         for (variant in variants) {
             if (variant.params.size != params.size){
@@ -59,7 +63,7 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
     override fun toString(): String = "\n$name: $returnType $virtual (\n\t${variants.joinToString("\n\t")}\n)"
 }
 
-class DefinedFunctionVariant(val translatedName: String, val params: List<DefinedType>, var defined:Boolean = true, val enableArgs: Boolean = false, val virtual: Boolean = false) {
+class DefinedFunctionVariant(val translatedName: String, val params: List<DefinedType>, val returnType: DefinedType? = null, var defined:Boolean = true, val enableArgs: Boolean = false, val virtual: Boolean = false) {
     var timeUsed: Int = 0
 
     override fun toString(): String = "$translatedName(${params.joinToString(",")}): $timeUsed $defined"

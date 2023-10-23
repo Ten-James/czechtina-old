@@ -23,7 +23,7 @@ fun LesanaBuilder<ASTNode>.inlineFunction(
     )
     { (funName, varDef, _, line) ->
         ASTFunctionNode(
-            ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
+            ASTUnaryNode(ASTUnaryTypes.TYPE,data="", expressionType =  line.getType()),
             funName,
             listOf(varDef),
             ASTUnaryNode(
@@ -41,7 +41,7 @@ fun LesanaBuilder<ASTNode>.inlineFunction(
     )
     { (funName, varDefs, _, line) ->
         ASTFunctionNode(
-            ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
+            ASTUnaryNode(ASTUnaryTypes.TYPE,data="", expressionType =  line.getType()),
             funName,
             varDefs.nodes,
             ASTUnaryNode(
@@ -59,7 +59,7 @@ fun LesanaBuilder<ASTNode>.inlineFunction(
     )
     { (funName, _, line) ->
         ASTFunctionNode(
-            ASTUnaryNode(ASTUnaryTypes.TYPE, line.getType()),
+            ASTUnaryNode(ASTUnaryTypes.TYPE,data="", expressionType =  line.getType()),
             funName,
             listOf(),
             ASTUnaryNode(

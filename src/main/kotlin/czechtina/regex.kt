@@ -183,7 +183,7 @@ fun cTypeFromCzechtina (czechType: String): String {
         if (czechType == cValue)
             return cValue
     }
-    return ""
+    throw Exception("Unknown type $czechType")
 }
 
 
@@ -199,7 +199,7 @@ fun czTypeFromCzechtina (czechType: String): String {
         if (czechType == cValue)
             return cValue
     }
-    return ""
+    throw Exception("Unknown type $czechType")
 }
 
 fun cAndCzechtinaRegex (list: List<GrammarToken>): String = list.joinToString("|") { czechtina[it]!! + "|" + C[it]!! }
