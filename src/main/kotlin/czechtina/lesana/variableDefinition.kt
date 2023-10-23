@@ -46,9 +46,9 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
         variables
     ) { (v, _, t) ->
-        if (Compiler.definedTypes.contains(t.toC())) ASTVarDefinitionNode(
-            v,
+        if (Compiler.definedTypes.contains(t.data)) ASTVarDefinitionNode(
+            v.addType(Compiler.tryGetDefinedType(t.data) ?: throw Exception("ERROR")),
             t
-        ) else throw Exception("Variable ${t.toC()} is not defined as an type")
+        ) else throw Exception("[${Compiler.definedTypes}]:Variable ${t.toC()}/is not defined as an type")
     }
 }

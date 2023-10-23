@@ -26,7 +26,26 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val import = NodeID<ASTUnaryNode>("import")
     val r_expression = include(expression(variables, types))
     val program = NodeID<ASTProgramNode>("program")
+    val structHead = NodeID<ASTStructureNode>("structure header")
+    val structure = NodeID<ASTStructureNode>("structure")
 
+
+    structHead to def(
+        re(czechtina[GrammarToken.KEYWORD_STRUCT]!!),
+        variables,
+        re("{")
+    ) {ASTStructureNode(it.v2.data, emptyList()).defineItSelf()}
+
+    structHead to def (
+        structHead,
+        varDefinition,
+        endOfLine
+    ) {it.v1.addProperty(it.v2 as ASTVarDefinitionNode)}
+
+    structure to def (
+        structHead,
+        re("}")
+    ) {it.v1}
 
     typeDefinition to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_TYPE_DEFINITION))),
@@ -37,7 +56,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     ) { (_, v,_, t,_) ->
         if (Compiler.definedTypes.contains(v.toC()))
             throw Exception("Type ${v.toC()} is already defined")
-        else if (Compiler.addToDefinedTypes(v.toC()))
+        else if (Compiler.addToDefinedTypes(v.toC(),t.getType()))
             ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v.addType(t.getType()))
         else
             throw Exception("Error")
@@ -140,6 +159,9 @@ fun czechtinaLesana() = lesana<ASTNode> {
     program to def(tFunction, program) { (func, program) -> program.appendFunction(func) }
     program to def(program, tFunction) { (program, func) -> program.appendFunction(func) }
     program to def(main) { ASTProgramNode(listOf(), listOf(), it.v1) }
+
+    program to def(program, structure) { (program, structure) -> program.appendStructure(structure) }
+    program to def(structure, program) { (structure, program) -> program.appendStructure(structure) }
 
     line to def (blockCode) { it.v1 }
 

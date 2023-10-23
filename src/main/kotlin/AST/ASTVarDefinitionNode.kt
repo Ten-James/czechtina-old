@@ -5,7 +5,7 @@ import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
-class ASTVarDefinitionNode : ASTTypedNode {
+open class ASTVarDefinitionNode : ASTTypedNode {
     var variable:ASTVariableNode
     var type:ASTTypedNode
 

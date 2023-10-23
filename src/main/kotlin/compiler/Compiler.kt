@@ -11,7 +11,7 @@ object Compiler {
     val VERSION = "0.1.5"
     var isParsed = false
     var compilingTo = "C"
-    var definedTypes = mutableListOf<String>()
+    var definedTypes = mutableMapOf<String, DefinedType>()
     var definedFunctions = mutableMapOf<String, DefinedFunction>(
         "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")))), virtual = true),
         "new" to DefinedFunction("new",DefinedType("pointer-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
@@ -24,6 +24,7 @@ object Compiler {
             DefinedType("pointer")
         ))), virtual = true),
     )
+    var definedStructures = mutableMapOf<String, DefinedStructure>()
     var variables = mutableListOf(mutableMapOf<String, DefinedType>())
     var grammar: Map<GrammarToken,String> = C
     var buildPath:String = ""
@@ -39,10 +40,19 @@ object Compiler {
         grammar = C
     }
 
-    fun addToDefinedTypes(type: String) = definedTypes.add(type)
+    fun addToDefinedTypes(type: String, definedType: DefinedType): Boolean {
+        definedTypes += mapOf(type to definedType)
+        return true
+    }
+
+    fun tryGetDefinedType(type: String) : DefinedType? {
+        if (definedTypes.containsKey(type))
+            return definedTypes[type]!!
+        return null
+    }
 
     fun controlDefinedVariables(varName: String): Boolean {
-        if (definedTypes.any { it == varName })
+        if (definedTypes.keys.any { it == varName })
             throw Exception("Variable $varName is defined as type")
         if (definedFunctions.containsKey(varName))
             throw Exception("Variable $varName is defined as function")
@@ -163,8 +173,14 @@ object Compiler {
         val czechtina = czechtinaLesana()
 
         isParsed = false
-
-        val tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
+        var tree: ASTProgramNode?
+        try {
+            tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
+        } catch (e:Exception) {
+            println(definedTypes)
+            println(definedStructures.keys)
+            throw e
+        }
 
         isParsed = true
 

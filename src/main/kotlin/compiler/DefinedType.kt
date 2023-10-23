@@ -4,18 +4,21 @@ class DefinedType {
     val typeString: String
     val isHeap:Boolean
     val isConst:Boolean
+    val isStructured:Boolean
     var dealocated: Boolean = false
 
-    constructor(typeString: String, isHeap: Boolean = false, isConst: Boolean = false) {
+    constructor(typeString: String, isHeap: Boolean = false, isConst: Boolean = false, isStructured: Boolean = false) {
         this.typeString = typeString
         this.isHeap = isHeap
         this.isConst = isConst
+        this.isStructured = isStructured
     }
 
     constructor(DT: DefinedType) {
         this.typeString = DT.typeString
         this.isHeap = DT.isHeap
         this.isConst = DT.isConst
+        this.isStructured = DT.isStructured
     }
 
     fun toC(): String {

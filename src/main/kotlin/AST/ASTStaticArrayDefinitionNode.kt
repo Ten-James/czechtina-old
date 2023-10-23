@@ -2,14 +2,11 @@ package AST
 
 import compiler.DefinedType
 
-class ASTStaticArrayDefinitionNode : ASTTypedNode {
-    var type: ASTNode
-    var variable: ASTNode
+class ASTStaticArrayDefinitionNode : ASTVarDefinitionNode {
     var size: String
 
-    constructor(type: ASTNode, variable: ASTNode, size: String): super(DefinedType("array-$type-$size")) {
-        this.type = type
-        this.variable = variable
+    constructor(type: ASTTypedNode, variable: ASTVariableNode, size: String): super( variable,type) {
+        expType = DefinedType("array-$type-$size")
         this.size = size
     }
 
