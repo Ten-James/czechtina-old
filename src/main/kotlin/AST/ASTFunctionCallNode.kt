@@ -29,8 +29,9 @@ class ASTFunctionCallNode : ASTVariableNode {
                 return (params!! as ASTVariableNode).getType().toDynamic()
             if (function.toC() == "const")
                 return (params!! as ASTVariableNode).getType().toConst()
-            if (Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes) != -1)
-                return Compiler.definedFunctions[function.toC()]!!.returnType
+            val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
+            if (variantIndex != -1)
+                return Compiler.definedFunctions[function.toC()]!!.getReturnType(variantIndex)
         }
         return DefinedType("none")
     }

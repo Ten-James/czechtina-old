@@ -58,7 +58,7 @@ class ASTUnaryNode : ASTTypedNode {
     override fun toC(): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
-        ASTUnaryTypes.TYPE -> if (getType().isTemplate()) getType().typeString else Compiler.typeFromCzechtina(data.toString())
+        ASTUnaryTypes.TYPE -> if (getType().isTemplate()) getType().typeString else getType().toC()
         ASTUnaryTypes.TYPE_POINTER -> "${(data as ASTNode).toC()}*"
         ASTUnaryTypes.RETURN -> "${Compiler.grammar[GrammarToken.KEYWORD_RETURN]} ${(data as ASTNode).toC()}"
         ASTUnaryTypes.IMPORT -> "//xd ${data.toString()}"

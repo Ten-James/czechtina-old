@@ -254,7 +254,6 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 
 ## TODO
 
-- invalidate "1 je 3"
 - std lib
 - string anotation
 - better cli
@@ -262,6 +261,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - rest of loop features.
 - structures
 - range definition
+- check validation of return type
 
 ## Credits
 

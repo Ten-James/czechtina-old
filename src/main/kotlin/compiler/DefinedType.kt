@@ -18,6 +18,12 @@ class DefinedType {
         this.isConst = DT.isConst
     }
 
+    fun toC(): String {
+        if (isPointer() || isDynamic())
+            return "${getPrimitive()} *"
+        return getPrimitive()
+    }
+
     fun toHeap(): DefinedType {
         return DefinedType(typeString, true)
     }
@@ -50,6 +56,14 @@ class DefinedType {
     fun getTemplate(): String {
         if (!isTemplate())
             throw Exception("Type $typeString is not template")
+        if (typeString.contains("-"))
+            return typeString.split("-")[1]
+        return typeString
+    }
+
+    fun getPrimitive(): String {
+        if (isTemplate())
+            return getTemplate()
         if (typeString.contains("-"))
             return typeString.split("-")[1]
         return typeString
