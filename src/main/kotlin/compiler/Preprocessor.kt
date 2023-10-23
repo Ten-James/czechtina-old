@@ -10,10 +10,8 @@ object Preprocessor {
         lastReadFile = File(filePath).readText()
     }
 
-    fun preprocess (filePath: String) :String {
-        readFile(filePath)
-
-        val splitedCode = lastReadFile.split("\"").toMutableList()
+    fun preprocessText (text:String, filePath: String): String {
+        val splitedCode = text.split("\"").toMutableList()
 
         for (i in 0 until splitedCode.size) {
             if (i % 2 == 0) continue
@@ -48,5 +46,10 @@ object Preprocessor {
         code = bylines.joinToString("\n")
 
         return code;
+    }
+
+    fun preprocess (filePath: String) :String {
+        readFile(filePath)
+        return preprocessText(lastReadFile, filePath)
     }
 }

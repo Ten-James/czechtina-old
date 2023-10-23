@@ -24,6 +24,7 @@ open class ASTVariableNode : ASTTypedNode {
     }
 
     fun addType(type: DefinedType ): ASTVariableNode {
+        Compiler.setVariableType(data, type)
         this.expType = type
         return this
     }
@@ -32,7 +33,7 @@ open class ASTVariableNode : ASTTypedNode {
         val compType = Compiler.getVariableType(data)
         if (compType != null)
             return compType
-        return super.getType()
+        return expType
     }
 
     override fun toString(): String {

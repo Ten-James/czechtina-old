@@ -6,17 +6,26 @@ import czechtina.GrammarToken
 import czechtina.czechtina
 
 class ASTFunctionCallNode : ASTVariableNode {
-    var function:ASTTypedNode
+    var function:ASTVariableNode
     var params:ASTNode? = null
 
 
 
-    constructor(function:ASTTypedNode, params:ASTNode? = null): super("", DefinedType("none")) {
+    constructor(function:ASTVariableNode, params:ASTNode? = null): super("", DefinedType("none")) {
         this.function = function
         this.params = params
     }
 
     override fun getType(): DefinedType {
+        if (function.data == "predej")
+            return (params!! as ASTVariableNode).getType().toDynamic()
+        if (function.data == "hodnota")
+            return (params!! as ASTVariableNode).getType().toDereference()
+        if (function.data == "adresa")
+            return (params!! as ASTVariableNode).getType().toPointer()
+        if (function.data == "const")
+            return (params!! as ASTVariableNode).getType().toConst()
+
         if (Compiler.definedFunctions.containsKey(function.toC())) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
@@ -25,10 +34,6 @@ class ASTFunctionCallNode : ASTVariableNode {
             else if (params is ASTTypedNode)
                 paramsTypes.add((params as ASTTypedNode).getType())
 
-            if (function.toC() == "predej")
-                return (params!! as ASTVariableNode).getType().toDynamic()
-            if (function.toC() == "const")
-                return (params!! as ASTVariableNode).getType().toConst()
             val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
             if (variantIndex != -1)
                 return Compiler.definedFunctions[function.toC()]!!.getReturnType(variantIndex)
@@ -50,18 +55,19 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun toC(): String {
-        if (function?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
+
+        if (function.data.equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
             return "&${params?.toC()}"
 
-        if (function?.toC().equals(czechtina[GrammarToken.TYPE_VALUE]!!))
+        if (function.data.equals(czechtina[GrammarToken.TYPE_VALUE]!!))
             return "*(${params?.toC()})"
 
-        if (function?.toC().equals("predej")) {
+        if (function.data.equals("predej")) {
             val body = "${params?.toC()}"
             Compiler.variables[Compiler.variables.size-1][params?.toC()!!]!!.dealocated = true
             return body
         }
-        if (function?.toC().equals("const")) {
+        if (function.data.equals("const")) {
             if (params is ASTVariableNode){
                 if (!(params as ASTVariableNode).getType().isPointer())
                     throw Exception("Const can be applied only to objects")
@@ -70,7 +76,7 @@ class ASTFunctionCallNode : ASTVariableNode {
             throw Exception("Const can be applied only to variables")
         }
 
-        if (Compiler.definedFunctions.containsKey(function.toC())) {
+        if (Compiler.definedFunctions.containsKey(function.data)) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
@@ -87,6 +93,6 @@ class ASTFunctionCallNode : ASTVariableNode {
         }
 
         throw Exception("Function ${function.toC()} not found")
-        return "${function.toC()}(${params?.toC()})"
+        return "${data}(${params?.toC()})"
     }
 }

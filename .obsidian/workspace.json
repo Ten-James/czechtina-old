@@ -18,8 +18,19 @@
                 "source": false
               }
             }
+          },
+          {
+            "id": "707df617f88c25ee",
+            "type": "leaf",
+            "state": {
+              "type": "release-notes",
+              "state": {
+                "currentVersion": "1.4.16"
+              }
+            }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -156,7 +167,7 @@
       "command-palette:Open command palette": false
     }
   },
-  "active": "33dc0471a61fef18",
+  "active": "707df617f88c25ee",
   "lastOpenFiles": [
     "test/t2.c",
     "test/t1 copy.c",

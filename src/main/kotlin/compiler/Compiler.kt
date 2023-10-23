@@ -13,7 +13,8 @@ object Compiler {
     var compilingTo = "C"
     var definedTypes = mutableMapOf<String, DefinedType>()
     var definedFunctions = mutableMapOf<String, DefinedFunction>(
-        "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")))), virtual = true),
+        "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
+        "scanf" to DefinedFunction("scanf",DefinedType("scanf"), listOf(DefinedFunctionVariant("scanf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
         "new" to DefinedFunction("new",DefinedType("pointer-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
             DefinedType("int")
         ))), virtual = true),
@@ -59,6 +60,15 @@ object Compiler {
         if (variables.any { it.containsKey(varName) })
             throw Exception("Variable $varName is already defined")
         return true
+    }
+
+    fun setVariableType(varName: String, type: DefinedType) {
+        for (variable in variables.reversed()){
+            if (variable.containsKey(varName)) {
+                variable[varName] = type
+                return
+            }
+        }
     }
 
     fun getVariableType(varName: String): DefinedType? {
@@ -107,8 +117,6 @@ object Compiler {
 
     private fun calcTypePriority(type: String) : Int = when (type) {
         "none" -> 100
-        "dynamic" -> 15
-        "pointer" -> 10
         "string" -> 5
         "double" -> 4
         "float" -> 3
@@ -116,7 +124,7 @@ object Compiler {
         "char" -> 1
         "bool" -> 1
         "void" -> 0
-        else -> if (type.contains("array")) 0 else throw Exception("Unhandled Type $type")
+        else -> if (type.contains("-")) 0 else throw Exception("Unhandled Type $type")
     }
 
     fun calcBinaryType(left: ASTTypedNode,  right: ASTTypedNode, operand: String): DefinedType {
@@ -131,6 +139,23 @@ object Compiler {
                 left.addType(right.getType())
             return DefinedType(right.getType())
         }
+        if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
+            return DefinedType("bool");
+
+        if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_MINUS))).matches(operand)) {
+            if (left.getType().isAddress() && right.getType().isAddress())
+               return DefinedType("int")
+            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int"))
+                return DefinedType(left.getType())
+            if (left.getType().getPrimitive().contains("int") && right.getType().isAddress())
+                return DefinedType(right.getType())
+        }
+        if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_PLUS))).matches(operand)) {
+            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int"))
+                return DefinedType(left.getType())
+            if (left.getType().getPrimitive().contains("int") && right.getType().isAddress())
+                return DefinedType(right.getType())
+        }
 
         try {
             val leftWeight = calcTypePriority(left.getType().typeString)
@@ -144,14 +169,15 @@ object Compiler {
             if (operand == "%" && listOf(leftWeight, rightWeight).any { it == 3 || it == 4 })
                 throw Exception("Modulo cant be made with floating point number")
 
-            if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
-                return DefinedType("bool");
 
             if (leftWeight > rightWeight)
                 return DefinedType(left.getType())
             return DefinedType(right.getType())
 
         } catch (e: Exception) {
+            println(operand)
+            println(left.getType())
+            println(right.getType())
             throw Exception("Error in calcBinaryType: ${e.message}")
         }
     }
@@ -160,40 +186,8 @@ object Compiler {
         return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, variables=$variables,)"
     }
 
-    fun isAnyUsedFunctionUndefined(): Boolean {
-        for (function in definedFunctions)
-            if (function.value.variants.any { !it.defined && it.timeUsed > 0 })
-                return true
-        return false
-    }
-
-    fun compileFile(path: String, args: Array<String>) {
-        var code = Preprocessor.preprocess(path)
-        var withoutExtension = path.substring(0, path.length - 3)
-        val czechtina = czechtinaLesana()
-
-        isParsed = false
-        var tree: ASTProgramNode?
-        try {
-            tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
-        } catch (e:Exception) {
-            println(definedTypes)
-            println(definedStructures.keys)
-            throw e
-        }
-
-        isParsed = true
-
-        if (args.any() { it == "--show-tree" }) {
-            println(tree.toString())
-        }
-
-        variables.clear()
-        variables.add(mutableMapOf())
-
-        var cCode = tree.toC()
-
-
+    fun addFunctionVariatns( Code:String, tree: ASTProgramNode) : String {
+        var cCode = Code
         while (isAnyUsedFunctionUndefined()) {
             for (function in definedFunctions){
                 val fce = function.value
@@ -248,6 +242,68 @@ object Compiler {
                 }
             }
         }
+        return cCode
+    }
+
+
+
+    fun isAnyUsedFunctionUndefined(): Boolean {
+        for (function in definedFunctions)
+            if (function.value.variants.any { !it.defined && it.timeUsed > 0 })
+                return true
+        return false
+    }
+
+    fun compileText(text:String): String {
+        val preprocesed = compiler.Preprocessor.preprocessText(text, "")
+        val czechtina = czechtinaLesana()
+        isParsed = false
+        var tree: ASTProgramNode?
+        try {
+            tree = czechtina.parse(InputFactory.fromString(preprocesed, "code")) as ASTProgramNode
+        } catch (e:Exception) {
+            println(variables)
+            throw e
+        }
+
+        isParsed = true
+        variables.clear()
+        variables.add(mutableMapOf())
+        var cCode = tree.toC()
+        cCode = addFunctionVariatns(cCode, tree)
+        cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
+        cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")
+        return cCode
+    }
+
+
+    fun compileFile(path: String, args: Array<String>) {
+        var code = Preprocessor.preprocess(path)
+        var withoutExtension = path.substring(0, path.length - 3)
+        val czechtina = czechtinaLesana()
+
+        isParsed = false
+        var tree: ASTProgramNode?
+        try {
+            tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
+        } catch (e:Exception) {
+            println(definedTypes)
+            println(definedStructures.keys)
+            throw e
+        }
+
+        isParsed = true
+
+        if (args.any() { it == "--show-tree" }) {
+            println(tree.toString())
+        }
+
+        variables.clear()
+        variables.add(mutableMapOf())
+
+        var cCode = tree.toC()
+
+        cCode = addFunctionVariatns(cCode, tree)
 
         if (Compiler.compilingTo == "CZ") {
             cCode = "#define \"czechtina.h\"\n$cCode"

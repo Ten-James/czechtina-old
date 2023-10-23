@@ -30,6 +30,12 @@ class ASTOperandNode : ASTTypedNode {
     }
 
     override fun toC(): String {
+        if (operand == "="){
+            val rString = right?.toC()
+            expType = Compiler.calcBinaryType(left, right, operand)
+            return "${left?.toC()} = $rString"
+        }
+
         expType = Compiler.calcBinaryType(left, right, operand)
         return "${left?.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
     }

@@ -128,7 +128,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     )
     {
        ASTFunctionNode(
-           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele"), it.v1,
+           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele", DefinedType("int")), it.v1,
            emptyList(), it.v2
        )
     }

@@ -46,7 +46,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType()}-${it.v2.nodes.size}")) }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType().typeString}-${it.v2.nodes.size}")) }
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
@@ -109,12 +109,12 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
 
     para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
     {
-        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+        ASTOperandNode(it.v2, it.v1, it.v3)
     }
 
     para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), variables)
     {
-        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+        ASTOperandNode(it.v2, it.v1, it.v3)
     }
 
     para4 to def(para4, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)

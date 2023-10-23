@@ -38,6 +38,13 @@ class DefinedType {
     fun toPointer(): DefinedType {
         return DefinedType("pointer-$typeString", isHeap)
     }
+    fun toDereference(): DefinedType {
+        if (!isAddress() && Compiler.isParsed)
+            throw Exception("Cannot convert non-pointer type to dereference - $this")
+        if (isAddress())
+            return DefinedType(typeString.substring(typeString.indexOf("-")+1), isHeap, isConst)
+        return DefinedType("none", isHeap)
+    }
 
     fun toDynamic(): DefinedType {
         if (!isHeap)
@@ -48,6 +55,8 @@ class DefinedType {
     fun isPointer(): Boolean {
         return typeString.contains("pointer")
     }
+
+    fun isAddress(): Boolean = isPointer() || isDynamic()
 
     fun isDynamic(): Boolean {
         return typeString.contains("dynamic")
