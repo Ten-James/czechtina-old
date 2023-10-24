@@ -1,5 +1,6 @@
 package compiler
 
+import compiler.Compiler.undefinedFunction
 import utils.GetFileLinkedFilePath
 import java.io.File
 
@@ -10,6 +11,11 @@ object Preprocessor {
         lastReadFile = File(filePath).readText()
     }
 
+    fun addUndefineFile(line: String):String {
+        undefinedFunction.add(line.split(" ")[1])
+        println(undefinedFunction)
+        return ""
+    }
 
     fun preprocessText (text:String, filePath: String): String {
         val splitedCode = text.split("\"").toMutableList()
@@ -36,6 +42,8 @@ object Preprocessor {
                 continue
             else if (bylines[i].startsWith("pripoj c"))
                 continue
+            else if (bylines[i].startsWith("#undefine"))
+                bylines[i] = addUndefineFile(bylines[i])
             else if (bylines[i].startsWith("pripoj"))
                 bylines[i] = File(GetFileLinkedFilePath(filePath, bylines[i].split(" ")[1])).readText()
             else if (!bylines[i].endsWith("\\") && blocklevel >0)

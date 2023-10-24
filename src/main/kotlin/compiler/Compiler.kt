@@ -12,6 +12,7 @@ object Compiler {
     var isParsed = false
     var compilingTo = "C"
     var definedTypes = mutableMapOf<String, DefinedType>()
+    var undefinedFunction = mutableListOf<String>()
     var definedFunctions = mutableMapOf<String, DefinedFunction>(
         "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
         "scanf" to DefinedFunction("scanf",DefinedType("scanf"), listOf(DefinedFunctionVariant("scanf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),

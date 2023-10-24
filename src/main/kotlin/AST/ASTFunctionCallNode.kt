@@ -100,8 +100,8 @@ class ASTFunctionCallNode : ASTVariableNode {
             }
             throw Exception("Function ${function.toC()} with params ${paramsTypes.joinToString(",")} not found")
         }
-
+        if (Compiler.undefinedFunction.contains(function.toC(false)))
+            return "${function.toC(false)}(${params?.toC()})"
         throw Exception("Function ${function.toC()} not found")
-        return "${data}(${params?.toC()})"
     }
 }
