@@ -37,7 +37,7 @@ open class ASTBinaryNode : ASTNode {
         return "'$type', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}\n"
     }
 
-    override fun toC(): String = when (type) {
+    override fun toC(sideEffect:Boolean): String = when (type) {
         ASTBinaryTypes.FLOW_CONTROL -> "${left.toC()} ${right.toC()}"
         ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left.toC()} ${right.toC()};"
     }

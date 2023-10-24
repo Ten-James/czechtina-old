@@ -10,6 +10,7 @@ object Preprocessor {
         lastReadFile = File(filePath).readText()
     }
 
+
     fun preprocessText (text:String, filePath: String): String {
         val splitedCode = text.split("\"").toMutableList()
 

@@ -58,7 +58,7 @@ class ASTProgramNode : ASTNode {
     }
 
     fun doubleNewLine(condition:Boolean) = if (condition) "\n\n" else ""
-    override fun toC(): String =
+    override fun toC(sideEffect:Boolean): String =
         imports.joinToString("\n") { it.toC() } +
                 doubleNewLine(imports.isNotEmpty()) + structures.joinToString("\n") { it.toC() } +
                 doubleNewLine(structures.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +

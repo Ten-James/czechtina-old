@@ -18,5 +18,5 @@ class ASTStaticArrayDefinitionNode : ASTVarDefinitionNode {
         return ASTStaticArrayDefinitionNode(type.copy(), variable.copy(), size)
     }
 
-    override fun toC(): String = "${type.toC()} ${variable.data}[${size}]"
+    override fun toC(sideEffect:Boolean): String = "${type.toC()} ${variable.data}[${size}]"
 }

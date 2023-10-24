@@ -31,7 +31,7 @@ class ASTStructureNode: ASTNode {
         return this
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
         return "typedef struct ${Compiler.scopePush()}{\n\t${properties.joinToString(";\n\t") { it.toC() }};\n ${Compiler.scopePop(false)}} $name;"
     }
 

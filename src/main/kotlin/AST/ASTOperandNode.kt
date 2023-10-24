@@ -29,7 +29,7 @@ class ASTOperandNode : ASTTypedNode {
         return ASTOperandNode(operand, left.copy(), right.copy())
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
         if (operand == "="){
             val rString = right?.toC()
             expType = Compiler.calcBinaryType(left, right, operand)

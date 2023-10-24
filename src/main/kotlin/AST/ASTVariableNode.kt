@@ -23,13 +23,16 @@ open class ASTVariableNode : ASTTypedNode {
         return ASTVariableNode(data, expType, isLocal)
     }
 
-    fun addType(type: DefinedType ): ASTVariableNode {
+    open fun addType(type: DefinedType ): ASTVariableNode {
         Compiler.setVariableType(data, type)
         this.expType = type
         return this
     }
 
     override fun getType(): DefinedType {
+        val defined = Compiler.tryGetDefinedType(data)
+        if (defined != null)
+            return defined
         val compType = Compiler.getVariableType(data)
         if (compType != null)
             return compType
@@ -59,5 +62,5 @@ open class ASTVariableNode : ASTTypedNode {
 
         return "${getType().typeString} $data"
     }
-    override fun toC(): String = if (Compiler.isDefined(data)) data else toDefineC()
+    override fun toC(sideEffect:Boolean): String = if (Compiler.isDefined(data) || !sideEffect) data else toDefineC()
 }

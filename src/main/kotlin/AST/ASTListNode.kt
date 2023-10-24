@@ -33,6 +33,6 @@ class ASTListNode : ASTNode {
     }
 
 
-    override fun toC(): String = nodes.joinToString(",") { it.toC() }
+    override fun toC(sideEffect:Boolean): String = nodes.joinToString(",") { it.toC() }
 
 }

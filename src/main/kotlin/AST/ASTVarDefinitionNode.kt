@@ -34,5 +34,5 @@ open class ASTVarDefinitionNode : ASTTypedNode {
         return "Var def for $variable with ${getType()}"
     }
 
-    override fun toC(): String = if (Compiler.controlDefinedVariables(variable.data)) variable.toDefineC() else ""
+    override fun toC(sideEffect:Boolean): String = if (Compiler.controlDefinedVariables(variable.data)) variable.toDefineC() else ""
 }

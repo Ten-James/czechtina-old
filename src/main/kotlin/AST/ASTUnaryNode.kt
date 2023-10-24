@@ -34,6 +34,12 @@ class ASTUnaryNode : ASTTypedNode {
         this.data = data
     }
 
+    override fun getType(): DefinedType {
+        if (type == ASTUnaryTypes.TYPE)
+            return Compiler.tryGetDefinedType(data.toString()) ?: super.getType()
+        return super.getType()
+    }
+
 
     override fun toString(): String {
         return "'$type', data=$data, exp=${getType()}"
@@ -55,7 +61,7 @@ class ASTUnaryNode : ASTTypedNode {
     override fun copy(): ASTUnaryNode {
         return ASTUnaryNode(type!!, data!!, expType)
     }
-    override fun toC(): String = when (type) {
+    override fun toC(sideEffect:Boolean): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
         ASTUnaryTypes.TYPE -> if (getType().isTemplate()) getType().typeString else getType().toC()

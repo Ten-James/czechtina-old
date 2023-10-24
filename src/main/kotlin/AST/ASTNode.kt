@@ -5,7 +5,7 @@ import czechtina.GrammarToken
 
 open abstract class ASTNode {
 
-    abstract fun toC(): String
+    abstract fun toC(sideEffect:Boolean = true): String
 
     abstract fun copy(): ASTNode
 

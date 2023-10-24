@@ -27,7 +27,7 @@ class ASTArrayAccessNode: ASTVariableNode {
         return "ARRAY ACCESS, \narray=${array.toString().replace("\n","\n\t")}, \nindex=${index.toString().replace("\n","\n\t")}\n"
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
         return "${array.toC()}[${index.toC()}]"
     }
 }

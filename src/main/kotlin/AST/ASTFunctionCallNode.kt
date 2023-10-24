@@ -26,6 +26,9 @@ class ASTFunctionCallNode : ASTVariableNode {
         if (function.data == "const")
             return (params!! as ASTVariableNode).getType().toConst()
 
+        if (function.data == "new" && (params as ASTTypedNode).getType().isStructured)
+            return (params as ASTTypedNode).getType()
+
         if (Compiler.definedFunctions.containsKey(function.toC())) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
@@ -54,13 +57,19 @@ class ASTFunctionCallNode : ASTVariableNode {
         return ASTFunctionCallNode(function.copy(), params?.copy())
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
 
         if (function.data.equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
             return "&${params?.toC()}"
 
         if (function.data.equals(czechtina[GrammarToken.TYPE_VALUE]!!))
             return "*(${params?.toC()})"
+
+        if (function.data.equals("new")){
+            if ((params as ASTTypedNode).getType().isStructured) {
+                return "(${(params as ASTTypedNode).getType().toC()})malloc(sizeof(${(params as ASTTypedNode).getType().getPrimitive()}))"
+            }
+        }
 
         if (function.data.equals("predej")) {
             val body = "${params?.toC()}"

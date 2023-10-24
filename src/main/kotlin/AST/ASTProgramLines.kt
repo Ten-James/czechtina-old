@@ -24,5 +24,5 @@ class ASTProgramLines : ASTNode {
         programLines.forEach { it.retype(map) }
     }
 
-    override fun toC(): String = programLines.joinToString("\n") { it.toC() }
+    override fun toC(sideEffect:Boolean): String = programLines.joinToString("\n") { it.toC() }
 }

@@ -130,4 +130,29 @@ class CodeBlockTest {
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
+    @Test
+    fun testStructures() {
+        val code = """
+            struct DATA {
+                x:int
+                y:DATA
+            }
+            
+            main {
+                b = new DATA
+                b.x = 5
+                a = b.x
+            }
+        """.trimIndent()
+        val cCode = Compiler.compileText(code)
+        val excepted = """
+            typedef struct { int x; DATA *y; } DATA; 
+            int main() { 
+                DATA *b = (DATA *)malloc(sizeof(DATA));
+                b->x = 5;
+                int a = b->x;
+            }
+        """.trimIndent()
+        assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
+    }
 }

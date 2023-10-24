@@ -34,7 +34,7 @@ class ASTFunctionNode : ASTNode {
         return "Function '$name' : '$type', \nparameters=${parameters.joinToString("").replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(): String  {
+    override fun toC(sideEffect:Boolean): String  {
         val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
             if (param is ASTTypedNode)

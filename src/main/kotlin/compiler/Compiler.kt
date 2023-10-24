@@ -259,17 +259,17 @@ object Compiler {
         val czechtina = czechtinaLesana()
         isParsed = false
         var tree: ASTProgramNode?
+        var cCode = ""
         try {
             tree = czechtina.parse(InputFactory.fromString(preprocesed, "code")) as ASTProgramNode
+            isParsed = true
+            variables.clear()
+            variables.add(mutableMapOf())
+            cCode = tree.toC()
         } catch (e:Exception) {
             println(variables)
             throw e
         }
-
-        isParsed = true
-        variables.clear()
-        variables.add(mutableMapOf())
-        var cCode = tree.toC()
         cCode = addFunctionVariatns(cCode, tree)
         cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
         cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")

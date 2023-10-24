@@ -32,7 +32,7 @@ class ASTRetypeNode: ASTTypedNode {
         return "Retype: ${expression} to ${type}"
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
         return "(${type.toC()})(${expression.toC()})"
     }
 }
