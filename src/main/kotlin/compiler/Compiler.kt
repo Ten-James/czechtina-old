@@ -255,9 +255,9 @@ object Compiler {
         return false
     }
 
+    val czechtina = czechtinaLesana()
     fun compileText(text:String): String {
         val preprocesed = compiler.Preprocessor.preprocessText(text, "")
-        val czechtina = czechtinaLesana()
         isParsed = false
         var tree: ASTProgramNode?
         var cCode = ""
