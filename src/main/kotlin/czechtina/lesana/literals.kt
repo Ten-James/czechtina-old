@@ -9,7 +9,6 @@ import cz.j_jzk.klang.prales.constants.decimal
 import cz.j_jzk.klang.prales.constants.integer
 import cz.j_jzk.klang.prales.constants.string
 
-
 fun literals() = lesana<ASTUnaryNode> {
     val literals = NodeID<ASTUnaryNode>("literal")
 
@@ -30,6 +29,3 @@ fun literals() = lesana<ASTUnaryNode> {
     inheritIgnoredREs()
     setTopNode(top)
 }
-
-
-

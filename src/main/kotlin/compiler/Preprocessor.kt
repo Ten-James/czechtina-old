@@ -11,17 +11,17 @@ object Preprocessor {
     }
 
     fun preprocessText (text:String, filePath: String): String {
-        val splitedCode = text.split("\"").toMutableList()
+        val splitedCode = text.split("\"").toTypedArray()
 
         for (i in 0 until splitedCode.size) {
             if (i % 2 == 0) continue
-            splitedCode[i] = splitedCode[i].replace("\\n", "\\\\n")
-            splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
-            splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
+            // splitedCode[i] = splitedCode[i].replace("\\n", "\\\\n")
+            // splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
+            // splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
         }
         var code = splitedCode.joinToString("\"").trim()
 
-        val bylines = code.lines().toMutableList()
+        val bylines = code.lines().toTypedArray()
 
         var blocklevel = 0
         for (i in 0 until bylines.size) {

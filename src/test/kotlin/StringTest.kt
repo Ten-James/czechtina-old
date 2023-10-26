@@ -13,13 +13,13 @@ class StringTest {
     @Test
     fun testWhitespaceRaw() {
         val lsn = lesana<ASTUnaryNode> {
-            val expr = NodeID<ASTUnaryNode>()
+            val expr = NodeID<ASTUnaryNode>("expr")
             expr to def(include(literals())) { it.v1 }
             setTopNode(expr)
 
             ignoreRegexes("\\s")
 
-            onUnexpectedToken(::println)
+            onUnexpectedToken { println("$it; (expected one of: ${it.expectedIDs}") }
         }.getLesana()
 
         fun checkString(source: String, expectedResult: String) =
