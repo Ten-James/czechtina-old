@@ -24,8 +24,6 @@ fun literals() = lesana<ASTUnaryNode> {
     literals to def(re("'.'")) { ASTUnaryNode(ASTUnaryTypes.LITERAL, it.v1, DefinedType("char")) }
     literals to def(include(string())) { ASTUnaryNode(ASTUnaryTypes.STRING, it.v1, DefinedType("string")) }
 
-    val top = NodeID<ASTUnaryNode>(show=false)
-    top to def(literals) { it.v1 }
     inheritIgnoredREs()
-    setTopNode(top)
+    setTopNode(literals)
 }

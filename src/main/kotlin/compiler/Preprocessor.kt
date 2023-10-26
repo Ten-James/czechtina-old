@@ -11,17 +11,7 @@ object Preprocessor {
     }
 
     fun preprocessText (text:String, filePath: String): String {
-        val splitedCode = text.split("\"").toTypedArray()
-
-        for (i in 0 until splitedCode.size) {
-            if (i % 2 == 0) continue
-            // splitedCode[i] = splitedCode[i].replace("\\n", "\\\\n")
-            // splitedCode[i] = splitedCode[i].replace("\\t", "\\t")
-            // splitedCode[i] = splitedCode[i].replace(" ", "#\$#CZECHTINAMEZERA\$#\$")
-        }
-        var code = splitedCode.joinToString("\"").trim()
-
-        val bylines = code.lines().toTypedArray()
+        val bylines = text.trim().lines().toTypedArray()
 
         var blocklevel = 0
         for (i in 0 until bylines.size) {
@@ -43,9 +33,7 @@ object Preprocessor {
                 bylines[i] = "${bylines[i]} konec".replace(";;",";")
         }
 
-        code = bylines.joinToString("\n")
-
-        return code;
+        return bylines.joinToString("\n")
     }
 
     fun preprocess (filePath: String) :String {
