@@ -57,7 +57,7 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
                 return variants.size-1
             }
         }
-        throw Exception("Function $name with params ${params.joinToString(",")} not found")
+        throw Exception("Function $name with params ${params.joinToString(","){it.typeString}} in [${variants}] not found")
     }
 
     override fun toString(): String = "\n$name: $returnType $virtual (\n\t${variants.joinToString("\n\t")}\n)"

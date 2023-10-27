@@ -4,15 +4,19 @@ import compiler.Compiler
 import compiler.DefinedType
 import czechtina.cTypeFromCzechtina
 
-class ASTOperandNode : ASTTypedNode {
+class ASTOperandNode : ASTNode {
     var operand:String
-    var left: ASTTypedNode
-    var right: ASTTypedNode
+    var left: ASTNode
+    var right: ASTNode
 
-    constructor(operand:String, left:ASTTypedNode, right:ASTTypedNode) : super(Compiler.calcBinaryType(left, right, operand)) {
+    constructor(operand:String, left:ASTNode, right:ASTNode) : super(Compiler.calcBinaryType(left, right, operand)) {
         this.operand = operand
         this.left = left
         this.right = right
+    }
+
+    override fun getType(): DefinedType {
+        return Compiler.calcBinaryType(left, right, operand)
     }
 
     override fun retype(map: Map<String, DefinedType>) {

@@ -17,25 +17,27 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
+        if (function.data == "inC")
+            return DefinedType("none")
         if (function.data == "predej")
             return (params!! as ASTVariableNode).getType().toDynamic()
         if (function.data == "hodnota")
-            return (params!! as ASTVariableNode).getType().toDereference()
+            return (params!! as ASTNode).getType().toDereference()
         if (function.data == "adresa")
-            return (params!! as ASTVariableNode).getType().toPointer()
+            return (params!! as ASTNode).getType().toPointer()
         if (function.data == "const")
             return (params!! as ASTVariableNode).getType().toConst()
 
-        if (function.data == "new" && (params as ASTTypedNode).getType().isStructured)
-            return (params as ASTTypedNode).getType()
+        if (function.data == "new" && (params as ASTNode).getType().isStructured)
+            return (params as ASTNode).getType().toDynamic()
 
         if (Compiler.definedFunctions.containsKey(function.toC())) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
-            else if (params is ASTTypedNode)
-                paramsTypes.add((params as ASTTypedNode).getType())
+            else if (params is ASTNode)
+                paramsTypes.add((params as ASTNode).getType())
 
             val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
             if (variantIndex != -1)
@@ -59,6 +61,9 @@ class ASTFunctionCallNode : ASTVariableNode {
 
     override fun toC(sideEffect:Boolean): String {
 
+        if (function.data == "inC")
+            return "${(params as ASTUnaryNode).data}"
+
         if (function.data.equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
             return "&${params?.toC()}"
 
@@ -66,8 +71,8 @@ class ASTFunctionCallNode : ASTVariableNode {
             return "*(${params?.toC()})"
 
         if (function.data.equals("new")){
-            if ((params as ASTTypedNode).getType().isStructured) {
-                return "(${(params as ASTTypedNode).getType().toC()})malloc(sizeof(${(params as ASTTypedNode).getType().getPrimitive()}))"
+            if ((params as ASTNode).getType().isStructured) {
+                return "(${(params as ASTNode).getType().toC()})malloc(sizeof(${(params as ASTNode).getType().getPrimitive()}))"
             }
         }
 
@@ -90,8 +95,8 @@ class ASTFunctionCallNode : ASTVariableNode {
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
-            else if (params is ASTTypedNode)
-                paramsTypes.add((params as ASTTypedNode).getType())
+            else if (params is ASTNode)
+                paramsTypes.add((params as ASTNode).getType())
 
             val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
             if (variantIndex != -1) {

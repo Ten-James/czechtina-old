@@ -10,7 +10,7 @@ class ASTProgramNode : ASTNode {
     var main: ASTFunctionNode? = null
 
 
-    constructor(functions: List<ASTFunctionNode>, imports: List<ASTUnaryNode>, main: ASTFunctionNode?) {
+    constructor(functions: List<ASTFunctionNode>, imports: List<ASTUnaryNode>, main: ASTFunctionNode?): super(DefinedType("")) {
         this.imports = imports
         this.functions = functions
         this.main = main

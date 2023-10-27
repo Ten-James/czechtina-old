@@ -3,11 +3,12 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-open class ASTVariableNode : ASTTypedNode {
+open class ASTVariableNode : ASTNode {
     val data: String
     val isLocal:Boolean
 
     constructor(data:String, expressionType: DefinedType, isLocal: Boolean = true) : super(expressionType) {
+        Compiler.setNewVariableType(data, DefinedType(expressionType))
         this.data = data
         this.isLocal = isLocal
 
@@ -24,7 +25,7 @@ open class ASTVariableNode : ASTTypedNode {
     }
 
     open fun addType(type: DefinedType ): ASTVariableNode {
-        Compiler.setVariableType(data, type)
+        Compiler.setVariableType(data, DefinedType(type))
         this.expType = type
         return this
     }
@@ -32,11 +33,11 @@ open class ASTVariableNode : ASTTypedNode {
     override fun getType(): DefinedType {
         val defined = Compiler.tryGetDefinedType(data)
         if (defined != null)
-            return defined
+            return defined.unDynamic()
         val compType = Compiler.getVariableType(data)
         if (compType != null)
-            return compType
-        return expType
+            return compType.unDynamic()
+        return expType.unDynamic()
     }
 
     override fun toString(): String {
@@ -51,16 +52,11 @@ open class ASTVariableNode : ASTTypedNode {
             val s = getType().typeString.split("-")
             return "${s[1]} $data[${s[2]}]"
         }
-        if (getType().typeString.contains("pointer")){
-            val s = getType().typeString.split("-")
-            return "${s[1]} *$data"
+        if (getType().isAddress()){
+            val s = getType().getPrimitive()
+            return "${s} *$data"
         }
-        if (getType().isHeap){
-            val s = getType().typeString.split("-")
-            return "${s[1]} *$data"
-        }
-
-        return "${getType().typeString} $data"
+        return "${getType().toC()} $data"
     }
     override fun toC(sideEffect:Boolean): String = if (Compiler.isDefined(data) || !sideEffect) data else toDefineC()
 }

@@ -11,7 +11,7 @@ class ASTForNode : ASTNode {
     var step: ASTNode
     var body: ASTNode
 
-    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) {
+    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) : super(DefinedType("")) {
         this.begin = begin
         this.condition = condition
         this.step = step
@@ -19,7 +19,7 @@ class ASTForNode : ASTNode {
         unscopeBody()
     }
 
-    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTTypedNode, rangeComparation: String , max: ASTTypedNode, body: ASTNode) {
+    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) : super(DefinedType("")) {
         this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable.addType(type.getType()), min) )
 
 

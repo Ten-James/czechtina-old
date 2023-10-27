@@ -7,7 +7,7 @@ class ASTStructureAccessNode: ASTVariableNode {
     var struct:ASTVariableNode
     var prop:ASTVariableNode
 
-    constructor(struct:ASTTypedNode, prop:ASTVariableNode) : super((struct as ASTVariableNode).data, DefinedType("")) {
+    constructor(struct:ASTNode, prop:ASTVariableNode) : super((struct as ASTVariableNode).data, DefinedType("")) {
         this.struct = struct
         this.prop = prop
     }

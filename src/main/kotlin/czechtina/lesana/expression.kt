@@ -8,27 +8,28 @@ import czechtina.AllComparation
 import czechtina.GrammarToken
 import czechtina.cAndCzechtinaRegex
 import czechtina.czechtina
+import java.sql.Types
 
-fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) = lesana {
+fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = lesana {
     val literals = include(literals())
     val elevatedVariable = NodeID<ASTVariableNode>("elevatedVariable")
-    val exp1 = NodeID<ASTTypedNode>("expressions")
-    val exp2 = NodeID<ASTTypedNode>("expressions")
-    val exp3 = NodeID<ASTTypedNode>("expressions")
-    val functionCalling = NodeID<ASTTypedNode>("functionCalling")
-    var para1 = NodeID<ASTTypedNode>("paragraph")
-    var para2 = NodeID<ASTTypedNode>("paragraph")
-    var para3 = NodeID<ASTTypedNode>("paragraph")
-    var para4 = NodeID<ASTTypedNode>("paragraph")
-    var para5 = NodeID<ASTTypedNode>("paragraph")
-    val sentence = NodeID<ASTTypedNode>("sentence")
+    val exp1 = NodeID<ASTNode>("expressions")
+    val exp2 = NodeID<ASTNode>("expressions")
+    val exp3 = NodeID<ASTNode>("expressions")
+    val functionCalling = NodeID<ASTNode>("functionCalling")
+    var para1 = NodeID<ASTNode>("paragraph")
+    var para2 = NodeID<ASTNode>("paragraph")
+    var para3 = NodeID<ASTNode>("paragraph")
+    var para4 = NodeID<ASTNode>("paragraph")
+    var para5 = NodeID<ASTNode>("paragraph")
+    val sentence = NodeID<ASTNode>("sentence")
     val listexp3 = include(listAble(listOf(exp3, variables)))
 
 
     elevatedVariable to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
     elevatedVariable to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
-    elevatedVariable to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
-    elevatedVariable to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    elevatedVariable to def(elevatedVariable, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    elevatedVariable to def(elevatedVariable, re("\\["), elevatedVariable, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
 
 
     elevatedVariable to def (variables, re("\\."), variables)  {ASTStructureAccessNode(it.v1, it.v3)}
@@ -52,10 +53,10 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType().typeString}-${it.v2.nodes.size}")) }
 
 
     functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), elevatedVariable) { ASTFunctionCallNode(it.v2) }
+    functionCalling to def(elevatedVariable, types) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(elevatedVariable, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(elevatedVariable, functionCalling) { (v, e) -> ASTFunctionCallNode( v, e) }
     functionCalling to def(elevatedVariable, elevatedVariable) { (v, e) -> ASTFunctionCallNode( v, e) }
@@ -134,6 +135,9 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     para5 to def(elevatedVariable) {it.v1}
 
     elevatedVariable to def(variables) {it.v1}
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType().typeString}-${it.v2.nodes.size}")) }
+
+    sentence to def(re("-"), para5) { ASTUnaryNode(ASTUnaryTypes.MINUS, it.v2, it.v2.getType()) }
 
     inheritIgnoredREs()
     setTopNode(para5)

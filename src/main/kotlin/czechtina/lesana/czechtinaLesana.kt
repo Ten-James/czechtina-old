@@ -21,20 +21,20 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val programLines = NodeID<ASTProgramLines>("programLines")
     val line = NodeID<ASTNode>("line")
     val typeDefinition = NodeID<ASTBinaryNode>("typeDefinition")
-    val varDefinition = NodeID<ASTTypedNode>("varDefinition")
+    val varDefinition = NodeID<ASTNode>("varDefinition")
     val listableDefinition = include(listAble(listOf(varDefinition)))
     val import = NodeID<ASTUnaryNode>("import")
-    val r_expression = include(expression(variables, types))
     val program = NodeID<ASTProgramNode>("program")
     val structHead = NodeID<ASTStructureNode>("structure header")
     val structure = NodeID<ASTStructureNode>("structure")
 
+    variableDefinition(varDefinition, variables, types)
 
     structHead to def(
         re(czechtina[GrammarToken.KEYWORD_STRUCT]!!),
-        variables,
+        types,
         re("{")
-    ) {ASTStructureNode(it.v2.data, emptyList()).defineItSelf()}
+    ) {ASTStructureNode(it.v2.data.toString(), emptyList()).defineItSelf()}
 
     structHead to def (
         structHead,
@@ -72,15 +72,15 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(">"))
     { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, t2.getType().toPointer()) }
 
-    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (it.v1.contains("T")) "*${it.v1}" else it.v1, DefinedType(if (it.v1.contains("T")) "*${it.v1}" else cTypeFromCzechtina(it.v1) )) }
+    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*|[A-Z]+")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 
+    val r_expression = include(expression(variables, types))
     // FOR LOOP
     forLoops(line, variables, types, r_expression, blockCode, endOfLine)
 
 
-    variableDefinition(varDefinition, variables, types)
 
     line to def(
         varDefinition,

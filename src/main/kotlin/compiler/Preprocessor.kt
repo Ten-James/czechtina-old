@@ -13,7 +13,6 @@ object Preprocessor {
 
     fun addUndefineFile(line: String):String {
         undefinedFunction.add(line.split(" ")[1])
-        println(undefinedFunction)
         return ""
     }
 

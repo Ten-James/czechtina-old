@@ -1,6 +1,6 @@
 # Czechtina
 
-Current version: 0.1.5
+Current version: 0.1.6
 
 Czechtina is programming language based on C and czech language.
 Czechtina should be faster to write than c and with additional features, easier to maintain.
@@ -261,6 +261,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - rest of loop features.
 - structures
 - range definition
+- pointer array borrow checking
 - check validation of return type
 
 ## Credits

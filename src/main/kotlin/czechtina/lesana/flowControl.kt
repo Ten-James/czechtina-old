@@ -9,7 +9,7 @@ import czechtina.czechtina
 
 fun LesanaBuilder<ASTNode>.flowControl(
     line: NodeID<ASTNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>
 ) {
     line to def(

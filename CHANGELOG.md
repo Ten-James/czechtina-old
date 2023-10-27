@@ -1,5 +1,12 @@
 # CZECHTINA - CHANGELOG
 
+### v 0.1.6
+
+- sturctures 
+- destroyed everything
+- `-1` is now valid
+- undefining functions 
+
 ### v 0.1.5
 
 - function parameters can be casted to const via `@`

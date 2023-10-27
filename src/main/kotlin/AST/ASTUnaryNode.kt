@@ -9,6 +9,7 @@ enum class ASTUnaryTypes {
     VARIABLE,
     TYPE,
     TYPE_POINTER,
+    MINUS,
     RETURN,
     IMPORT,
     IMPORT_C,
@@ -25,7 +26,7 @@ enum class ASTUnaryTypes {
     NEW_LINE,
     NO_PARAM_CALL
 }
-class ASTUnaryNode : ASTTypedNode {
+class ASTUnaryNode : ASTNode {
     var type:ASTUnaryTypes? = null
     var data:Any? = null
 
@@ -37,6 +38,10 @@ class ASTUnaryNode : ASTTypedNode {
     override fun getType(): DefinedType {
         if (type == ASTUnaryTypes.TYPE)
             return Compiler.tryGetDefinedType(data.toString()) ?: super.getType()
+        if (type == ASTUnaryTypes.TYPE_POINTER)
+            return expType
+        if (data is ASTNode)
+            return (data as ASTNode).getType()
         return super.getType()
     }
 
@@ -88,6 +93,7 @@ class ASTUnaryNode : ASTTypedNode {
                 "{\n\t${body.replace("\n", "\n\t")}${Compiler.scopePop(true)}\n}"
         }
         ASTUnaryTypes.SEMICOLON -> "${(data as ASTNode).toC()};"
+        ASTUnaryTypes.MINUS -> "-${(data as ASTNode).toC()}"
         ASTUnaryTypes.JUST_C -> (data as ASTNode).toC()
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
         ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"

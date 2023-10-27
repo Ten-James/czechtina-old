@@ -9,8 +9,8 @@ import czechtina.czechtina
 
 fun LesanaBuilder<ASTNode>.inlineFunction(
     tFunction: NodeID<ASTFunctionNode>,
-    varDefinition: NodeID<ASTTypedNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    varDefinition: NodeID<ASTNode>,
+    r_expression: NodeID<ASTNode>,
     konec: NodeID<String>,
     listableDefinition: NodeID<ASTListNode>
 ) {
@@ -23,7 +23,7 @@ fun LesanaBuilder<ASTNode>.inlineFunction(
     )
     { (funName, varDef, _, line) ->
         ASTFunctionNode(
-            ASTUnaryNode(ASTUnaryTypes.TYPE,data="", expressionType =  line.getType()),
+            ASTUnaryNode(ASTUnaryTypes.TYPE,data= "", expressionType =  line.getType()),
             funName,
             listOf(varDef),
             ASTUnaryNode(
@@ -72,9 +72,9 @@ fun LesanaBuilder<ASTNode>.inlineFunction(
 
 fun LesanaBuilder<ASTNode>.inlineTypedFunction(
     tFunction: NodeID<ASTFunctionNode>,
-    varDefinition: NodeID<ASTTypedNode>,
+    varDefinition: NodeID<ASTNode>,
     types: NodeID<ASTUnaryNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     konec: NodeID<String>,
     listableDefinition: NodeID<ASTListNode>
 ) {
@@ -140,7 +140,7 @@ fun LesanaBuilder<ASTNode>.inlineTypedFunction(
 
 fun LesanaBuilder<ASTNode>.blockFunction(
     tFunction: NodeID<ASTFunctionNode>,
-    varDefinition: NodeID<ASTTypedNode>,
+    varDefinition: NodeID<ASTNode>,
     types: NodeID<ASTUnaryNode>,
     programLines: NodeID<ASTProgramLines>,
     listableDefinition: NodeID<ASTListNode>

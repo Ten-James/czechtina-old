@@ -103,7 +103,7 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typ",
     GrammarToken.KEYWORD_AS to "jako|as",
     GrammarToken.KEYWORD_STRUCT to "struct",
-    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9]*",
 )
 
 val C = mapOf<GrammarToken,String>(
@@ -136,7 +136,7 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_BREAK to "break",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typedef",
     GrammarToken.KEYWORD_CONTINUE to "continue",
-    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9]*",
 )
 
 

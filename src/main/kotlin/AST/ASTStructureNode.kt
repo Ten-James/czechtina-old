@@ -9,7 +9,7 @@ class ASTStructureNode: ASTNode {
     val name: String
     val properties : MutableList<ASTVarDefinitionNode>
 
-    constructor(name: String, props: List<ASTVarDefinitionNode>) {
+    constructor(name: String, props: List<ASTVarDefinitionNode>) : super(DefinedType("pointer-$name", isStructured = true, isHeap = true)) {
         if (name.uppercase(Locale.getDefault()) != name)
             throw Exception("Structure name must be in Uppercase")
         this.name = name.uppercase(Locale.getDefault())
@@ -17,7 +17,7 @@ class ASTStructureNode: ASTNode {
     }
 
     fun defineItSelf(): ASTStructureNode {
-        val structureType = DefinedType("pointer-$name", isStructured = true)
+        val structureType = DefinedType("pointer-$name", isStructured = true, isHeap = true)
         Compiler.addToDefinedTypes(name, structureType)
         Compiler.definedStructures += mapOf(name to
             DefinedStructure(name, structureType, mutableMapOf())

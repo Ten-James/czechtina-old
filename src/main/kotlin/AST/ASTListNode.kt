@@ -3,20 +3,20 @@ package AST
 import compiler.DefinedType
 
 class ASTListNode : ASTNode {
-    val nodes: List<ASTTypedNode>
+    val nodes: List<ASTNode>
 
-    constructor(nodes: List<ASTTypedNode>) {
+    constructor(nodes: List<ASTNode>) : super(DefinedType("")) {
         this.nodes = nodes
     }
 
-    fun getType(): DefinedType {
+    override fun getType(): DefinedType {
         val types = nodes.map { it.getType() }
         val type = types[0]
         for (t in types) {
-            if (t != type)
-                throw Exception("Cant get type of array of variant types")
+            if (t.typeString != type.typeString)
+                throw Exception("Cant get type of array of variant types, $type and $t")
         }
-        return type;
+        return type.toArray(types.size);
     }
 
     override fun toString(): String {

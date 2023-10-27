@@ -9,7 +9,7 @@ import czechtina.GrammarToken
 import czechtina.czechtina
 
 fun LesanaBuilder<ASTNode>.variableDefinition(
-    varDefinition: NodeID<ASTTypedNode>,
+    varDefinition: NodeID<ASTNode>,
     variables: NodeID<ASTVariableNode>,
     types: NodeID<ASTUnaryNode>
 ) {

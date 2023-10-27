@@ -130,6 +130,23 @@ class CodeBlockTest {
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
+
+    @Test
+    fun testMorePointersArithmetic() {
+        val code = """
+            main {
+                x = new 5 as pointer<znak>
+                z = x[3]
+                x[3] = 5
+            }
+        """.trimIndent()
+        val cCode = Compiler.compileText(code)
+        val excepted = """
+            int main() { char *x = (char*)(malloc(5)); char z = x[3]; x[3] = 5; if(x)free(x); }""".trimIndent()
+        assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
+    }
+
+
     @Test
     fun testStructures() {
         val code = """
@@ -151,7 +168,81 @@ class CodeBlockTest {
                 DATA *b = (DATA *)malloc(sizeof(DATA));
                 b->x = 5;
                 int a = b->x;
+                if(b)free(b);
             }
+        """.trimIndent()
+        assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
+    }
+
+
+    @Test
+    fun testHistogramProgram() {
+        val code = """
+            pripoj c stdio
+            zpracuj histo:ukazatel<int>,minimum:int { void
+                c:cele = 0
+                scanf "%d", (adresa c)
+                for i:cele -> 0 do 9 {
+                    if c == i+minimum{
+                        histo[i] = histo[i] + 1
+                        vrat
+                    }
+                }
+                histo[9] = histo[9] + 1
+            }
+            main {
+                t:znak
+                histo:pointer<int> = [0,0,0,0,0,0,0,0,0,0]
+                scanf "%c", (adresa t)
+                if 'v' neni presne t neni presne 'h' {
+                    printf "Neplatny mod vykresleni\\n"
+                    vrat 1
+                }
+                n:int
+                minimum:int
+                scanf "%d", (adresa n)
+                scanf "%d", (adresa minimum)
+                for i:cele -> 0 do n {
+                    zpracuj histo, minimum
+                }
+                vrat 0
+            }
+        """.trimIndent()
+        val cCode = Compiler.compileText(code)
+        val excepted = """
+#include "stdio.h"
+
+void zpracuj(int *histo, int minimum); 
+
+void zpracuj(int *histo, int minimum) {
+	int c = 0;
+	scanf("%d",&c);
+	for  (int i = 0; i < 9; i = i + 1) {
+		if (c == i + minimum) 
+			histo[i] = histo[i] + 1;
+			return ;
+		}
+	}
+	histo[9] = histo[9] + 1;
+}
+
+int main() {
+	char t;
+	int *histo = {0,0,0,0,0,0,0,0,0,0};
+	scanf("%c",&t);
+	if ('v' != t && t != 'h') 
+		printf("Neplatny mod vykresleni\n");
+		return 1;
+	}
+	int n;
+	int minimum;
+	scanf("%d",&n);
+	scanf("%d",&minimum);
+	for  (int i = 0; i < n; i = i + 1) {
+		zpracuj(histo,minimum);
+	}
+	return 0;
+}
         """.trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }

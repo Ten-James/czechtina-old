@@ -67,8 +67,6 @@ fun main(args: Array<String>) {
             println(line)
         }
 
-        val exitCode = process.waitFor()
-        println("Exited with error code $exitCode")
     } catch (e: Exception) {
         e.printStackTrace()
     }

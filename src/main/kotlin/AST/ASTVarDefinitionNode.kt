@@ -5,9 +5,9 @@ import compiler.DefinedType
 import czechtina.GrammarToken
 import czechtina.czechtina
 
-open class ASTVarDefinitionNode : ASTTypedNode {
+open class ASTVarDefinitionNode : ASTNode {
     var variable:ASTVariableNode
-    var type:ASTTypedNode
+    var type:ASTNode
 
 
     override fun retype(map: Map<String, DefinedType>) {
@@ -18,16 +18,18 @@ open class ASTVarDefinitionNode : ASTTypedNode {
                 expType = m.value
     }
 
+
+    override fun getType(): DefinedType {
+        return variable.getType()
+    }
+
     override fun copy(): ASTVarDefinitionNode {
         return ASTVarDefinitionNode(variable.copy(), type.copy())
     }
 
-    constructor(variable:ASTVariableNode, type : ASTTypedNode): super(type.expType) {
+    constructor(variable:ASTVariableNode, type : ASTNode): super(variable.expType) {
         this.type = type
-        this.variable = variable
-
-        if (variable.isLocal)
-            Compiler.variables[Compiler.variables.size-1] += mapOf(variable.data to getType())
+        this.variable = variable.addType(type.getType())
     }
 
     override fun toString(): String {

@@ -5,7 +5,7 @@ import compiler.DefinedType
 class ASTStaticArrayDefinitionNode : ASTVarDefinitionNode {
     var size: String
 
-    constructor(type: ASTTypedNode, variable: ASTVariableNode, size: String): super( variable,type) {
+    constructor(type: ASTNode, variable: ASTVariableNode, size: String): super( variable,type) {
         expType = DefinedType("array-$type-$size")
         this.size = size
     }

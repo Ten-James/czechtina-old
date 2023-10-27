@@ -3,11 +3,18 @@ package AST
 import compiler.DefinedType
 import czechtina.GrammarToken
 
-open abstract class ASTNode {
+open abstract class ASTNode(var expType: DefinedType) {
 
     abstract fun toC(sideEffect:Boolean = true): String
 
     abstract fun copy(): ASTNode
 
-    abstract fun retype(map: Map<String, DefinedType>)
+    open fun getType(): DefinedType = expType
+
+    open fun retype(map: Map<String, DefinedType>) {
+        for (m in map)
+            if (expType.typeString == m.key)
+                expType = m.value
+    }
+
 }

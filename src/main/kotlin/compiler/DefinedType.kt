@@ -1,7 +1,7 @@
 package compiler
 
 class DefinedType {
-    val typeString: String
+    var typeString: String
     val isHeap:Boolean
     val isConst:Boolean
     val isStructured:Boolean
@@ -27,6 +27,12 @@ class DefinedType {
         return getPrimitive()
     }
 
+    fun toArray(size: Number): DefinedType {
+        if (isPointer() || isDynamic())
+            return DefinedType("array-${getPrimitive()}-${size}", isHeap, isConst)
+        return DefinedType("array-${getPrimitive()}-${size}", isHeap, isConst)
+    }
+
     fun toHeap(): DefinedType {
         return DefinedType(typeString, true)
     }
@@ -49,7 +55,7 @@ class DefinedType {
     fun toDynamic(): DefinedType {
         if (!isHeap)
             throw Exception("Cannot convert non-heap type to dynamic")
-        return DefinedType(typeString.replace("pointer","dynamic"), isHeap)
+        return DefinedType(typeString.replace("pointer","dynamic"), isHeap, isConst, isStructured)
     }
 
     fun isPointer(): Boolean {
@@ -83,4 +89,10 @@ class DefinedType {
 
 
     override fun toString(): String = "$typeString - $isHeap - $isConst"
+
+    fun unDynamic(): DefinedType {
+        if (isDynamic())
+            return DefinedType(typeString.replace("dynamic","pointer"), isHeap, isConst, isStructured)
+        return DefinedType(typeString, isHeap, isConst, isStructured)
+    }
 }

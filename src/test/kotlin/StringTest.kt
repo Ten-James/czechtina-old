@@ -1,12 +1,9 @@
-import compiler.Compiler
 import cz.j_jzk.klang.input.InputFactory
-import czechtina.lesana.czechtinaLesana
 import czechtina.lesana.literals
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import AST.ASTTypedNode
 import AST.ASTUnaryNode
 
 class StringTest {
@@ -31,6 +28,7 @@ class StringTest {
         checkString("\"\"", "")
         checkString("\"ahoj\"", "ahoj")
         checkString("\"ahoj mami\"", "ahoj mami")
+        checkString("\"ahoj mami\n\"", "ahoj mami\n")
 
     }
 

@@ -11,7 +11,7 @@ fun LesanaBuilder<ASTNode>.forLoops(
     line: NodeID<ASTNode>,
     variables: NodeID<ASTVariableNode>,
     types: NodeID<ASTUnaryNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>,
     endOfLine: NodeID<String>
 ) {
@@ -26,7 +26,7 @@ fun LesanaBuilder<ASTNode>.forLoops(
 fun LesanaBuilder<ASTNode>.rangedTypedFor(
     variables: NodeID<ASTVariableNode>,
     types: NodeID<ASTUnaryNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
     re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -43,7 +43,7 @@ fun LesanaBuilder<ASTNode>.rangedTypedFor(
 
 fun LesanaBuilder<ASTNode>.inlineCodedFor(
     line: NodeID<ASTNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     endOfLine: NodeID<String>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
     re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -57,7 +57,7 @@ fun LesanaBuilder<ASTNode>.inlineCodedFor(
 
 fun LesanaBuilder<ASTNode>.rangedFor(
     variables: NodeID<ASTVariableNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
     re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -81,7 +81,7 @@ fun LesanaBuilder<ASTNode>.rangedFor(
 
 fun LesanaBuilder<ASTNode>.codedFor(
     line: NodeID<ASTNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     endOfLine: NodeID<String>,
     blockCode: NodeID<ASTUnaryNode>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
@@ -95,7 +95,7 @@ fun LesanaBuilder<ASTNode>.codedFor(
 
 fun LesanaBuilder<ASTNode>.inlineRangedFor(
     variables: NodeID<ASTVariableNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     line: NodeID<ASTNode>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
     re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),
@@ -121,7 +121,7 @@ fun LesanaBuilder<ASTNode>.inlineRangedFor(
 fun LesanaBuilder<ASTNode>.inlineTypedRangedFor(
     variables: NodeID<ASTVariableNode>,
     types: NodeID<ASTUnaryNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     line: NodeID<ASTNode>
 ): LesanaBuilder.IntermediateNodeDefinition<ASTNode> = def(
     re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_FOR))),

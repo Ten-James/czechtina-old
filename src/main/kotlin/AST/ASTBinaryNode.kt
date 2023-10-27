@@ -18,7 +18,7 @@ open class ASTBinaryNode : ASTNode {
 
 
 
-    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) {
+    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) : super(DefinedType("none")) {
         this.type = type
         this.left = left
         this.right = right

@@ -8,7 +8,7 @@ import czechtina.lesana.czechtinaLesana
 import java.io.File
 
 object Compiler {
-    val VERSION = "0.1.5"
+    val VERSION = "0.1.6"
     var isParsed = false
     var compilingTo = "C"
     var definedTypes = mutableMapOf<String, DefinedType>()
@@ -16,7 +16,7 @@ object Compiler {
     var definedFunctions = mutableMapOf<String, DefinedFunction>(
         "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
         "scanf" to DefinedFunction("scanf",DefinedType("scanf"), listOf(DefinedFunctionVariant("scanf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
-        "new" to DefinedFunction("new",DefinedType("pointer-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
+        "new" to DefinedFunction("new",DefinedType("dynamic-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
             DefinedType("int")
         ))), virtual = true),
         "predej" to DefinedFunction("predej",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
@@ -63,6 +63,14 @@ object Compiler {
         return true
     }
 
+    fun setNewVariableType(varName: String, type: DefinedType) {
+        if (variables[variables.size - 1].containsKey(varName)) {
+            setVariableType(varName, type)
+            return
+        }
+        variables[variables.size - 1] += mapOf(varName to type)
+    }
+
     fun setVariableType(varName: String, type: DefinedType) {
         for (variable in variables.reversed()){
             if (variable.containsKey(varName)) {
@@ -99,8 +107,8 @@ object Compiler {
         if (variables.size == 1)
             throw Exception("Cant pop global scope")
         variables[variables.size -1].forEach {
-            if (it.value.isHeap && !it.value.dealocated)
-                retVal += "free(${it.key});\n\t"
+            if (it.value.isDynamic() && !it.value.dealocated)
+                retVal += "if(${it.key})free(${it.key});\n\t"
         }
         variables.removeAt(variables.size - 1)
         if (retVal != init)
@@ -128,7 +136,7 @@ object Compiler {
         else -> if (type.contains("-")) 0 else throw Exception("Unhandled Type $type")
     }
 
-    fun calcBinaryType(left: ASTTypedNode,  right: ASTTypedNode, operand: String): DefinedType {
+    fun calcBinaryType(left: ASTNode,  right: ASTNode, operand: String): DefinedType {
         if (left.getType().isTemplate())
             return DefinedType(left.getType())
         if (right.getType().isTemplate())
@@ -152,8 +160,9 @@ object Compiler {
                 return DefinedType(right.getType())
         }
         if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_PLUS))).matches(operand)) {
-            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int"))
+            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int")){
                 return DefinedType(left.getType())
+            }
             if (left.getType().getPrimitive().contains("int") && right.getType().isAddress())
                 return DefinedType(right.getType())
         }
@@ -203,7 +212,7 @@ object Compiler {
                     Compiler.scopePop()
                     val paramsTypes = mutableListOf<DefinedType>()
                     for (param in functionAST.parameters)
-                        if (param is ASTTypedNode)
+                        if (param is ASTNode)
                             paramsTypes.add(param.getType())
                     val abstractIndex = fce.validateParams(paramsTypes)
                     var retypeMap = mutableMapOf<String,DefinedType>()
@@ -257,13 +266,15 @@ object Compiler {
 
     val czechtina = czechtinaLesana()
     fun compileText(text:String): String {
-        val preprocesed = compiler.Preprocessor.preprocessText(text, "")
+        val preprocessed = Preprocessor.preprocessText(text, "")
         isParsed = false
         var tree: ASTProgramNode?
-        var cCode = ""
+        var cCode: String
         try {
-            tree = czechtina.parse(InputFactory.fromString(preprocesed, "code")) as ASTProgramNode
+            tree = czechtina.parse(InputFactory.fromString(preprocessed, "code")) as ASTProgramNode
             isParsed = true
+            for (function in tree.functions)
+                function.precalculateType()
             variables.clear()
             variables.add(mutableMapOf())
             cCode = tree.toC()
@@ -281,7 +292,6 @@ object Compiler {
     fun compileFile(path: String, args: Array<String>) {
         var code = Preprocessor.preprocess(path)
         var withoutExtension = path.substring(0, path.length - 3)
-        val czechtina = czechtinaLesana()
 
         isParsed = false
         var tree: ASTProgramNode?
