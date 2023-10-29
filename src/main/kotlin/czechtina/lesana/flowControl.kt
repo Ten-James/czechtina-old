@@ -3,15 +3,39 @@ package czechtina.lesana
 import AST.*
 import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.GrammarToken
-import czechtina.cAndCzechtinaRegex
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.cAndCzechtinaRegex
+import czechtina.grammar.czechtina
 
 fun LesanaBuilder<ASTNode>.flowControl(
     line: NodeID<ASTNode>,
-    r_expression: NodeID<ASTTypedNode>,
+    r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>
 ) {
+    // while
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_WHILE))),
+        r_expression,
+        blockCode
+    ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.WHILE, exp), block) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_WHILE))),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    ) { (_, exp, _, block) ->
+        ASTBinaryNode(
+            ASTBinaryTypes.FLOW_CONTROL,
+            ASTUnaryNode(ASTUnaryTypes.WHILE, exp),
+            ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)
+        )
+    }
+
+
+    // if
+
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,

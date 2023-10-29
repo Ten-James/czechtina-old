@@ -2,28 +2,33 @@ package AST
 
 import compiler.DefinedType
 
-class ASTRetypeNode: ASTTypedNode {
-    val expression: ASTTypedNode;
-    val type: ASTTypedNode;
+class ASTRetypeNode: ASTNode {
+    val expression: ASTNode;
+    val type: ASTNode;
 
-    constructor(expression: ASTTypedNode, type: ASTTypedNode): super(DefinedType("")) {
+    constructor(expression: ASTNode, type: ASTNode): super(DefinedType("")) {
         this.expression = expression;
         this.type = type;
     }
 
     override fun getType(): DefinedType {
-        if (expression.getType().typeString.contains("-") && !type.getType().typeString.contains("-"))
+        if (expression.getType().typeString.contains("-") && !this.type.getType().typeString.contains("-"))
             throw Exception("Cannot retype pointer to non-pointer type")
-        if (type.getType().typeString.contains("arrau"))
+        if (this.type.getType().typeString.contains("array"))
             throw Exception("Cannot retype to array type")
 
-        var type = type.getType();
-        if (expression.getType().isHeap)
-            type = type.toHeap()
+        var type = DefinedType(expression.getType())
+        type.typeString = this.type.getType().typeString
+        if (expression.getType().isDynamic())
+            type = type.toDynamic()
 
         return type
     }
 
+    override fun retype(map: Map<String, DefinedType>) {
+        expression.retype(map)
+        type.retype(map)
+    }
     override fun copy(): ASTRetypeNode {
         return ASTRetypeNode(expression.copy(), type.copy())
     }
@@ -32,7 +37,7 @@ class ASTRetypeNode: ASTTypedNode {
         return "Retype: ${expression} to ${type}"
     }
 
-    override fun toC(): String {
+    override fun toC(sideEffect:Boolean): String {
         return "(${type.toC()})(${expression.toC()})"
     }
 }

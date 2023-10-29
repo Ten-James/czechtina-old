@@ -3,11 +3,12 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-open class ASTVariableNode : ASTTypedNode {
+open class ASTVariableNode : ASTNode {
     val data: String
     val isLocal:Boolean
 
     constructor(data:String, expressionType: DefinedType, isLocal: Boolean = true) : super(expressionType) {
+        Compiler.setNewVariableType(data, DefinedType(expressionType))
         this.data = data
         this.isLocal = isLocal
 
@@ -23,16 +24,20 @@ open class ASTVariableNode : ASTTypedNode {
         return ASTVariableNode(data, expType, isLocal)
     }
 
-    fun addType(type: DefinedType ): ASTVariableNode {
+    open fun addType(type: DefinedType ): ASTVariableNode {
+        Compiler.setVariableType(data, DefinedType(type))
         this.expType = type
         return this
     }
 
     override fun getType(): DefinedType {
+        val defined = Compiler.tryGetDefinedType(data)
+        if (defined != null)
+            return defined.unDynamic()
         val compType = Compiler.getVariableType(data)
         if (compType != null)
-            return compType
-        return super.getType()
+            return compType.unDynamic()
+        return expType.unDynamic()
     }
 
     override fun toString(): String {
@@ -42,21 +47,19 @@ open class ASTVariableNode : ASTTypedNode {
     fun toDefineC(): String {
         if (isLocal && !Compiler.isDefined(data))
             Compiler.variables[Compiler.variables.size-1] += mapOf(data to DefinedType(expType))
+        if (getType().isArray()){
+            val s = getType().typeString.split("-")
+            val starcount = s.size - 3
 
-        if (getType().typeString.contains("array")){
-            val s = getType().typeString.split("-")
-            return "${s[1]} $data[${s[2]}]"
-        }
-        if (getType().typeString.contains("pointer")){
-            val s = getType().typeString.split("-")
-            return "${s[1]} *$data"
-        }
-        if (getType().isHeap){
-            val s = getType().typeString.split("-")
-            return "${s[1]} *$data"
-        }
+            val star = "*".repeat(starcount)
 
-        return "${getType().typeString} $data"
+            return "${s[s.size-2]} $star$data[${s[s.size-1]}]"
+        }
+        if (getType().isAddress()){
+            val s = getType().getPrimitive()
+            return "${s} *$data"
+        }
+        return "${getType().toC()} $data"
     }
-    override fun toC(): String = if (Compiler.isDefined(data)) data else toDefineC()
+    override fun toC(sideEffect:Boolean): String = if (Compiler.isDefined(data) || !sideEffect) data else toDefineC()
 }

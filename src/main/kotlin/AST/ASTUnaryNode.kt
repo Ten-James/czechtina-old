@@ -2,13 +2,14 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
+import czechtina.grammar.GrammarToken
 
 enum class ASTUnaryTypes {
     LITERAL,
     VARIABLE,
     TYPE,
     TYPE_POINTER,
+    MINUS,
     RETURN,
     IMPORT,
     IMPORT_C,
@@ -22,16 +23,27 @@ enum class ASTUnaryTypes {
     IF,
     ELSE,
     ELSE_IF,
+    WHILE,
     NEW_LINE,
     NO_PARAM_CALL
 }
-class ASTUnaryNode : ASTTypedNode {
+class ASTUnaryNode : ASTNode {
     var type:ASTUnaryTypes? = null
     var data:Any? = null
 
     constructor(type:ASTUnaryTypes, data:Any, expressionType: DefinedType = DefinedType("none")) : super(expressionType) {
         this.type = type
         this.data = data
+    }
+
+    override fun getType(): DefinedType {
+        if (type == ASTUnaryTypes.TYPE)
+            return Compiler.tryGetDefinedType(data.toString()) ?: super.getType()
+        if (type == ASTUnaryTypes.TYPE_POINTER)
+            return expType
+        if (data is ASTNode)
+            return (data as ASTNode).getType()
+        return super.getType()
     }
 
 
@@ -55,7 +67,7 @@ class ASTUnaryNode : ASTTypedNode {
     override fun copy(): ASTUnaryNode {
         return ASTUnaryNode(type!!, data!!, expType)
     }
-    override fun toC(): String = when (type) {
+    override fun toC(sideEffect:Boolean): String = when (type) {
         ASTUnaryTypes.LITERAL -> data.toString()
         ASTUnaryTypes.VARIABLE -> data.toString()
         ASTUnaryTypes.TYPE -> if (getType().isTemplate()) getType().typeString else getType().toC()
@@ -82,9 +94,11 @@ class ASTUnaryNode : ASTTypedNode {
                 "{\n\t${body.replace("\n", "\n\t")}${Compiler.scopePop(true)}\n}"
         }
         ASTUnaryTypes.SEMICOLON -> "${(data as ASTNode).toC()};"
+        ASTUnaryTypes.MINUS -> "-${(data as ASTNode).toC()}"
         ASTUnaryTypes.JUST_C -> (data as ASTNode).toC()
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
         ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
+        ASTUnaryTypes.WHILE -> "${Compiler.grammar[GrammarToken.KEYWORD_WHILE]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.ELSE -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]}"
         ASTUnaryTypes.ELSE_IF -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]} ${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.NEW_LINE -> "\n\t${(data as ASTNode).toC().replace("\n","\n\t")}"

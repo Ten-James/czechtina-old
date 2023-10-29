@@ -2,33 +2,45 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.czechtina
 
 class ASTFunctionCallNode : ASTVariableNode {
-    var function:ASTTypedNode
+    var function:ASTVariableNode
     var params:ASTNode? = null
 
 
 
-    constructor(function:ASTTypedNode, params:ASTNode? = null): super("", DefinedType("none")) {
+    constructor(function:ASTVariableNode, params:ASTNode? = null): super("", DefinedType("none")) {
         this.function = function
         this.params = params
     }
 
     override fun getType(): DefinedType {
+        if (function.data == "throw")
+            return DefinedType("none")
+        if (function.data == "inC")
+            return DefinedType("none")
+        if (function.data == "predej")
+            return (params!! as ASTVariableNode).getType().toDynamic()
+        if (function.data == "hodnota")
+            return params!!.getType().toDereference()
+        if (function.data == "adresa")
+            return params!!.getType().toPointer()
+        if (function.data == "const")
+            return (params!! as ASTVariableNode).getType().toConst()
+
+        if (function.data == "new" && (params as ASTNode).getType().isStructured)
+            return (params as ASTNode).getType().toDynamic()
+
         if (Compiler.definedFunctions.containsKey(function.toC())) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
-            else if (params is ASTTypedNode)
-                paramsTypes.add((params as ASTTypedNode).getType())
+            else if (params is ASTNode)
+                paramsTypes.add((params as ASTNode).getType())
 
-            if (function.toC() == "predej")
-                return (params!! as ASTVariableNode).getType().toDynamic()
-            if (function.toC() == "const")
-                return (params!! as ASTVariableNode).getType().toConst()
             val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
             if (variantIndex != -1)
                 return Compiler.definedFunctions[function.toC()]!!.getReturnType(variantIndex)
@@ -49,19 +61,32 @@ class ASTFunctionCallNode : ASTVariableNode {
         return ASTFunctionCallNode(function.copy(), params?.copy())
     }
 
-    override fun toC(): String {
-        if (function?.toC().equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
+    override fun toC(sideEffect:Boolean): String {
+
+        if (function.data == "throw")
+            return "printf(${params?.toC()}); exit(1)"
+
+        if (function.data == "inC")
+            return "${(params as ASTUnaryNode).data}"
+
+        if (function.data.equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
             return "&${params?.toC()}"
 
-        if (function?.toC().equals(czechtina[GrammarToken.TYPE_VALUE]!!))
+        if (function.data.equals(czechtina[GrammarToken.TYPE_VALUE]!!))
             return "*(${params?.toC()})"
 
-        if (function?.toC().equals("predej")) {
+        if (function.data.equals("new")){
+            if ((params as ASTNode).getType().isStructured) {
+                return "(${(params as ASTNode).getType().toC()})malloc(sizeof(${(params as ASTNode).getType().getPrimitive()}))"
+            }
+        }
+
+        if (function.data.equals("predej")) {
             val body = "${params?.toC()}"
             Compiler.variables[Compiler.variables.size-1][params?.toC()!!]!!.dealocated = true
             return body
         }
-        if (function?.toC().equals("const")) {
+        if (function.data.equals("const")) {
             if (params is ASTVariableNode){
                 if (!(params as ASTVariableNode).getType().isPointer())
                     throw Exception("Const can be applied only to objects")
@@ -70,13 +95,13 @@ class ASTFunctionCallNode : ASTVariableNode {
             throw Exception("Const can be applied only to variables")
         }
 
-        if (Compiler.definedFunctions.containsKey(function.toC())) {
+        if (Compiler.definedFunctions.containsKey(function.data)) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
-            else if (params is ASTTypedNode)
-                paramsTypes.add((params as ASTTypedNode).getType())
+            else if (params is ASTNode)
+                paramsTypes.add((params as ASTNode).getType())
 
             val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
             if (variantIndex != -1) {
@@ -85,8 +110,8 @@ class ASTFunctionCallNode : ASTVariableNode {
             }
             throw Exception("Function ${function.toC()} with params ${paramsTypes.joinToString(",")} not found")
         }
-
+        if (Compiler.undefinedFunction.contains(function.toC(false)))
+            return "${function.toC(false)}(${params?.toC()})"
         throw Exception("Function ${function.toC()} not found")
-        return "${function.toC()}(${params?.toC()})"
     }
 }

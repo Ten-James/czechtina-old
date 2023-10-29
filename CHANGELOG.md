@@ -1,14 +1,25 @@
 # CZECHTINA - CHANGELOG
 
+### v 0.1.6
+
+- throw keyword
+- variables now has to start with lowercase letter
+- functions now has to start with lowercase letter
+- types now has to start with uppercase letter
+- structures in work
+- while loop
+- `-1` is now valid
+- undefining functions via `#undefine <function_name>`
+
 ### v 0.1.5
 
-- function parameters can be casted to const via `@`
+- function parameters can be cast to const via `@`
 - function can take entire heap memory via `&` it will automatically deallocate memory
 - templating via T keyword (T is replaced by type, available T - T999999999999999 types)
 - function overloading
 - `as` or `jako` keyword for type casting
 - `new` virtual function for allocating memory
-- automatical deallocation of memory (weak - garbage collector)
+- automatically deallocation of memory (weak - garbage collector)
 - preprocessor
 - file structure
 - including file (before compilation)

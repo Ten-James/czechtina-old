@@ -1,65 +1,4 @@
-package czechtina
-
-enum class GrammarToken {
-    TYPE_VOID,
-    TYPE_INTEGER,
-    TYPE_DECIMAL,
-    TYPE_BOOLEAN,
-    TYPE_CHAR,
-    TYPE_POINTER,
-    TYPE_ADDRESS,
-    TYPE_VALUE,
-    TYPE_ARRAY,
-    OPERATOR_PLUS,
-    OPERATOR_MINUS,
-    OPERATOR_MULTIPLY,
-    OPERATOR_DIVIDE,
-    OPERATOR_MODULO,
-    OPERATOR_ASSIGN,
-    OPERATOR_EQUAL,
-    OPERATOR_NOT_EQUAL,
-    OPERATOR_LESS,
-    OPERATOR_LESS_OR_EQUAL,
-    OPERATOR_GREATER,
-    OPERATOR_GREATER_OR_EQUAL,
-    OPERATOR_AND,
-    OPERATOR_OR,
-    OPERATOR_NOT,
-    OPERATOR_ITERATE,
-    KEYWORD_IF,
-    KEYWORD_ELSE,
-    KEYWORD_WHILE,
-    KEYWORD_FOR,
-    KEYWORD_FUNCTION_CALL,
-    KEYWORD_RETURN,
-    KEYWORD_BREAK,
-    KEYWORD_CONTINUE,
-    KEYWORD_VAR_DEFINITION,
-    KEYWORD_IMPORT,
-    KEYWORD_IMPORT_C,
-    KEYWORD_RANGE_DEFINITION,
-    KEYWORD_TYPE_DEFINITION,
-    KEYWORD_AS,
-    VARIABLE,
-}
-
-val Alltypes = listOf(
-    GrammarToken.TYPE_VOID,
-    GrammarToken.TYPE_INTEGER,
-    GrammarToken.TYPE_DECIMAL,
-    GrammarToken.TYPE_BOOLEAN,
-    GrammarToken.TYPE_CHAR,
-)
-
-val AllComparation = listOf(
-    GrammarToken.OPERATOR_EQUAL,
-    GrammarToken.OPERATOR_NOT_EQUAL,
-    GrammarToken.OPERATOR_LESS,
-    GrammarToken.OPERATOR_LESS_OR_EQUAL,
-    GrammarToken.OPERATOR_GREATER,
-    GrammarToken.OPERATOR_GREATER_OR_EQUAL,
-)
-
+package czechtina.grammar
 
 val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.TYPE_VOID to "void",
@@ -101,9 +40,9 @@ val czechtina = mapOf<GrammarToken, String>(
     GrammarToken.KEYWORD_RANGE_DEFINITION to "do|az",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typ",
     GrammarToken.KEYWORD_AS to "jako|as",
-    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+    GrammarToken.KEYWORD_STRUCT to "struct",
+    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9]*",
 )
-
 val C = mapOf<GrammarToken,String>(
     GrammarToken.TYPE_VOID to "void",
     GrammarToken.TYPE_INTEGER to "int",
@@ -134,10 +73,8 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_BREAK to "break",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typedef",
     GrammarToken.KEYWORD_CONTINUE to "continue",
-    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9]*",
 )
-
-
 val CZ = mapOf<GrammarToken,String>(
     GrammarToken.TYPE_VOID to "void",
     GrammarToken.TYPE_INTEGER to "cele",
@@ -170,38 +107,3 @@ val CZ = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_CONTINUE to "pokracuj",
     GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
 )
-
-fun cTypeFromCzechtina (czechType: String): String {
-    for (type in GrammarToken.values()) {
-        if (type == GrammarToken.VARIABLE)
-            continue
-        var cValue = C.entries.find { it.key == type }?.value ?: ""
-        cValue = cValue.replace("\\", "")
-        if (Regex(czechtina[type]!!).matches(czechType))
-            return cValue
-
-        if (czechType == cValue)
-            return cValue
-    }
-    throw Exception("Unknown type $czechType")
-}
-
-
-fun czTypeFromCzechtina (czechType: String): String {
-    for (type in GrammarToken.values()) {
-        if (type == GrammarToken.VARIABLE)
-            continue
-        var cValue = CZ.entries.find { it.key == type }?.value ?: ""
-        cValue = cValue.replace("\\", "")
-        if (Regex(czechtina[type]!!).matches(czechType))
-            return cValue
-
-        if (czechType == cValue)
-            return cValue
-    }
-    throw Exception("Unknown type $czechType")
-}
-
-fun cAndCzechtinaRegex (list: List<GrammarToken>): String = list.joinToString("|") { czechtina[it]!! + "|" + C[it]!! }
-
-fun czechtinaRegex (list: List<GrammarToken>): String = list.joinToString("|") { czechtina[it]!! }

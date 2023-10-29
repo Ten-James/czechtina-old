@@ -12,7 +12,7 @@ class ASTArrayAccessNode: ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
-        return DefinedType( array.getType().typeString.split("-")[1], array.getType().isHeap, array.getType().isConst)
+        return array.getType().toDereference()
     }
 
     override fun copy(): ASTArrayAccessNode {
@@ -27,7 +27,7 @@ class ASTArrayAccessNode: ASTVariableNode {
         return "ARRAY ACCESS, \narray=${array.toString().replace("\n","\n\t")}, \nindex=${index.toString().replace("\n","\n\t")}\n"
     }
 
-    override fun toC(): String {
-        return "${array.toC()}[${index.toC()}]"
+    override fun toC(sideEffect:Boolean): String {
+        return "${array.toC(false)}[${index.toC(false)}]"
     }
 }

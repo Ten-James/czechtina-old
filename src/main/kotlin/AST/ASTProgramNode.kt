@@ -3,30 +3,37 @@ package AST
 import compiler.DefinedType
 
 class ASTProgramNode : ASTNode {
-    var imports: List<ASTUnaryNode> = listOf<ASTUnaryNode>()
-    var functions: List<ASTFunctionNode> = listOf<ASTFunctionNode>()
+    var imports: List<ASTUnaryNode> = listOf()
+    var functions: List<ASTFunctionNode> = listOf()
+    var structures: List<ASTStructureNode> = listOf()
     var typeDefinition = listOf<ASTBinaryNode>()
     var main: ASTFunctionNode? = null
 
 
-    constructor(functions: List<ASTFunctionNode>, imports: List<ASTUnaryNode>, main: ASTFunctionNode?) {
+    constructor(functions: List<ASTFunctionNode>, imports: List<ASTUnaryNode>, main: ASTFunctionNode?): super(DefinedType("")) {
         this.imports = imports
         this.functions = functions
         this.main = main
+        structures = emptyList()
     }
 
-    public fun appendFunction(function: ASTFunctionNode): ASTProgramNode {
+    fun appendFunction(function: ASTFunctionNode): ASTProgramNode {
         functions += function
         return this
     }
 
-    public fun appendTypeDefinition(typeDefinition: ASTBinaryNode): ASTProgramNode {
+    fun appendTypeDefinition(typeDefinition: ASTBinaryNode): ASTProgramNode {
         this.typeDefinition += typeDefinition
         return this
     }
 
-    public fun appendImport(import: ASTUnaryNode): ASTProgramNode {
+    fun appendImport(import: ASTUnaryNode): ASTProgramNode {
         imports += import
+        return this
+    }
+
+    fun appendStructure(struct: ASTStructureNode): ASTProgramNode {
+        structures += struct
         return this
     }
 
@@ -51,9 +58,10 @@ class ASTProgramNode : ASTNode {
     }
 
     fun doubleNewLine(condition:Boolean) = if (condition) "\n\n" else ""
-    override fun toC(): String =
+    override fun toC(sideEffect:Boolean): String =
         imports.joinToString("\n") { it.toC() } +
-                doubleNewLine(imports.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +
+                doubleNewLine(imports.isNotEmpty()) + structures.joinToString("\n") { it.toC() } +
+                doubleNewLine(structures.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +
                 doubleNewLine(functions.isNotEmpty()) + typeDefinition.joinToString("\n") { it.toC() } +
                 doubleNewLine(typeDefinition.isNotEmpty()) + functions.joinToString("\n\n") { it.toC() } +
                 doubleNewLine(functions.isNotEmpty()) + main?.toC()

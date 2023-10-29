@@ -2,8 +2,7 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
 
 
 enum class ASTBinaryTypes {
@@ -18,7 +17,7 @@ open class ASTBinaryNode : ASTNode {
 
 
 
-    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) {
+    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) : super(DefinedType("none")) {
         this.type = type
         this.left = left
         this.right = right
@@ -37,7 +36,7 @@ open class ASTBinaryNode : ASTNode {
         return "'$type', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}\n"
     }
 
-    override fun toC(): String = when (type) {
+    override fun toC(sideEffect:Boolean): String = when (type) {
         ASTBinaryTypes.FLOW_CONTROL -> "${left.toC()} ${right.toC()}"
         ASTBinaryTypes.TYPE_DEFINITION -> "${Compiler.grammar[GrammarToken.KEYWORD_TYPE_DEFINITION]} ${left.toC()} ${right.toC()};"
     }

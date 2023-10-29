@@ -9,7 +9,7 @@ class ASTFunctionNode : ASTNode {
     var parameters:List<ASTNode> = listOf<ASTNode>()
     var body:ASTUnaryNode? = null
 
-    constructor(type:ASTUnaryNode, name:String, parameters:List<ASTNode>, body:ASTUnaryNode) {
+    constructor(type:ASTUnaryNode, name:String, parameters:List<ASTNode>, body:ASTUnaryNode) : super(DefinedType("")) {
         this.type = type
         this.name = name
         this.parameters = parameters
@@ -34,11 +34,10 @@ class ASTFunctionNode : ASTNode {
         return "Function '$name' : '$type', \nparameters=${parameters.joinToString("").replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(): String  {
+    override fun toC(sideEffect:Boolean): String  {
         val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
-            if (param is ASTTypedNode)
-                paramsTypes.add(param.getType())
+            paramsTypes.add(param.getType())
         if (paramsTypes.any{it.isTemplate()})
             return "//${name}_CZECHTINA ANCHOR\n"
         return "//${name}_CZECHTINA ANCHOR\n${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
@@ -46,6 +45,17 @@ class ASTFunctionNode : ASTNode {
 
     override fun copy(): ASTFunctionNode {
         return ASTFunctionNode(type.copy(), name!!, parameters.map { it.copy() }, body!!.copy())
+    }
+
+    fun precalculateType() {
+        if (type.expType.typeString != "none")
+            return
+
+        Compiler.scopePush()
+        for (param in parameters)
+            Compiler.setNewVariableType((param as ASTVarDefinitionNode).variable.data, param.type.getType())
+        type.expType = body!!.getType()
+        Compiler.scopePop(false)
     }
 
     fun toCNoSideEffect(): String = "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
@@ -56,8 +66,7 @@ class ASTFunctionNode : ASTNode {
     fun toCDeclaration(): String {
         val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
-            if (param is ASTTypedNode)
-                paramsTypes.add(param.getType())
+            paramsTypes.add(param.getType())
 
         if (Compiler.definedFunctions.containsKey(name!!)) {
             val newName = "${name}_v${Compiler.definedFunctions[name!!]!!.variants.size}"

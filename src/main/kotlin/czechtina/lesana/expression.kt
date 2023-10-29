@@ -1,59 +1,66 @@
 package czechtina.lesana
 
 import AST.*
+import compiler.Compiler
 import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.AllComparation
-import czechtina.GrammarToken
-import czechtina.cAndCzechtinaRegex
-import czechtina.czechtina
+import czechtina.grammar.AllComparation
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.cAndCzechtinaRegex
+import czechtina.grammar.czechtina
 
-fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) = lesana {
+fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = lesana {
     val literals = include(literals())
-    val exp1 = NodeID<ASTTypedNode>("expressions")
-    val exp2 = NodeID<ASTTypedNode>("expressions")
-    val exp3 = NodeID<ASTTypedNode>("expressions")
-    val functionCalling = NodeID<ASTTypedNode>("functionCalling")
-    var para1 = NodeID<ASTTypedNode>("paragraph")
-    var para2 = NodeID<ASTTypedNode>("paragraph")
-    var para3 = NodeID<ASTTypedNode>("paragraph")
-    var para4 = NodeID<ASTTypedNode>("paragraph")
-    var para5 = NodeID<ASTTypedNode>("paragraph")
-    val sentence = NodeID<ASTTypedNode>("sentence")
-    val listexp3 = include(listAble(listOf(exp3, variables)))
+    val elevatedVariable = NodeID<ASTVariableNode>("elevatedVariable")
+    val exp1 = NodeID<ASTNode>("expressions")
+    val exp2 = NodeID<ASTNode>("expressions")
+    val exp3 = NodeID<ASTNode>("expressions")
+    val functionCalling = NodeID<ASTNode>("functionCalling")
+    var para1 = NodeID<ASTNode>("paragraph")
+    var para2 = NodeID<ASTNode>("paragraph")
+    var para3 = NodeID<ASTNode>("paragraph")
+    var para4 = NodeID<ASTNode>("paragraph")
+    var para5 = NodeID<ASTNode>("paragraph")
+    val sentence = NodeID<ASTNode>("sentence")
+    val listexp3 = include(listAble(listOf(exp3, elevatedVariable)))
 
 
-    variables to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
-    variables to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
-    variables to def(variables, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
-    variables to def(variables, re("\\["), variables, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    elevatedVariable to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
+    elevatedVariable to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
+    elevatedVariable to def(elevatedVariable, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+    elevatedVariable to def(elevatedVariable, re("\\["), elevatedVariable, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
+
+
+    elevatedVariable to def (variables, re("\\."), variables)  {ASTStructureAccessNode(it.v1, it.v3)}
+    elevatedVariable to def (elevatedVariable, re("\\."), variables)  {ASTStructureAccessNode(it.v1, it.v3)}
+
     exp1 to def(literals) { it.v1 }
 
     exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp1) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp2 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp2) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp2 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp2 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), exp2) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp2 to def(exp2, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), elevatedVariable) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp2 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MULTIPLY, GrammarToken.OPERATOR_DIVIDE, GrammarToken.OPERATOR_MODULO))), elevatedVariable) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
     exp2 to def(exp1) { it.v1 }
 
     exp3 to def(exp3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), exp2) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp3 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), exp3) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp3 to def(exp3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
-    exp3 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), variables) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp3 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), exp3) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp3 to def(exp3, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), elevatedVariable) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
+    exp3 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS, GrammarToken.OPERATOR_MINUS))), elevatedVariable) { (e1, o, e2) -> ASTOperandNode(o, e1, e2) }
     exp3 to def(exp2) { it.v1 }
 
     exp1 to def (re("\\(") , para5, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.BRACKET, it.v2, it.v2.getType()) }
     exp1 to def (re("\\(") , functionCalling, re("\\)")) { ASTUnaryNode(ASTUnaryTypes.JUST_C, it.v2, it.v2.getType()) }
 
 
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType()}-${it.v2.nodes.size}")) }
 
 
-    functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), variables) { ASTFunctionCallNode(it.v2) }
-    functionCalling to def(variables, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
-    functionCalling to def(variables, functionCalling) { (v, e) -> ASTFunctionCallNode( v, e) }
-    functionCalling to def(variables, variables) { (v, e) -> ASTFunctionCallNode( v, e) }
-    functionCalling to def(variables, listexp3) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(re(czechtina[GrammarToken.KEYWORD_FUNCTION_CALL]!!), elevatedVariable) { ASTFunctionCallNode(it.v2) }
+    functionCalling to def(elevatedVariable, types) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(elevatedVariable, exp3) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(elevatedVariable, functionCalling) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(elevatedVariable, elevatedVariable) { (v, e) -> ASTFunctionCallNode( v, e) }
+    functionCalling to def(elevatedVariable, listexp3) { (v, e) -> ASTFunctionCallNode( v, e) }
 
 
     sentence to def(functionCalling) { it.v1 }
@@ -63,29 +70,29 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     {
         (e1, o, e2) ->
             if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
-                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right, e2))
             else if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
-                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left),e2)
             else
                 ASTOperandNode(o, e1, e2)
     }
-    para1 to def(para1, re(cAndCzechtinaRegex(AllComparation)), variables )
+    para1 to def(para1, re(cAndCzechtinaRegex(AllComparation)), elevatedVariable )
     {
             (e1, o, e2) ->
         if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
-            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right, e2))
         else
             ASTOperandNode(o, e1, e2)
     }
-    para1 to def(variables, re(cAndCzechtinaRegex(AllComparation)), para1 )
+    para1 to def(elevatedVariable, re(cAndCzechtinaRegex(AllComparation)), para1 )
     {
             (e1, o, e2) ->
         if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
-            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left),e2)
         else
             ASTOperandNode(o, e1, e2)
     }
-    para1 to def(variables, re(cAndCzechtinaRegex(AllComparation)), variables )
+    para1 to def(elevatedVariable, re(cAndCzechtinaRegex(AllComparation)), elevatedVariable )
     {
             (e1, o, e2) ->
             ASTOperandNode(o, e1, e2)
@@ -103,18 +110,18 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     para4 to def(para4, re(czechtina[GrammarToken.KEYWORD_AS]!!), types) {
         ASTRetypeNode(it.v1, it.v3)
     }
-    para4 to def(variables, re(czechtina[GrammarToken.KEYWORD_AS]!!), types) {
+    para4 to def(elevatedVariable, re(czechtina[GrammarToken.KEYWORD_AS]!!), types) {
         ASTRetypeNode(it.v1, it.v3)
     }
 
-    para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
+    para4 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
     {
-        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+        ASTOperandNode(it.v2, it.v1, it.v3)
     }
 
-    para4 to def(variables, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), variables)
+    para4 to def(elevatedVariable, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), elevatedVariable)
     {
-        ASTOperandNode(it.v2, it.v1.addType(it.v3.getType()), it.v3)
+        ASTOperandNode(it.v2, it.v1, it.v3)
     }
 
     para4 to def(para4, re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))), para4)
@@ -125,9 +132,18 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTTypedNode>) 
     para4 to def(para3) {it.v1}
 
     para5 to def(para4) {it.v1}
-    para5 to def(variables) {it.v1}
+    para5 to def(elevatedVariable) {it.v1}
 
+    elevatedVariable to def(variables) {it.v1}
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType().typeString}-${it.v2.nodes.size}")) }
+
+    sentence to def(re("-"), para5) { ASTUnaryNode(ASTUnaryTypes.MINUS, it.v2, it.v2.getType()) }
 
     inheritIgnoredREs()
     setTopNode(para5)
+
+    onUnexpectedToken { err ->
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception("CZECHTINA EXPRESSION ERROR")
+    }
 }

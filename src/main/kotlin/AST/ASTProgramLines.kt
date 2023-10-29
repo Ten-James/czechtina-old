@@ -5,7 +5,7 @@ import compiler.DefinedType
 class ASTProgramLines : ASTNode {
     var programLines: List<ASTNode> = listOf<ASTNode>()
 
-    constructor(programLines: List<ASTNode>)  {
+    constructor(programLines: List<ASTNode>) : super(DefinedType("")) {
         this.programLines = programLines
     }
 
@@ -24,5 +24,5 @@ class ASTProgramLines : ASTNode {
         programLines.forEach { it.retype(map) }
     }
 
-    override fun toC(): String = programLines.joinToString("\n") { it.toC() }
+    override fun toC(sideEffect:Boolean): String = programLines.joinToString("\n") { it.toC() }
 }

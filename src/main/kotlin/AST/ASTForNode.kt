@@ -2,8 +2,8 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.czechtina
 
 class ASTForNode : ASTNode {
     var begin: ASTNode
@@ -11,7 +11,7 @@ class ASTForNode : ASTNode {
     var step: ASTNode
     var body: ASTNode
 
-    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) {
+    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) : super(DefinedType("")) {
         this.begin = begin
         this.condition = condition
         this.step = step
@@ -19,7 +19,7 @@ class ASTForNode : ASTNode {
         unscopeBody()
     }
 
-    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTTypedNode, rangeComparation: String , max: ASTTypedNode, body: ASTNode) {
+    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) : super(DefinedType("")) {
         this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable.addType(type.getType()), min) )
 
 
@@ -57,5 +57,5 @@ class ASTForNode : ASTNode {
         return "For: \nbegin=${begin.toString().replace("\n","\n\t")}, \ncondition=${condition.toString().replace("\n","\n\t")}, \nstep=${step.toString().replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC() = "for ${Compiler.scopePush()} (${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
+    override fun toC(sideEffect:Boolean) = "for ${Compiler.scopePush()} (${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
 }

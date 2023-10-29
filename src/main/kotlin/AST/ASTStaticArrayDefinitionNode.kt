@@ -1,15 +1,13 @@
 package AST
 
+import compiler.Compiler
 import compiler.DefinedType
 
-class ASTStaticArrayDefinitionNode : ASTTypedNode {
-    var type: ASTNode
-    var variable: ASTNode
+class ASTStaticArrayDefinitionNode : ASTVarDefinitionNode {
     var size: String
 
-    constructor(type: ASTNode, variable: ASTNode, size: String): super(DefinedType("array-$type-$size")) {
-        this.type = type
-        this.variable = variable
+    constructor(type: ASTNode, variable: ASTVariableNode, size: String): super( variable,type) {
+        variable.addType(type.getType().toArray(size))
         this.size = size
     }
 
@@ -21,5 +19,5 @@ class ASTStaticArrayDefinitionNode : ASTTypedNode {
         return ASTStaticArrayDefinitionNode(type.copy(), variable.copy(), size)
     }
 
-    override fun toC(): String = "${type.toC()} ${variable.toC()}[${size}]"
+    override fun toC(sideEffect:Boolean): String = if (Compiler.controlDefinedVariables(variable.data)) variable.toDefineC() else ""
 }

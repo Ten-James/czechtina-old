@@ -3,10 +3,9 @@ package czechtina.lesana
 import AST.*
 import compiler.Compiler
 import compiler.DefinedType
-import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.*
+import czechtina.grammar.*
 
 
 fun czechtinaLesana() = lesana<ASTNode> {
@@ -21,12 +20,31 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val programLines = NodeID<ASTProgramLines>("programLines")
     val line = NodeID<ASTNode>("line")
     val typeDefinition = NodeID<ASTBinaryNode>("typeDefinition")
-    val varDefinition = NodeID<ASTTypedNode>("varDefinition")
+    val varDefinition = NodeID<ASTNode>("varDefinition")
     val listableDefinition = include(listAble(listOf(varDefinition)))
     val import = NodeID<ASTUnaryNode>("import")
-    val r_expression = include(expression(variables, types))
     val program = NodeID<ASTProgramNode>("program")
+    val structHead = NodeID<ASTStructureNode>("structure header")
+    val structure = NodeID<ASTStructureNode>("structure")
 
+    variableDefinition(varDefinition, variables, types)
+
+    structHead to def(
+        re(czechtina[GrammarToken.KEYWORD_STRUCT]!!),
+        types,
+        re("{")
+    ) {ASTStructureNode(it.v2.data.toString(), emptyList()).defineItSelf()}
+
+    structHead to def (
+        structHead,
+        varDefinition,
+        endOfLine
+    ) {it.v1.addProperty(it.v2 as ASTVarDefinitionNode)}
+
+    structure to def (
+        structHead,
+        re("}")
+    ) {it.v1}
 
     typeDefinition to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_TYPE_DEFINITION))),
@@ -37,7 +55,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     ) { (_, v,_, t,_) ->
         if (Compiler.definedTypes.contains(v.toC()))
             throw Exception("Type ${v.toC()} is already defined")
-        else if (Compiler.addToDefinedTypes(v.toC()))
+        else if (Compiler.addToDefinedTypes(v.toC(),t.getType()))
             ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v.addType(t.getType()))
         else
             throw Exception("Error")
@@ -53,55 +71,14 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(">"))
     { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, t2.getType().toPointer()) }
 
-    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (it.v1.contains("T")) "*${it.v1}" else it.v1, DefinedType(if (it.v1.contains("T")) "*${it.v1}" else cTypeFromCzechtina(it.v1) )) }
+    types to def(re(cAndCzechtinaRegex(Alltypes) +"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 
-    // FOR LOOP
-    forLoops(line, variables, types, r_expression, blockCode, endOfLine)
+    val r_expression = include(expression(variables, types))
 
 
-    variableDefinition(varDefinition, variables, types)
-
-    line to def(
-        varDefinition,
-        endOfLine
-    ) { (v, _) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, v) }
-
-    line to def(
-        varDefinition,
-        operands,
-        r_expression,
-        endOfLine
-    ) { (v, o, l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTOperandNode(o, v, l)) }
-
-    line to def(
-        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
-        r_expression,
-        endOfLine
-    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, it.v2)) }
-
-    line to def(
-        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
-        endOfLine
-    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, ASTUnaryNode(ASTUnaryTypes.LITERAL, ""))) }
-
-
-    flowControl(line, r_expression, blockCode)
-
-
-
-    line to def(
-        r_expression,
-        endOfLine
-    ) { (l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, l) }
-
-
-
-
-    blockCode to def(re("{"), programLines, re("}")) {
-        ASTUnaryNode(ASTUnaryTypes.CURLY, it.v2)
-    }
+    programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, operands, programLines)
 
     // MAIN FUNCTION
     main to def(
@@ -109,7 +86,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     )
     {
        ASTFunctionNode(
-           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele"), it.v1,
+           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele", DefinedType("int")), it.v1,
            emptyList(), it.v2
        )
     }
@@ -121,9 +98,6 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
 
 
-
-    programLines to def(line, programLines) { ASTProgramLines(listOf(it.v1) + it.v2.programLines) }
-    programLines to def(line) { ASTProgramLines(listOf(it.v1)) }
 
     import to def(re(czechtinaRegex(listOf(GrammarToken.KEYWORD_IMPORT_C))), re("[a-zA-Z][a-zA-Z0-9]*")) {
         ASTUnaryNode(
@@ -141,14 +115,15 @@ fun czechtinaLesana() = lesana<ASTNode> {
     program to def(program, tFunction) { (program, func) -> program.appendFunction(func) }
     program to def(main) { ASTProgramNode(listOf(), listOf(), it.v1) }
 
+    program to def(program, structure) { (program, structure) -> program.appendStructure(structure) }
+    program to def(structure, program) { (structure, program) -> program.appendStructure(structure) }
+
     line to def (blockCode) { it.v1 }
 
     setTopNode(program)
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
-        println(err.got.toString())
-        println("excepted: " + err.expectedIDs)
-        println("------------------")
-        println(err)
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception( "CZECHTINA ERROR")
     }
 }.getLesana()

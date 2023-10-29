@@ -2,12 +2,12 @@ package czechtina.lesana
 
 import AST.ASTListNode
 import AST.ASTNode
-import AST.ASTTypedNode
+import compiler.Compiler
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 
 
-fun listAble (list: List<NodeID<ASTTypedNode>>) = lesana<ASTListNode> {
+fun listAble (list: List<NodeID<ASTNode>>) = lesana<ASTListNode> {
     val listAble = NodeID<ASTListNode>("listAble")
 
     for (i in list) {
@@ -22,4 +22,9 @@ fun listAble (list: List<NodeID<ASTTypedNode>>) = lesana<ASTListNode> {
     }
     setTopNode(listAble)
     inheritIgnoredREs()
+
+    onUnexpectedToken { err ->
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception("CZECHTINA ListAble ERROR")
+    }
 }
