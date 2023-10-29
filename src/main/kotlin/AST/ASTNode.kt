@@ -1,7 +1,6 @@
 package AST
 
 import compiler.DefinedType
-import czechtina.GrammarToken
 
 open abstract class ASTNode(var expType: DefinedType) {
 

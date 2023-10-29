@@ -2,8 +2,8 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.czechtina
 
 class ASTFunctionCallNode : ASTVariableNode {
     var function:ASTVariableNode

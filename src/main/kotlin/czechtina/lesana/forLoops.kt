@@ -3,9 +3,9 @@ package czechtina.lesana
 import AST.*
 import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.GrammarToken
-import czechtina.cAndCzechtinaRegex
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.cAndCzechtinaRegex
+import czechtina.grammar.czechtina
 
 fun LesanaBuilder<ASTNode>.forLoops(
     line: NodeID<ASTNode>,

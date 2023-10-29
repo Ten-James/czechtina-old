@@ -5,11 +5,6 @@ import utils.GetFileLinkedFilePath
 import java.io.File
 
 object Preprocessor {
-    var lastReadFile: String = ""
-
-    fun readFile(filePath: String) {
-        lastReadFile = File(filePath).readText()
-    }
 
     fun addUndefineFile(line: String):String {
         undefinedFunction.add(line.split(" ")[1])
@@ -20,7 +15,7 @@ object Preprocessor {
         val bylines = text.trim().lines().toTypedArray()
 
         var blocklevel = 0
-        for (i in 0 until bylines.size) {
+        for (i in bylines.indices) {
             if (bylines[i].isBlank())
                 continue
             else if (bylines[i].contains("{"))
@@ -44,10 +39,5 @@ object Preprocessor {
         }
 
         return bylines.joinToString("\n")
-    }
-
-    fun preprocess (filePath: String) :String {
-        readFile(filePath)
-        return preprocessText(lastReadFile, filePath)
     }
 }

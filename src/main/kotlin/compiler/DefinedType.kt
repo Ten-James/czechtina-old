@@ -27,50 +27,44 @@ class DefinedType {
         return getPrimitive()
     }
 
-    fun toArray(size: Number): DefinedType {
+    fun toArray(size: String): DefinedType {
         if (isPointer() || isDynamic())
-            return DefinedType("array-${getPrimitive()}-${size}", isHeap, isConst)
-        return DefinedType("array-${getPrimitive()}-${size}", isHeap, isConst)
+            return changeTypeString("array-${this.typeString}-${size}")
+        return changeTypeString("array-${this.typeString}-${size}")
     }
 
-    fun toHeap(): DefinedType {
-        return DefinedType(typeString, true)
-    }
+    fun toHeap(): DefinedType = DefinedType(typeString, true, isConst, isStructured)
+    fun toConst(): DefinedType = DefinedType(typeString, isHeap, true, isStructured)
+    fun toPointer(): DefinedType = changeTypeString("pointer-$typeString")
 
-    fun toConst(): DefinedType {
-        return DefinedType(typeString, isHeap, true)
-    }
 
-    fun toPointer(): DefinedType {
-        return DefinedType("pointer-$typeString", isHeap)
-    }
     fun toDereference(): DefinedType {
         if (!isAddress() && Compiler.isParsed)
             throw Exception("Cannot convert non-pointer type to dereference - $this")
         if (isAddress())
-            return DefinedType(typeString.substring(typeString.indexOf("-")+1), isHeap, isConst)
-        return DefinedType("none", isHeap)
+            return changeTypeString(typeString.substring(typeString.indexOf("-")+1))
+        return changeTypeString("none")
     }
-
     fun toDynamic(): DefinedType {
         if (!isHeap)
             throw Exception("Cannot convert non-heap type to dynamic")
-        return DefinedType(typeString.replace("pointer","dynamic"), isHeap, isConst, isStructured)
+        return changeTypeString(typeString.replace("pointer","dynamic"))
     }
 
-    fun isPointer(): Boolean {
-        return typeString.contains("pointer")
+
+    fun changeTypeString(newTypeString: String):DefinedType {
+        var newT = DefinedType(this)
+        newT.typeString = newTypeString
+        return newT
     }
 
-    fun isAddress(): Boolean = isPointer() || isDynamic()
+    fun isAddress() = isPointer() || isDynamic() || isArray()
+    fun isPointer() = typeString.contains("pointer")
+    fun isDynamic() = typeString.contains("dynamic")
+    fun isArray() = typeString.contains("array")
 
-    fun isDynamic(): Boolean {
-        return typeString.contains("dynamic")
-    }
+    fun isTemplate(): Boolean = typeString.contains("*")
 
-    fun isTemplate(): Boolean {
-        return typeString.contains("*")
-    }
     fun getTemplate(): String {
         if (!isTemplate())
             throw Exception("Type $typeString is not template")
@@ -88,11 +82,11 @@ class DefinedType {
     }
 
 
-    override fun toString(): String = "$typeString - $isHeap - $isConst"
+    override fun toString(): String = "$typeString ${if (isHeap) "Heap " else ""}${if (isConst) "Const " else ""}${if (isStructured) "Struct" else " "}"
 
     fun unDynamic(): DefinedType {
         if (isDynamic())
-            return DefinedType(typeString.replace("dynamic","pointer"), isHeap, isConst, isStructured)
-        return DefinedType(typeString, isHeap, isConst, isStructured)
+            return changeTypeString(typeString.replace("dynamic","pointer"))
+        return DefinedType(this)
     }
 }

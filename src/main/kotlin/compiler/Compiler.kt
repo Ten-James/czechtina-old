@@ -2,31 +2,22 @@ package compiler
 
 import AST.*
 import cz.j_jzk.klang.input.InputFactory
-import czechtina.*
+import czechtina.grammar.*
 import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
+import utils.ArgsProvider
 import java.io.File
+import kotlin.system.exitProcess
 
 object Compiler {
-    val VERSION = "0.1.6"
+    private const val VERSION = "0.1.6"
+    private const val red = "\u001b[31m"
+    private const val reset = "\u001b[0m"
     var isParsed = false
-    var compilingTo = "C"
+    private var compilingTo = "C"
     var definedTypes = mutableMapOf<String, DefinedType>()
     var undefinedFunction = mutableListOf<String>()
-    var definedFunctions = mutableMapOf<String, DefinedFunction>(
-        "printf" to DefinedFunction("printf",DefinedType("void"), listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
-        "scanf" to DefinedFunction("scanf",DefinedType("scanf"), listOf(DefinedFunctionVariant("scanf", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
-        "new" to DefinedFunction("new",DefinedType("dynamic-void", true), listOf(DefinedFunctionVariant("malloc", listOf(
-            DefinedType("int")
-        ))), virtual = true),
-        "predej" to DefinedFunction("predej",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
-            DefinedType("pointer", isHeap = true)
-        ))), virtual = true),
-        "const" to DefinedFunction("const",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
-            DefinedType("pointer")
-        ))), virtual = true),
-        "throw" to DefinedFunction("throw",DefinedType("void"), listOf(DefinedFunctionVariant("throw", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
-    )
+    var definedFunctions = initDefinedFunction()
     var definedStructures = mutableMapOf<String, DefinedStructure>()
     var variables = mutableListOf(mutableMapOf<String, DefinedType>())
     var grammar: Map<GrammarToken,String> = C
@@ -38,7 +29,7 @@ object Compiler {
         else -> ""
     }
 
-    fun setToC() {
+    private fun setToC() {
         compilingTo = "C"
         grammar = C
     }
@@ -144,13 +135,13 @@ object Compiler {
             return DefinedType(right.getType())
         if (operand == "=") {
             if (left.getType().isConst && isParsed)
-                throw Exception("Cannot change const type of variable ${left}")
+                throw Exception("Cannot change const type of variable $left")
             if (left is ASTVariableNode)
                 left.addType(right.getType())
             return DefinedType(right.getType())
         }
         if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
-            return DefinedType("bool");
+            return DefinedType("bool")
 
         if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_MINUS))).matches(operand)) {
             if (left.getType().isAddress() && right.getType().isAddress())
@@ -197,8 +188,8 @@ object Compiler {
         return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, variables=$variables,)"
     }
 
-    fun addFunctionVariatns( Code:String, tree: ASTProgramNode) : String {
-        var cCode = Code
+    private fun addFunctionVariants(code:String, tree: ASTProgramNode) : String {
+        var cCode = code
         while (isAnyUsedFunctionUndefined()) {
             for (function in definedFunctions){
                 val fce = function.value
@@ -206,20 +197,19 @@ object Compiler {
                     continue
                 val variants = listOf(fce.variants).flatten().filter { !it.defined && it.timeUsed > 0 }
                 for (variant in variants){
-                    val functionASTref = tree.functions.find { it.name == function.key }
+                    val functionASTree = tree.functions.find { it.name == function.key }
                         ?: throw Exception("Function ${function.key} not found")
-                    Compiler.scopePush()
-                    var functionAST = functionASTref.copy()
-                    Compiler.scopePop()
+                    scopePush()
+                    val functionAST = functionASTree.copy()
+                    scopePop()
                     val paramsTypes = mutableListOf<DefinedType>()
                     for (param in functionAST.parameters)
-                        if (param is ASTNode)
-                            paramsTypes.add(param.getType())
+                        paramsTypes.add(param.getType())
                     val abstractIndex = fce.validateParams(paramsTypes)
-                    var retypeMap = mutableMapOf<String,DefinedType>()
+                    val retypeMap = mutableMapOf<String,DefinedType>()
                     for (i in 0 until variant.params.size){
-                        var old =fce.variants[abstractIndex].params[i]
-                        var new = DefinedType(variant.params[i])
+                        val old =fce.variants[abstractIndex].params[i]
+                        val new = DefinedType(variant.params[i])
 
                         if (old.isPointer()){
                             if (old.typeString.replace("pointer", "dynamic") == new.typeString) {
@@ -258,7 +248,7 @@ object Compiler {
 
 
 
-    fun isAnyUsedFunctionUndefined(): Boolean {
+    private fun isAnyUsedFunctionUndefined(): Boolean {
         for (function in definedFunctions)
             if (function.value.variants.any { !it.defined && it.timeUsed > 0 })
                 return true
@@ -269,9 +259,10 @@ object Compiler {
     fun compileText(text:String): String {
         val preprocessed = Preprocessor.preprocessText(text, "")
         isParsed = false
-        var tree: ASTProgramNode?
+        val tree: ASTProgramNode?
         var cCode: String
         try {
+            currentCode = preprocessed
             tree = czechtina.parse(InputFactory.fromString(preprocessed, "code")) as ASTProgramNode
             isParsed = true
             for (function in tree.functions)
@@ -283,48 +274,98 @@ object Compiler {
             println(variables)
             throw e
         }
-        cCode = addFunctionVariatns(cCode, tree)
+        cCode = addFunctionVariants(cCode, tree)
         cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
         cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")
         return cCode
     }
 
 
-    fun compileFile(path: String, args: Array<String>) {
-        var code = Preprocessor.preprocess(path)
-        var withoutExtension = path.substring(0, path.length - 3)
+
+    var currentCode = ""
+
+    var currentErrors = mutableMapOf<Int, MutableList<Int>>()
+
+    fun getCurrentCodeLine(charIndex: Int) {
+        var line = 1
+        var char = 0
+        for (i in 0 until charIndex) {
+            if (currentCode[i] == '\n') {
+                line++
+                char = 0
+            }
+            else
+                char++
+        }
+
+        if (currentErrors.containsKey(line))
+            currentErrors[line]!!.add(char)
+        else
+            currentErrors += mapOf(line to mutableListOf(char))
+    }
+
+    fun printCurrentErrors() {
+        for (error in currentErrors) {
+            println("$red[ERR]$reset: syntax error in line ${error.key} at char ${error.value.joinToString(",")}")
+            println(currentCode.split("\n")[error.key - 1])
+            val max = error.value.max()!!
+            for (i in 0..max)
+                if (error.value.contains(i))
+                    print("$red^$reset")
+                else
+                    print(" ")
+            println()
+        }
+    }
+
+    fun compile(text: String, path: String) {
+        val code = Preprocessor.preprocessText(text, path)
+        val withoutExtension = path.substring(0, path.length - 3)
 
         isParsed = false
-        var tree: ASTProgramNode?
+        val tree: ASTProgramNode?
         try {
+            currentCode = code
             tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
         } catch (e:Exception) {
-            println(definedTypes)
-            println(definedStructures.keys)
-            throw e
+            printCurrentErrors()
+            println("$red[FATAL]: There is syntax error in your code$reset")
+            println("$red[FATAL]: ${e.message}$reset")
+            if (ArgsProvider.debug)
+                e.printStackTrace()
+            exitProcess(1)
         }
 
         isParsed = true
 
-        if (args.any() { it == "--show-tree" }) {
+        if (ArgsProvider.showTree) {
             println(tree.toString())
         }
 
         variables.clear()
         variables.add(mutableMapOf())
 
-        var cCode = tree.toC()
+        var cCode = ""
 
-        cCode = addFunctionVariatns(cCode, tree)
+        try {
+            cCode = tree.toC()
+        } catch (e:Exception) {
+            println("$red[FATAL]: ${e.message}$reset")
+            if (ArgsProvider.debug)
+                e.printStackTrace()
+            exitProcess(1)
+        }
 
-        if (Compiler.compilingTo == "CZ") {
+        cCode = addFunctionVariants(cCode, tree)
+
+        if (compilingTo == "CZ") {
             cCode = "#define \"czechtina.h\"\n$cCode"
             createCzechtinaDefineFile()
         }
 
-        if (args.any { it == "--friendly" }) {
-            if (Compiler.compilingTo != "C") {
-                Compiler.setToC()
+        if (ArgsProvider.friendly) {
+            if (compilingTo != "C") {
+                setToC()
                 cCode += "\n/*\n ${tree.toC()} \n*/"
             }
         }
@@ -333,10 +374,10 @@ object Compiler {
 
         cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")
 
-        cCode= "// Czechtina ${Compiler.VERSION}\n$cCode"
+        cCode= "// Czechtina $VERSION\n$cCode"
 
-        if (args.any { it == "--write-code" }) {
-            cCode = "/*\n\t${Preprocessor.lastReadFile.replace("\n", "\n\t")}\n*/\n$cCode"
+        if (ArgsProvider.writeCode) {
+            cCode = "/*\n\t${text.replace("\n", "\n\t")}\n*/\n$cCode"
         }
         File("$buildPath$withoutExtension.c").writeText(cCode)
     }

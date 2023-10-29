@@ -16,7 +16,7 @@ class ASTListNode : ASTNode {
             if (t.typeString != type.typeString)
                 throw Exception("Cant get type of array of variant types, $type and $t")
         }
-        return type.toArray(types.size);
+        return type.toArray(types.size.toString());
     }
 
     override fun toString(): String {

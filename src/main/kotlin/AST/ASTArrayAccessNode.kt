@@ -12,7 +12,7 @@ class ASTArrayAccessNode: ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
-        return DefinedType(array.getType().getPrimitive(), array.getType().isHeap, array.getType().isConst)
+        return array.getType().toDereference()
     }
 
     override fun copy(): ASTArrayAccessNode {

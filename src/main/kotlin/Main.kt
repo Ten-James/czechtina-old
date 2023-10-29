@@ -8,6 +8,8 @@ import cz.j_jzk.klang.prales.useful.list
 import czechtina.*
 import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
+import utils.ArgsProvider
+import utils.Filer
 import utils.RemoveFileExtension
 import java.io.BufferedReader
 import java.io.File
@@ -24,30 +26,43 @@ fun main(args: Array<String>) {
             |   --fpeterek      Uses macros from old czechtina.h file
             |   --friendly      Generate valid C without macros in comment bellow code
             |   --set-dir       Set dir for file creation
+            |   --debug         Show debug info
         """.trimMargin())
 
-    if (args.any(){it == "--fpeterek"}) {
+    ArgsProvider.processArgs(args)
+
+    if (ArgsProvider.fpeterek) {
         Compiler.setToCZ()
     }
 
-    val setDirIndex = args.indexOf("--set-dir")
-    if (setDirIndex != -1 && setDirIndex != args.size -1) {
-        Compiler.buildPath= args[setDirIndex+1] + "/"
+    if (ArgsProvider.setDir) {
+        Compiler.buildPath= ArgsProvider.dir
     }
 
     //create file with name of input file in current directory
-    val file = args.firstOrNull() ?: return println("No input file specified")
+    val file = args.firstOrNull() ?: return println("[FAT]: no input file")
+
+    var text = ""
 
     try {
-        Compiler.compileFile(file, args)
+        text= Filer.readFromFile(file)
     }
     catch (e: Exception) {
-        println("Error: variables scope ${Compiler.variables}")
-        println("Error: ${e.message}")
-        throw e
+        return println("[FAT]: file can't be read")
     }
 
-    if (args.any() { it == "--no-compile" }) {
+    try {
+        Compiler.compile(text,file)
+    }
+    catch (e: Exception) {
+        println("[ERR]: ${e.message}")
+        if (ArgsProvider.debug)
+            e.printStackTrace()
+        return
+
+    }
+
+    if (ArgsProvider.noCompilation) {
         return
     }
 

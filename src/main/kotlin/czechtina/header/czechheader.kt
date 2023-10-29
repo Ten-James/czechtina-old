@@ -1,10 +1,10 @@
 package czechtina.header
 
 import compiler.Compiler
-import czechtina.C
-import czechtina.CZ
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.C
+import czechtina.grammar.CZ
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.czechtina
 import java.io.File
 
 

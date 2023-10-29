@@ -3,10 +3,9 @@ package czechtina.lesana
 import AST.*
 import compiler.Compiler
 import compiler.DefinedType
-import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.*
+import czechtina.grammar.*
 
 
 fun czechtinaLesana() = lesana<ASTNode> {
@@ -72,55 +71,14 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(">"))
     { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, t2.getType().toPointer()) }
 
-    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
+    types to def(re(cAndCzechtinaRegex(Alltypes) +"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 
     val r_expression = include(expression(variables, types))
-    // FOR LOOP
-    forLoops(line, variables, types, r_expression, blockCode, endOfLine)
 
 
-
-    line to def(
-        varDefinition,
-        endOfLine
-    ) { (v, _) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, v) }
-
-    line to def(
-        varDefinition,
-        operands,
-        r_expression,
-        endOfLine
-    ) { (v, o, l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTOperandNode(o, v, l)) }
-
-    line to def(
-        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
-        r_expression,
-        endOfLine
-    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, it.v2)) }
-
-    line to def(
-        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_RETURN))),
-        endOfLine
-    ) { ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTUnaryNode(ASTUnaryTypes.RETURN, ASTUnaryNode(ASTUnaryTypes.LITERAL, ""))) }
-
-
-    flowControl(line, r_expression, blockCode)
-
-
-
-    line to def(
-        r_expression,
-        endOfLine
-    ) { (l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, l) }
-
-
-
-
-    blockCode to def(re("{"), programLines, re("}")) {
-        ASTUnaryNode(ASTUnaryTypes.CURLY, it.v2)
-    }
+    programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, operands, programLines)
 
     // MAIN FUNCTION
     main to def(
@@ -140,9 +98,6 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
 
 
-
-    programLines to def(line, programLines) { ASTProgramLines(listOf(it.v1) + it.v2.programLines) }
-    programLines to def(line) { ASTProgramLines(listOf(it.v1)) }
 
     import to def(re(czechtinaRegex(listOf(GrammarToken.KEYWORD_IMPORT_C))), re("[a-zA-Z][a-zA-Z0-9]*")) {
         ASTUnaryNode(
@@ -168,9 +123,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     setTopNode(program)
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
-        println(err.got.toString())
-        println("excepted: " + err.expectedIDs)
-        println("------------------")
-        println(err)
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception( "CZECHTINA ERROR")
     }
 }.getLesana()

@@ -1,14 +1,14 @@
 package czechtina.lesana
 
 import AST.*
+import compiler.Compiler
 import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
-import czechtina.AllComparation
-import czechtina.GrammarToken
-import czechtina.cAndCzechtinaRegex
-import czechtina.czechtina
-import java.sql.Types
+import czechtina.grammar.AllComparation
+import czechtina.grammar.GrammarToken
+import czechtina.grammar.cAndCzechtinaRegex
+import czechtina.grammar.czechtina
 
 fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = lesana {
     val literals = include(literals())
@@ -141,4 +141,9 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
 
     inheritIgnoredREs()
     setTopNode(para5)
+
+    onUnexpectedToken { err ->
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception("CZECHTINA EXPRESSION ERROR")
+    }
 }

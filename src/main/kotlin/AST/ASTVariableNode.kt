@@ -47,10 +47,13 @@ open class ASTVariableNode : ASTNode {
     fun toDefineC(): String {
         if (isLocal && !Compiler.isDefined(data))
             Compiler.variables[Compiler.variables.size-1] += mapOf(data to DefinedType(expType))
-
-        if (getType().typeString.contains("array")){
+        if (getType().isArray()){
             val s = getType().typeString.split("-")
-            return "${s[1]} $data[${s[2]}]"
+            val starcount = s.size - 3
+
+            val star = "*".repeat(starcount)
+
+            return "${s[s.size-2]} $star$data[${s[s.size-1]}]"
         }
         if (getType().isAddress()){
             val s = getType().getPrimitive()

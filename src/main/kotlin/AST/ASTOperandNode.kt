@@ -2,7 +2,6 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.cTypeFromCzechtina
 
 class ASTOperandNode : ASTNode {
     var operand:String

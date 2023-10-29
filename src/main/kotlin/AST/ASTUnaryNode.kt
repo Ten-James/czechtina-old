@@ -2,7 +2,7 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
+import czechtina.grammar.GrammarToken
 
 enum class ASTUnaryTypes {
     LITERAL,

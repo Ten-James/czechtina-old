@@ -2,6 +2,7 @@ package czechtina.lesana
 
 import AST.ASTListNode
 import AST.ASTNode
+import compiler.Compiler
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 
@@ -21,4 +22,9 @@ fun listAble (list: List<NodeID<ASTNode>>) = lesana<ASTListNode> {
     }
     setTopNode(listAble)
     inheritIgnoredREs()
+
+    onUnexpectedToken { err ->
+        Compiler.getCurrentCodeLine(err.got.position.character)
+        throw Exception("CZECHTINA ListAble ERROR")
+    }
 }

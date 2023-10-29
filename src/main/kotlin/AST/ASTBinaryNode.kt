@@ -2,8 +2,7 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import czechtina.GrammarToken
-import czechtina.czechtina
+import czechtina.grammar.GrammarToken
 
 
 enum class ASTBinaryTypes {
