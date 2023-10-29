@@ -235,7 +235,9 @@ To get address of variable use virtual Function `adresa`
 
 ## Building compiler
 
-TODO - use intelij xd
+```bash
+./gradlew build
+```
 
 ## Using Compiler
 
@@ -248,6 +250,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - **--no-compile** - Do not compile the output C code, it will be created in the same directory as the input file
 - **--show-tree** - Show the AST tree
 - **--write-code** - Write Code in comment before C code
+- **--debug** - Show debug info
 - **--fpeterek** - Uses macros from old czechtina.h file
 - **--friendly** - Generate valid C without macros in comment bellow code
 - **--set-dir** - Set dir for file creation
@@ -256,11 +259,10 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 
 - std lib
 - string anotation
-- better cli
 - file structure
 - rest of loop features.
-- nacti
-- structures
+- nacti function
+- objects
 - range definition
 - pointer array borrow checking
 - check validation of return type

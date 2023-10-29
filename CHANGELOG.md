@@ -6,7 +6,7 @@
 - variables now has to start with lowercase letter
 - functions now has to start with lowercase letter
 - types now has to start with uppercase letter
-- sturctures in work
+- structures in work
 - while loop
 - `-1` is now valid
 - undefining functions via `#undefine <function_name>`
