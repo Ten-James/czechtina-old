@@ -17,14 +17,16 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
+        if (function.data == "throw")
+            return DefinedType("none")
         if (function.data == "inC")
             return DefinedType("none")
         if (function.data == "predej")
             return (params!! as ASTVariableNode).getType().toDynamic()
         if (function.data == "hodnota")
-            return (params!! as ASTNode).getType().toDereference()
+            return params!!.getType().toDereference()
         if (function.data == "adresa")
-            return (params!! as ASTNode).getType().toPointer()
+            return params!!.getType().toPointer()
         if (function.data == "const")
             return (params!! as ASTVariableNode).getType().toConst()
 
@@ -60,6 +62,9 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun toC(sideEffect:Boolean): String {
+
+        if (function.data == "throw")
+            return "printf(${params?.toC()}); exit(1)"
 
         if (function.data == "inC")
             return "${(params as ASTUnaryNode).data}"

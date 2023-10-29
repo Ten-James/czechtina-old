@@ -25,6 +25,7 @@ object Compiler {
         "const" to DefinedFunction("const",DefinedType("pointer-void"), listOf(DefinedFunctionVariant("", listOf(
             DefinedType("pointer")
         ))), virtual = true),
+        "throw" to DefinedFunction("throw",DefinedType("void"), listOf(DefinedFunctionVariant("throw", listOf(DefinedType("string")), enableArgs = true)), virtual = true),
     )
     var definedStructures = mutableMapOf<String, DefinedStructure>()
     var variables = mutableListOf(mutableMapOf<String, DefinedType>())

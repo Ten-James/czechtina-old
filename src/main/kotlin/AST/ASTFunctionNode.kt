@@ -66,8 +66,7 @@ class ASTFunctionNode : ASTNode {
     fun toCDeclaration(): String {
         val paramsTypes = mutableListOf<DefinedType>()
         for (param in parameters)
-            if (param is ASTNode)
-                paramsTypes.add(param.getType())
+            paramsTypes.add(param.getType())
 
         if (Compiler.definedFunctions.containsKey(name!!)) {
             val newName = "${name}_v${Compiler.definedFunctions[name!!]!!.variants.size}"

@@ -72,7 +72,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
         re(">"))
     { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, t2.getType().toPointer()) }
 
-    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*|[A-Z]+")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
+    types to def(re(cAndCzechtinaRegex(Alltypes)+"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
 
     operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 

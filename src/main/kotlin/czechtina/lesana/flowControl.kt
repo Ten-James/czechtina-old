@@ -12,6 +12,30 @@ fun LesanaBuilder<ASTNode>.flowControl(
     r_expression: NodeID<ASTNode>,
     blockCode: NodeID<ASTUnaryNode>
 ) {
+    // while
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_WHILE))),
+        r_expression,
+        blockCode
+    ) { (_, exp, block) -> ASTBinaryNode(ASTBinaryTypes.FLOW_CONTROL, ASTUnaryNode(ASTUnaryTypes.WHILE, exp), block) }
+
+    line to def(
+        re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_WHILE))),
+        r_expression,
+        re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
+        line
+    ) { (_, exp, _, block) ->
+        ASTBinaryNode(
+            ASTBinaryTypes.FLOW_CONTROL,
+            ASTUnaryNode(ASTUnaryTypes.WHILE, exp),
+            ASTUnaryNode(ASTUnaryTypes.NEW_LINE, block)
+        )
+    }
+
+
+    // if
+
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_IF))),
         r_expression,

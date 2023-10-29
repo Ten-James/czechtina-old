@@ -39,6 +39,8 @@ object Preprocessor {
                 bylines[i] = "${bylines[i]};".replace(";;",";")
             else if (!bylines[i].endsWith("\\"))
                 bylines[i] = "${bylines[i]} konec".replace(";;",";")
+            else if (bylines[i].endsWith("\\"))
+                bylines[i] = bylines[i].substringBeforeLast("\\")
         }
 
         return bylines.joinToString("\n")

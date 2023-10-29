@@ -23,7 +23,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     var para4 = NodeID<ASTNode>("paragraph")
     var para5 = NodeID<ASTNode>("paragraph")
     val sentence = NodeID<ASTNode>("sentence")
-    val listexp3 = include(listAble(listOf(exp3, variables)))
+    val listexp3 = include(listAble(listOf(exp3, elevatedVariable)))
 
 
     elevatedVariable to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
@@ -70,9 +70,9 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     {
         (e1, o, e2) ->
             if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
-                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right, e2))
             else if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
-                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+                ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left),e2)
             else
                 ASTOperandNode(o, e1, e2)
     }
@@ -80,7 +80,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     {
             (e1, o, e2) ->
         if (e1 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e1.operand))
-            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right!!, e2))
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, e1, ASTOperandNode(o,e1.right, e2))
         else
             ASTOperandNode(o, e1, e2)
     }
@@ -88,7 +88,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     {
             (e1, o, e2) ->
         if (e2 is ASTOperandNode && Regex(cAndCzechtinaRegex(AllComparation)).matches(e2.operand))
-            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left!!),e2)
+            ASTOperandNode(czechtina[GrammarToken.OPERATOR_AND]!!, ASTOperandNode(o,e1, e2.left),e2)
         else
             ASTOperandNode(o, e1, e2)
     }

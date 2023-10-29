@@ -259,6 +259,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - better cli
 - file structure
 - rest of loop features.
+- nacti
 - structures
 - range definition
 - pointer array borrow checking

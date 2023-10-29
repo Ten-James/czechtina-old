@@ -23,6 +23,7 @@ enum class ASTUnaryTypes {
     IF,
     ELSE,
     ELSE_IF,
+    WHILE,
     NEW_LINE,
     NO_PARAM_CALL
 }
@@ -97,6 +98,7 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.JUST_C -> (data as ASTNode).toC()
         ASTUnaryTypes.STRING -> "\"${data.toString()}\""
         ASTUnaryTypes.IF -> "${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
+        ASTUnaryTypes.WHILE -> "${Compiler.grammar[GrammarToken.KEYWORD_WHILE]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.ELSE -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]}"
         ASTUnaryTypes.ELSE_IF -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]} ${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.NEW_LINE -> "\n\t${(data as ASTNode).toC().replace("\n","\n\t")}"
