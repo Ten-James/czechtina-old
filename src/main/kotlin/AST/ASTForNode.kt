@@ -57,5 +57,5 @@ class ASTForNode : ASTNode {
         return "For: \nbegin=${begin.toString().replace("\n","\n\t")}, \ncondition=${condition.toString().replace("\n","\n\t")}, \nstep=${step.toString().replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
     }
 
-    override fun toC(sideEffect:Boolean) = "for ${Compiler.scopePush()} (${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
+    override fun toC(sideEffect:Boolean) = "for ${Compiler.scopePush()}(${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"
 }

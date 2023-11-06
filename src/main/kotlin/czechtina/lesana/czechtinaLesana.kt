@@ -6,12 +6,12 @@ import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.grammar.*
+import utils.ArgsProvider
 
 
 fun czechtinaLesana() = lesana<ASTNode> {
     val types = NodeID<ASTUnaryNode>("types")
     val variables = NodeID<ASTVariableNode>("variables")
-    val operands = NodeID<String>("operands")
     val endOfLine = re(";|kafe")
     val konec = re("konec")
     val main = NodeID<ASTFunctionNode>("main")
@@ -73,12 +73,11 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
     types to def(re(cAndCzechtinaRegex(Alltypes) +"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
 
-    operands to def(re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN)))) { it.v1 }
 
     val r_expression = include(expression(variables, types))
 
 
-    programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, operands, programLines)
+    programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, programLines)
 
     // MAIN FUNCTION
     main to def(
@@ -124,6 +123,9 @@ fun czechtinaLesana() = lesana<ASTNode> {
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
         Compiler.getCurrentCodeLine(err.got.position.character)
+        if (ArgsProvider.debug) {
+            println(err)
+        }
         throw Exception( "CZECHTINA ERROR")
     }
 }.getLesana()

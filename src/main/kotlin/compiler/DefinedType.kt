@@ -46,7 +46,7 @@ class DefinedType {
         return changeTypeString("none")
     }
     fun toDynamic(): DefinedType {
-        if (!isHeap)
+        if (!isHeap && Compiler.isParsed)
             throw Exception("Cannot convert non-heap type to dynamic")
         return changeTypeString(typeString.replace("pointer","dynamic"))
     }
@@ -88,5 +88,18 @@ class DefinedType {
         if (isDynamic())
             return changeTypeString(typeString.replace("dynamic","pointer"))
         return DefinedType(this)
+    }
+
+
+    fun isCastAbleTo(definedType: DefinedType) : Boolean {
+        if (definedType.typeString == typeString)
+            return true
+        if (definedType.isDynamic() && !isDynamic())
+            return false
+        if (!definedType.isDynamic() && isDynamic())
+            return false
+        if (definedType.isAddress() && isAddress())
+            return definedType.getPrimitive() == getPrimitive()
+        return false
     }
 }

@@ -1,5 +1,12 @@
 # CZECHTINA - CHANGELOG
 
+### v 0.1.6.5
+
+- fixing bugs
+- added +=, -=, *=, /=
+- preincrement and postincrement (++, --)
+
+
 ### v 0.1.6
 
 - throw keyword

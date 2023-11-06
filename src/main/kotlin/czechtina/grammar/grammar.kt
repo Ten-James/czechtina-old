@@ -25,6 +25,11 @@ enum class GrammarToken {
     OPERATOR_DIVIDE,
     OPERATOR_MODULO,
     OPERATOR_ASSIGN,
+    OPERATOR_ASSIGN_PLUS,
+    OPERATOR_ASSIGN_MINUS,
+    OPERATOR_ASSIGN_MULTIPLY,
+    OPERATOR_ASSIGN_DIVIDE,
+    OPERATOR_ASSIGN_MODULO,
     OPERATOR_EQUAL,
     OPERATOR_NOT_EQUAL,
     OPERATOR_LESS,
@@ -59,4 +64,12 @@ val Alltypes = listOf(
     GrammarToken.TYPE_DECIMAL,
     GrammarToken.TYPE_BOOLEAN,
     GrammarToken.TYPE_CHAR,
+)
+
+val AllOtherAssignOperators = listOf(
+    GrammarToken.OPERATOR_ASSIGN_PLUS,
+    GrammarToken.OPERATOR_ASSIGN_MINUS,
+    GrammarToken.OPERATOR_ASSIGN_MULTIPLY,
+    GrammarToken.OPERATOR_ASSIGN_DIVIDE,
+    GrammarToken.OPERATOR_ASSIGN_MODULO,
 )

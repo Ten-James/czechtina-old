@@ -25,7 +25,11 @@ enum class ASTUnaryTypes {
     ELSE_IF,
     WHILE,
     NEW_LINE,
-    NO_PARAM_CALL
+    NO_PARAM_CALL,
+    POST_INCREMENT,
+    POST_DECREMENT,
+    PRE_INCREMENT,
+    PRE_DECREMENT,
 }
 class ASTUnaryNode : ASTNode {
     var type:ASTUnaryTypes? = null
@@ -80,7 +84,7 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.CURLY -> {
             val body = "${Compiler.scopePush()}${(data as ASTNode).toC()}"
             if (body.contains("return"))
-                "\n\t${body.replace("\n","\n\t").replace("return","${Compiler.scopePop(true,"", "")}return")}\n}"
+                "{\n\t${body.replace("\n","\n\t").replace("return","${Compiler.scopePop(true,"", "")}return")}\n}"
             else
                 "{\n\t${body.replace("\n","\n\t")}${Compiler.scopePop(true)}\n}"
         }
@@ -103,6 +107,10 @@ class ASTUnaryNode : ASTNode {
         ASTUnaryTypes.ELSE_IF -> "${Compiler.grammar[GrammarToken.KEYWORD_ELSE]} ${Compiler.grammar[GrammarToken.KEYWORD_IF]} (${(data as ASTNode).toC()})"
         ASTUnaryTypes.NEW_LINE -> "\n\t${(data as ASTNode).toC().replace("\n","\n\t")}"
         ASTUnaryTypes.NO_PARAM_CALL -> "${(data as ASTNode).toC()}()"
+        ASTUnaryTypes.POST_INCREMENT -> "${(data as ASTNode).toC()}++"
+        ASTUnaryTypes.POST_DECREMENT -> "${(data as ASTNode).toC()}--"
+        ASTUnaryTypes.PRE_INCREMENT -> "++${(data as ASTNode).toC()}"
+        ASTUnaryTypes.PRE_DECREMENT -> "--${(data as ASTNode).toC()}"
         else -> ""
     }
 }

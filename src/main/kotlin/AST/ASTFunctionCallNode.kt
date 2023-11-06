@@ -4,6 +4,7 @@ import compiler.Compiler
 import compiler.DefinedType
 import czechtina.grammar.GrammarToken
 import czechtina.grammar.czechtina
+import virtual.getVirtualFunction
 
 class ASTFunctionCallNode : ASTVariableNode {
     var function:ASTVariableNode
@@ -17,21 +18,9 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
-        if (function.data == "throw")
-            return DefinedType("none")
-        if (function.data == "inC")
-            return DefinedType("none")
-        if (function.data == "predej")
-            return (params!! as ASTVariableNode).getType().toDynamic()
-        if (function.data == "hodnota")
-            return params!!.getType().toDereference()
-        if (function.data == "adresa")
-            return params!!.getType().toPointer()
-        if (function.data == "const")
-            return (params!! as ASTVariableNode).getType().toConst()
-
-        if (function.data == "new" && (params as ASTNode).getType().isStructured)
-            return (params as ASTNode).getType().toDynamic()
+        val virFun = getVirtualFunction(function.data)
+        if (virFun != null)
+            return virFun.getReturnType(params)
 
         if (Compiler.definedFunctions.containsKey(function.toC())) {
             val paramsTypes = mutableListOf<DefinedType>()
@@ -62,7 +51,10 @@ class ASTFunctionCallNode : ASTVariableNode {
     }
 
     override fun toC(sideEffect:Boolean): String {
-
+        val virFun = getVirtualFunction(function.data)
+        if (virFun != null)
+            return virFun.toC(params)
+        /*
         if (function.data == "throw")
             return "printf(${params?.toC()}); exit(1)"
 
@@ -94,7 +86,7 @@ class ASTFunctionCallNode : ASTVariableNode {
             }
             throw Exception("Const can be applied only to variables")
         }
-
+        */
         if (Compiler.definedFunctions.containsKey(function.data)) {
             val paramsTypes = mutableListOf<DefinedType>()
             if (params is ASTListNode)

@@ -16,16 +16,17 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
             if (variant.params.size != params.size){
                 if (variant.enableArgs) {
                     var same = true
-                    for (i in 0 until variant.params.size - 1)
+                    for (i in 0 until variant.params.size - 1) {
                         if (variant.params[i].typeString != params[i].typeString)
                             same = false
+                    }
                     if (same) {
                         variant.timeUsed++
                         return variants.indexOf(variant)
                     }
                 }
             }
-            if (variant.params.zip(params).all { it.first.typeString == it.second.typeString }) {
+            if (variant.params.zip(params).all { it.second.isCastAbleTo(it.first)}) {
                 if (variant.params.zip(params).any{!it.first.isConst && it.second.isConst} ) {
                     val newName = "${name}_v${variants.size}"
                     variants.add(DefinedFunctionVariant(newName, variant.params.zip(params).map { DefinedType(it.first.typeString,it.first.isHeap, it.first.isConst || it.second.isConst) }, defined = false, virtual = true))
@@ -41,6 +42,7 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
             for (i in 0 until variant.params.size) {
                 val old = variant.params[i]
                 if (old.isPointer()){
+
                     if (old.typeString.replace("pointer","dynamic") == params[i].typeString) {
                         retypeMap[old.typeString] = params[i]
                         continue

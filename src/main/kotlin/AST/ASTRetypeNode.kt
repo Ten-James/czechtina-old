@@ -12,7 +12,7 @@ class ASTRetypeNode: ASTNode {
     }
 
     override fun getType(): DefinedType {
-        if (expression.getType().typeString.contains("-") && !this.type.getType().typeString.contains("-"))
+        if (expression.getType().isAddress() && !this.type.getType().isAddress())
             throw Exception("Cannot retype pointer to non-pointer type")
         if (this.type.getType().typeString.contains("array"))
             throw Exception("Cannot retype to array type")

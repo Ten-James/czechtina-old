@@ -304,7 +304,7 @@ object Compiler {
             currentErrors += mapOf(line to mutableListOf(char))
     }
 
-    fun printCurrentErrors() {
+    private fun printCurrentErrors() {
         for (error in currentErrors) {
             println("$red[ERR]$reset: syntax error in line ${error.key} at char ${error.value.joinToString(",")}")
             println(currentCode.split("\n")[error.key - 1])

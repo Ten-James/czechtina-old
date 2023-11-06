@@ -15,7 +15,6 @@ fun LesanaBuilder<ASTNode>.programLine(
     blockCode: NodeID<ASTUnaryNode>,
     endOfLine: NodeID<String>,
     varDefinition: NodeID<ASTNode>,
-    operands: NodeID<String>,
     programLines: NodeID<ASTProgramLines>
 ) {
     // FOR LOOP
@@ -30,7 +29,7 @@ fun LesanaBuilder<ASTNode>.programLine(
 
     line to def(
         varDefinition,
-        operands,
+        re(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_ASSIGN))),
         r_expression,
         endOfLine
     ) { (v, o, l) -> ASTUnaryNode(ASTUnaryTypes.SEMICOLON, ASTOperandNode(o, v, l)) }

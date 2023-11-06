@@ -94,7 +94,7 @@ fun LesanaBuilder<ASTNode>.flowControl(
     line to def(
         re(cAndCzechtinaRegex(listOf(GrammarToken.KEYWORD_ELSE))),
         re(czechtina[GrammarToken.OPERATOR_ITERATE]!!),
-        blockCode
+        line
     ) { (_, _, block) ->
         ASTBinaryNode(
             ASTBinaryTypes.FLOW_CONTROL,
