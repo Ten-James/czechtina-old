@@ -112,7 +112,14 @@ fun czechtinaLesana() = lesana<ASTNode> {
     program to def(program, typeDefinition) { (program, typ) -> program.appendTypeDefinition(typ) }
     program to def(tFunction, program) { (func, program) -> program.appendFunction(func) }
     program to def(program, tFunction) { (program, func) -> program.appendFunction(func) }
-    program to def(main) { ASTProgramNode(listOf(), listOf(), it.v1) }
+    program to def(main) { ASTProgramNode(listOf(), listOf(
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdio"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdlib"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "malloc"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "string"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdbool"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "math"),
+    ), it.v1) }
 
     program to def(program, structure) { (program, structure) -> program.appendStructure(structure) }
     program to def(structure, program) { (structure, program) -> program.appendStructure(structure) }

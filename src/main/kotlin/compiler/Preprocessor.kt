@@ -12,7 +12,7 @@ object Preprocessor {
     }
 
     fun preprocessText (text:String, filePath: String): String {
-        val bylines = text.trim().lines().toTypedArray()
+        val bylines = text.trim().lines().map { it.substringBefore("//") }.toTypedArray()
 
         var blocklevel = 0
         for (i in bylines.indices) {

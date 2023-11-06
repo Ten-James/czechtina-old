@@ -10,7 +10,7 @@ import java.io.File
 import kotlin.system.exitProcess
 
 object Compiler {
-    private const val VERSION = "0.1.6"
+    private const val VERSION = "0.1.6.5"
     private const val red = "\u001b[31m"
     private const val reset = "\u001b[0m"
     var isParsed = false

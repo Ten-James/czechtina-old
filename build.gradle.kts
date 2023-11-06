@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "cz.tenjames"
-version = "1.0-SNAPSHOT"
+version = "0.1.6"
 
 repositories {
     mavenCentral()

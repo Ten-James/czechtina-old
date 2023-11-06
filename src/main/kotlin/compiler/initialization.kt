@@ -7,14 +7,16 @@ fun initDefinedFunction() = mutableMapOf(
         listOf(DefinedFunctionVariant("printf", listOf(DefinedType("string")), enableArgs = true)),
         virtual = true
     ),
+    "println" to DefinedFunction(
+        "println",
+        DefinedType("void"),
+        listOf(),
+        virtual = true
+    ),
     "print" to DefinedFunction(
         "print",
         DefinedType("void"),
-        listOf(
-            DefinedFunctionVariant("print", listOf(DefinedType("char"))),
-            DefinedFunctionVariant("print", listOf(DefinedType("bool"))),
-            DefinedFunctionVariant("print", listOf(DefinedType("int"))),
-            ),
+        listOf(),
         virtual = true
     ),
     "scanf" to DefinedFunction(

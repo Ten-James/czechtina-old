@@ -1,6 +1,7 @@
 package virtual
 
 import AST.ASTNode
+import AST.ASTListNode
 import AST.ASTVariableNode
 import compiler.Compiler
 import compiler.DefinedType
@@ -61,13 +62,32 @@ class ConstFunction: VirtualFunction {
 
     }
 }
+class PrintfFunction: VirtualFunction {
+    override val name = "printf"
+    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun toC(params: ASTNode?) = "printf(${params!!.toC()})"
+}
 
 class PrintFunction: VirtualFunction {
     override val name = "print"
     override fun getReturnType(params: ASTNode?) = DefinedType("none")
     override fun toC(params: ASTNode?) = when {
+        params is ASTListNode -> (params as ASTListNode).nodes.joinToString(";\n") {otherToC(it)} 
+        else -> otherToC(params)
+    }
+    fun otherToC(params: ASTNode?) = when {
+        params!!.getType().typeString == "int" -> "printf(\"%d\",${params.toC()})"
+        params!!.getType().typeString == "bool" -> "(${params.toC()}? puts(\"true\"): puts(\"false\"))"
+        params!!.getType().typeString == "char" -> "printf(\"%c\",${params.toC()})"
+        params!!.getType().typeString == "string" -> "puts(${params.toC()})"
         else -> "/*${params.toC()}*/"
     }
+}
+
+class PrintlnFunction: VirtualFunction {
+    override val name = "println"
+    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun toC(params: ASTNode?) = PrintFunction().toC(params)+";\nputs(\"\\n\")"
 }
 
 
@@ -85,7 +105,9 @@ val AllVirtualFunction = listOf(
     PredejFunction(),
     HodnotaFunction(),
     AdresaFunction(),
-    ThrowFunction()
+    ThrowFunction(),
+    PrintFunction(),
+    PrintlnFunction()
 )
 
 fun getVirtualFunction(name: String): VirtualFunction? {
