@@ -17,8 +17,14 @@ interface VirtualFunction {
 
 class NewFunction : VirtualFunction {
     override val name = "new"
-    override fun getReturnType(params: ASTNode?) = params!!.getType().toDynamic()
-    override fun toC(params: ASTNode?) = "malloc(${params!!.toC()})"
+    override fun getReturnType(params: ASTNode?) = when {
+        params!!.getType().isStructured -> params.getType().toDynamic()
+        else -> DefinedType("dynamic-void",true, false, false)
+    }
+    override fun toC(params: ASTNode?) = when {
+        params!!.getType().isStructured -> "(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
+        else -> "malloc(${params.toC()})"
+    }
 }
 
 class InCFuntion : VirtualFunction {
@@ -40,7 +46,7 @@ class PredejFunction : VirtualFunction {
 class HodnotaFunction : VirtualFunction {
     override val name = czechtina[GrammarToken.TYPE_VALUE]!!
     override fun getReturnType(params: ASTNode?) = params!!.getType().toDereference()
-    override fun toC(params: ASTNode?) = "*${params!!.toC()}"
+    override fun toC(params: ASTNode?) = "*(${params!!.toC()})"
 }
 
 class AdresaFunction : VirtualFunction {
@@ -56,7 +62,7 @@ class ConstFunction: VirtualFunction {
         if (params is ASTVariableNode){
             if (!params.getType().isPointer())
                 throw Exception("Const can be applied only to objects")
-        return params!!.toC()
+        return params.toC()
     }
         throw Exception("Const can be applied only to variables")
 
@@ -77,9 +83,9 @@ class PrintFunction: VirtualFunction {
     }
     fun otherToC(params: ASTNode?) = when {
         params!!.getType().typeString == "int" -> "printf(\"%d\",${params.toC()})"
-        params!!.getType().typeString == "bool" -> "(${params.toC()}? puts(\"true\"): puts(\"false\"))"
-        params!!.getType().typeString == "char" -> "printf(\"%c\",${params.toC()})"
-        params!!.getType().typeString == "string" -> "puts(${params.toC()})"
+        params.getType().typeString == "bool" -> "(${params.toC()}? puts(\"true\"): puts(\"false\"))"
+        params.getType().typeString == "char" -> "printf(\"%c\",${params.toC()})"
+        params.getType().typeString == "string" -> "puts(${params.toC()})"
         else -> "/*${params.toC()}*/"
     }
 }

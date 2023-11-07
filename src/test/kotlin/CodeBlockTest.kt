@@ -4,18 +4,22 @@ import cz.j_jzk.klang.input.InputFactory
 import czechtina.lesana.czechtinaLesana
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import utils.ArgsProvider
 
 class CodeBlockTest {
 
     @Test
     fun testHelloWorldCompilation() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 printf "Hello world!"
             }
         """.trimIndent()
         val cCode = Compiler.compileText(code)
-        val excepted = """int main() {
+        val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
+            int main() {
 	     printf("Hello world!");
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
@@ -23,6 +27,7 @@ class CodeBlockTest {
 
     @Test
     fun testBasicNumericOperations() {
+        ArgsProvider.debug = true
         val code = """
             timesTwo x:int -> x * 2
             main {
@@ -31,6 +36,7 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int timesTwo(int x);
             
             int timesTwo(int x) {
@@ -45,6 +51,7 @@ class CodeBlockTest {
 
     @Test
     fun testInputOutputForStaticVariable() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 x:int
@@ -54,6 +61,7 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
             int x;
             scanf("%d",&x);
@@ -65,6 +73,7 @@ class CodeBlockTest {
 
     @Test
     fun testCreatingPointerToStaticVariable() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 x:int
@@ -74,6 +83,7 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
             int x;
             int *p = &x;
@@ -84,6 +94,7 @@ class CodeBlockTest {
 
     @Test
     fun testCreatingHardCodedStaticArray() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 x:pole<int,3> = [1,2,3]
@@ -91,6 +102,7 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
             int x[3] = {1,2,3};
         }""".trimIndent()
@@ -99,6 +111,7 @@ class CodeBlockTest {
 
     @Test
     fun testCreatingDeducedStaticArray() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 x = [1,2,3]
@@ -106,6 +119,7 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
             int x[3] = {1,2,3};
         }""".trimIndent()
@@ -114,6 +128,7 @@ class CodeBlockTest {
 
     @Test
     fun testPointerArithmetic() {
+        ArgsProvider.debug = true
         val code = """
             main {
                 x:pointer<int>
@@ -123,6 +138,8 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
+            
             int main() {
             int *x;
             int *y = x + 3;
@@ -133,15 +150,17 @@ class CodeBlockTest {
 
     @Test
     fun testMorePointersArithmetic() {
+        ArgsProvider.debug = true
         val code = """
             main {
-                x = new 5 as pointer<znak>
+                x = (new 5) as pointer<znak>
                 z = x[3]
                 x[3] = 5
             }
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() { char *x = (char*)(malloc(5)); char z = x[3]; x[3] = 5; if(x)free(x); }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
@@ -149,8 +168,8 @@ class CodeBlockTest {
 
     @Test
     fun testHistogramProgram() {
+        ArgsProvider.debug = true
         val code = """
-            pripoj c stdio
             zpracuj histo:ukazatel<int>,minimum:int { void
                 c:cele = 0
                 scanf "%d", (adresa c)
@@ -182,15 +201,15 @@ class CodeBlockTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
-#include "stdio.h"
-
+#include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
+            
 void zpracuj(int *histo, int minimum); 
 
 void zpracuj(int *histo, int minimum) {
 	int c = 0;
 	scanf("%d",&c);
 	for  (int i = 0; i < 9; i = i + 1) {
-		if (c == i + minimum) 
+		if (c == i + minimum) {
 			histo[i] = histo[i] + 1;
 			return ;
 		}
@@ -202,7 +221,7 @@ int main() {
 	char t;
 	int *histo = {0,0,0,0,0,0,0,0,0,0};
 	scanf("%c",&t);
-	if ('v' != t && t != 'h') 
+	if ('v' != t && t != 'h') {
 		printf("Neplatny mod vykresleni\n");
 		return 1;
 	}

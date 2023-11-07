@@ -10,6 +10,7 @@ import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import utils.ArgsProvider
 import utils.Filer
+import utils.Printer
 import utils.RemoveFileExtension
 import java.io.BufferedReader
 import java.io.File
@@ -40,7 +41,7 @@ fun main(args: Array<String>) {
     }
 
     //create file with name of input file in current directory
-    val file = args.firstOrNull() ?: return println("[FAT]: no input file")
+    val file = args.firstOrNull() ?: return Printer.fatal("No input file specified")
 
     var text = ""
 
@@ -48,14 +49,14 @@ fun main(args: Array<String>) {
         text= Filer.readFromFile(file)
     }
     catch (e: Exception) {
-        return println("[FAT]: file can't be read")
+        return Printer.fatal("Cannot read file $file")
     }
 
     try {
         Compiler.compile(text,file)
     }
     catch (e: Exception) {
-        println("[ERR]: ${e.message}")
+        Printer.fatal("Cannot compile file $file")
         if (ArgsProvider.debug)
             e.printStackTrace()
         return

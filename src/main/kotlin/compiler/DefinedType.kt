@@ -46,8 +46,10 @@ class DefinedType {
         return changeTypeString("none")
     }
     fun toDynamic(): DefinedType {
-        if (!isHeap && Compiler.isParsed)
+        if (!isHeap && Compiler.isParsed) {
+            println(this)
             throw Exception("Cannot convert non-heap type to dynamic")
+        }
         return changeTypeString(typeString.replace("pointer","dynamic"))
     }
 

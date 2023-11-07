@@ -4,10 +4,12 @@ import cz.j_jzk.klang.input.InputFactory
 import czechtina.lesana.czechtinaLesana
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import utils.ArgsProvider
 
 class StructureTest {
     @Test
     fun testStructures() {
+        ArgsProvider.debug = true
         val code = """
             struct DATA {
                 x:int
@@ -22,6 +24,7 @@ class StructureTest {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             typedef struct { int x; DATA *y; } DATA; 
             int main() { 
                 DATA *b = (DATA *)malloc(sizeof(DATA));
@@ -35,6 +38,7 @@ class StructureTest {
 
     @Test
     fun testStructArray() {
+        ArgsProvider.debug = true
         val code = """
             struct DATA {
     data:int
@@ -58,6 +62,7 @@ main {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             typedef struct {
 	int data;
 	DATA *next;
@@ -86,6 +91,7 @@ int main() {
 
     @Test
     fun testStructAsParameter() {
+        ArgsProvider.debug = true
         val code = """
 struct DATA {
     data:int
@@ -104,6 +110,7 @@ main {
         """.trimIndent()
         val cCode = Compiler.compileText(code)
         val excepted = """
+            #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
 typedef struct {
 	int data;
 	DATA *next;

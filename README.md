@@ -1,6 +1,6 @@
 # Czechtina
 
-Current version: 0.1.6
+Current version: 0.1.6.5
 
 Czechtina is programming language based on C and czech language.
 Czechtina should be faster to write than c and with additional features, easier to maintain.

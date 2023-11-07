@@ -6,13 +6,12 @@ import czechtina.grammar.*
 import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import utils.ArgsProvider
+import utils.Printer
 import java.io.File
 import kotlin.system.exitProcess
 
 object Compiler {
     private const val VERSION = "0.1.6.5"
-    private const val red = "\u001b[31m"
-    private const val reset = "\u001b[0m"
     var isParsed = false
     private var compilingTo = "C"
     var definedTypes = mutableMapOf<String, DefinedType>()
@@ -56,6 +55,9 @@ object Compiler {
     }
 
     fun setNewVariableType(varName: String, type: DefinedType) {
+        if (varName == "")
+            return
+        Printer.info("Adding variable '$varName' with type $type")
         if (variables[variables.size - 1].containsKey(varName)) {
             setVariableType(varName, type)
             return
@@ -66,6 +68,7 @@ object Compiler {
     fun setVariableType(varName: String, type: DefinedType) {
         for (variable in variables.reversed()){
             if (variable.containsKey(varName)) {
+                Printer.info("Setting variable '$varName' with type $type")
                 variable[varName] = type
                 return
             }
@@ -227,7 +230,6 @@ object Compiler {
                             continue
                         retypeMap += mapOf(old.getTemplate() to new)
                     }
-                    println(retypeMap)
                     functionAST.name = variant.translatedName
                     functionAST.retype(retypeMap)
 
@@ -271,7 +273,7 @@ object Compiler {
             variables.add(mutableMapOf())
             cCode = tree.toC()
         } catch (e:Exception) {
-            println(variables)
+            Printer.warning("Variables: $variables")
             throw e
         }
         cCode = addFunctionVariants(cCode, tree)
@@ -304,21 +306,10 @@ object Compiler {
             currentErrors += mapOf(line to mutableListOf(char))
     }
 
-    private fun printCurrentErrors() {
-        for (error in currentErrors) {
-            println("$red[ERR]$reset: syntax error in line ${error.key} at char ${error.value.joinToString(",")}")
-            println(currentCode.split("\n")[error.key - 1])
-            val max = error.value.max()!!
-            for (i in 0..max)
-                if (error.value.contains(i))
-                    print("$red^$reset")
-                else
-                    print(" ")
-            println()
-        }
-    }
+
 
     fun compile(text: String, path: String) {
+        Printer.info("Started compiling process -> ${path}")
         val code = Preprocessor.preprocessText(text, path)
         val withoutExtension = path.substring(0, path.length - 3)
 
@@ -328,15 +319,16 @@ object Compiler {
             currentCode = code
             tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
         } catch (e:Exception) {
-            printCurrentErrors()
-            println("$red[FATAL]: There is syntax error in your code$reset")
-            println("$red[FATAL]: ${e.message}$reset")
+            Printer.printCurrentErrors(currentErrors)
+            Printer.fatal("There is syntax error in your code")
+            Printer.fatal(e.message!!)
             if (ArgsProvider.debug)
                 e.printStackTrace()
             exitProcess(1)
         }
-
+        Printer.info("File ${path} has been parsed")
         isParsed = true
+
 
         if (ArgsProvider.showTree) {
             println(tree.toString())
@@ -350,7 +342,7 @@ object Compiler {
         try {
             cCode = tree.toC()
         } catch (e:Exception) {
-            println("$red[FATAL]: ${e.message}$reset")
+            Printer.fatal(e.message!!)
             if (ArgsProvider.debug)
                 e.printStackTrace()
             exitProcess(1)
@@ -380,5 +372,6 @@ object Compiler {
             cCode = "/*\n\t${text.replace("\n", "\n\t")}\n*/\n$cCode"
         }
         File("$buildPath$withoutExtension.c").writeText(cCode)
+        Printer.success("File was compiled into $withoutExtension.c")
     }
 }
