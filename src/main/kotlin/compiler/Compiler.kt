@@ -312,7 +312,7 @@ object Compiler {
         Printer.info("Started compiling process -> ${path}")
         val code = Preprocessor.preprocessText(text, path)
         val withoutExtension = path.substring(0, path.length - 3)
-
+        Printer.info(code)
         isParsed = false
         val tree: ASTProgramNode?
         try {

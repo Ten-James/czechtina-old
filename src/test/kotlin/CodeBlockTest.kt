@@ -186,7 +186,7 @@ class CodeBlockTest {
                 histo:pointer<int> = [0,0,0,0,0,0,0,0,0,0]
                 scanf "%c", (adresa t)
                 if 'v' neni presne t neni presne 'h' {
-                    printf "Neplatny mod vykresleni\\n"
+                    printf "Neplatny mod vykresleni\n"
                     vrat 1
                 }
                 n:int

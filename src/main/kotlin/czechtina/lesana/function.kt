@@ -161,6 +161,20 @@ fun LesanaBuilder<ASTNode>.blockFunction(
     }
     tFunction to def(
         re("[a-zA-Z][a-zA-Z0-9]*"),
+        re("{"),
+        types,
+        programLines,
+        re("}")
+    )
+    { (funName, _, retType, lines, _) ->
+        ASTFunctionNode(
+            retType, funName,
+            listOf(), ASTUnaryNode(ASTUnaryTypes.CURLY_UNSCOPE, lines)
+        )
+    }
+
+    tFunction to def(
+        re("[a-zA-Z][a-zA-Z0-9]*"),
         listableDefinition,
         re("{"),
         types,

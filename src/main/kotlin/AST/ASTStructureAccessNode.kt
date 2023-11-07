@@ -2,6 +2,7 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
+import utils.Printer
 
 class ASTStructureAccessNode: ASTVariableNode {
     var struct:ASTVariableNode
@@ -13,7 +14,27 @@ class ASTStructureAccessNode: ASTVariableNode {
     }
 
     override fun getType(): DefinedType {
-        return Compiler.definedStructures[struct.getType().getPrimitive()]?.getPropType(prop.data) ?: DefinedType("none")
+        val struct = Compiler.definedStructures[struct.getType().getPrimitive()]
+            ?: return DefinedType("none")
+
+        if (struct.functions.contains(prop.data))
+            return Compiler.definedFunctions["${struct.name}_${prop.data}"]!!.getReturnType(0)
+
+        return struct.getPropType(prop.data)
+    }
+
+    fun getFunctionName(): String {
+        val struct = Compiler.definedStructures[struct.getType().getPrimitive()]
+            ?: throw Exception("Cant access to non struct type")
+
+        Printer.info("struct: $struct")
+
+        if (struct.functions.contains("${struct.name}_${prop.data}"))
+            return "${struct.name}_${prop.data}"
+
+        Printer.err("Cant Find Function ${prop.data} in ${struct.name}")
+
+        throw Exception("Cant access to non function type")
     }
 
     override fun copy(): ASTStructureAccessNode {
@@ -35,7 +56,11 @@ class ASTStructureAccessNode: ASTVariableNode {
 
     override fun toC(sideEffect:Boolean): String {
         if (!struct.getType().isStructured)
-            throw Exception("Cant access to non struct type")
+            throw Exception("Cant access to non struct type ${struct.getType()}")
+
+        if (Compiler.definedStructures[struct.getType().getPrimitive()]!!.functions.contains("${struct.getType().getPrimitive()}_${prop.data}"))
+            return "${struct.getType().getPrimitive()}_${prop.data}(${struct.toC()})"
+
         return "${struct.toC(false)}->${prop.toC(false)}"
     }
 }

@@ -5,6 +5,8 @@
 - fixing bugs
 - added +=, -=, *=, /=
 - preincrement and postincrement (++, --)
+- better printer for cli
+- better definition for virtual functions
 
 
 ### v 0.1.6

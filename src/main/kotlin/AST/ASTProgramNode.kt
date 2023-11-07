@@ -34,6 +34,7 @@ class ASTProgramNode : ASTNode {
 
     fun appendStructure(struct: ASTStructureNode): ASTProgramNode {
         structures += struct
+        this.functions += struct.functions
         return this
     }
 

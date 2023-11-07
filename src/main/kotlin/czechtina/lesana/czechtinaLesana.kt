@@ -41,6 +41,11 @@ fun czechtinaLesana() = lesana<ASTNode> {
         endOfLine
     ) {it.v1.addProperty(it.v2 as ASTVarDefinitionNode)}
 
+    structHead to def (
+        structHead,
+        tFunction,
+    ) {it.v1.addFunction(it.v2)}
+
     structure to def (
         structHead,
         re("}")

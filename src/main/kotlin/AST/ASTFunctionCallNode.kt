@@ -4,7 +4,7 @@ import compiler.Compiler
 import compiler.DefinedType
 import czechtina.grammar.GrammarToken
 import czechtina.grammar.czechtina
-import virtual.getVirtualFunction
+import compiler.virtual.getVirtualFunction
 
 class ASTFunctionCallNode : ASTVariableNode {
     var function:ASTVariableNode
@@ -22,17 +22,27 @@ class ASTFunctionCallNode : ASTVariableNode {
         if (virFun != null)
             return virFun.getReturnType(params)
 
-        if (Compiler.definedFunctions.containsKey(function.toC())) {
+        var funName = function.data
+
+        if (function is ASTStructureAccessNode)
+            funName = (function as ASTStructureAccessNode).getFunctionName()
+
+        if (Compiler.definedFunctions.containsKey(funName)) {
             val paramsTypes = mutableListOf<DefinedType>()
+
+            if (function is ASTStructureAccessNode)
+                paramsTypes.add((function as ASTStructureAccessNode).struct.getType())
+
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
             else if (params is ASTNode)
                 paramsTypes.add((params as ASTNode).getType())
 
-            val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
+
+            val variantIndex = Compiler.definedFunctions[funName]!!.validateParams(paramsTypes)
             if (variantIndex != -1)
-                return Compiler.definedFunctions[function.toC()]!!.getReturnType(variantIndex)
+                return Compiler.definedFunctions[funName]!!.getReturnType(variantIndex)
         }
         return DefinedType("none")
     }
@@ -87,23 +97,31 @@ class ASTFunctionCallNode : ASTVariableNode {
             throw Exception("Const can be applied only to variables")
         }
         */
-        if (Compiler.definedFunctions.containsKey(function.data)) {
+
+        var funName = function.data
+
+        if (function is ASTStructureAccessNode)
+            funName = (function as ASTStructureAccessNode).getFunctionName()
+
+        if (Compiler.definedFunctions.containsKey(funName)) {
             val paramsTypes = mutableListOf<DefinedType>()
+            if (function is ASTStructureAccessNode)
+                paramsTypes.add((function as ASTStructureAccessNode).struct.getType())
             if (params is ASTListNode)
                 for (param in (params as ASTListNode).nodes)
                     paramsTypes.add(param.getType())
             else if (params is ASTNode)
                 paramsTypes.add((params as ASTNode).getType())
 
-            val variantIndex = Compiler.definedFunctions[function.toC()]!!.validateParams(paramsTypes)
+            val variantIndex = Compiler.definedFunctions[funName]!!.validateParams(paramsTypes)
             if (variantIndex != -1) {
-                Compiler.definedFunctions[function.toC()]!!.variants[variantIndex].timeUsed++
-                return "${Compiler.definedFunctions[function.toC()]!!.variants[variantIndex].translatedName}(${params?.toC()})"
+                Compiler.definedFunctions[funName]!!.variants[variantIndex].timeUsed++
+                return "${Compiler.definedFunctions[funName]!!.variants[variantIndex].translatedName}(${params?.toC()})"
             }
-            throw Exception("Function ${function.toC()} with params ${paramsTypes.joinToString(",")} not found")
+            throw Exception("Function ${funName} with params ${paramsTypes.joinToString(",")} not found")
         }
-        if (Compiler.undefinedFunction.contains(function.toC(false)))
-            return "${function.toC(false)}(${params?.toC()})"
-        throw Exception("Function ${function.toC()} not found")
+        if (Compiler.undefinedFunction.contains(funName))
+            return "${funName}(${params?.toC()})"
+        throw Exception("Function ${funName} not found")
     }
 }

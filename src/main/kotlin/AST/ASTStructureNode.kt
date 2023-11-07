@@ -8,6 +8,7 @@ import java.util.*
 class ASTStructureNode: ASTNode {
     val name: String
     val properties : MutableList<ASTVarDefinitionNode>
+    val functions = mutableListOf<ASTFunctionNode>()
 
     constructor(name: String, props: List<ASTVarDefinitionNode>) : super(DefinedType("pointer-$name", isStructured = true, isHeap = true)) {
         if (name.uppercase(Locale.getDefault()) != name)
@@ -28,6 +29,16 @@ class ASTStructureNode: ASTNode {
     fun addProperty(prop: ASTVarDefinitionNode):ASTStructureNode {
         Compiler.definedStructures[name]!!.addPropType(prop.variable.data, prop.getType())
         properties.add(prop)
+        return this
+    }
+
+    fun addFunction(func: ASTFunctionNode):ASTStructureNode {
+        func.name = "${name}_${func.name}"
+        val thisParam =  ASTVarDefinitionNode(ASTVariableNode("this", DefinedType("none")), ASTUnaryNode(ASTUnaryTypes.TYPE, "", DefinedType("pointer-$name", isStructured = true, isHeap = true)))
+        func.parameters = listOf(thisParam) + func.parameters
+
+        Compiler.definedStructures[name]!!.addFunction(func.name!!)
+        functions.add(func)
         return this
     }
 

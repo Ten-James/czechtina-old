@@ -1,4 +1,4 @@
-package virtual
+package compiler.virtual
 
 import AST.ASTNode
 import AST.ASTListNode
@@ -112,6 +112,7 @@ val AllVirtualFunction = listOf(
     HodnotaFunction(),
     AdresaFunction(),
     ThrowFunction(),
+    PrintfFunction(),
     PrintFunction(),
     PrintlnFunction()
 )

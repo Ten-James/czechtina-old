@@ -83,7 +83,7 @@ val C = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_BREAK to "break",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "typedef",
     GrammarToken.KEYWORD_CONTINUE to "continue",
-    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9]*",
+    GrammarToken.VARIABLE to "[a-z][a-zA-Z0-9_]*",
 )
 val CZ = mapOf<GrammarToken,String>(
     GrammarToken.TYPE_VOID to "void",
@@ -115,5 +115,5 @@ val CZ = mapOf<GrammarToken,String>(
     GrammarToken.KEYWORD_BREAK to "veget",
     GrammarToken.KEYWORD_TYPE_DEFINITION to "zadejtyp",
     GrammarToken.KEYWORD_CONTINUE to "pokracuj",
-    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9]*",
+    GrammarToken.VARIABLE to "[a-zA-Z][a-zA-Z0-9_]*",
 )
