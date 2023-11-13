@@ -33,8 +33,9 @@ class ASTStructureNode: ASTNode {
     }
 
     fun addFunction(func: ASTFunctionNode):ASTStructureNode {
+        val dest = func.name == "destruct"
         func.name = "${name}_${func.name}"
-        val thisParam =  ASTVarDefinitionNode(ASTVariableNode("this", DefinedType("none")), ASTUnaryNode(ASTUnaryTypes.TYPE, "", DefinedType("pointer-$name", isStructured = true, isHeap = true)))
+        val thisParam =  ASTVarDefinitionNode(ASTVariableNode("this", DefinedType("none")), ASTUnaryNode(ASTUnaryTypes.TYPE, "", DefinedType("${if (dest) "dynamic" else "pointer" }-$name", isStructured = true, isHeap = true)))
         func.parameters = listOf(thisParam) + func.parameters
 
         Compiler.definedStructures[name]!!.addFunction(func.name!!)

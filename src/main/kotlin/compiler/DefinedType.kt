@@ -78,8 +78,12 @@ class DefinedType {
     fun getPrimitive(): String {
         if (isTemplate())
             return getTemplate()
-        if (typeString.contains("-"))
-            return typeString.split("-")[1]
+        if (typeString.contains("-")) {
+            val arr = typeString.split("-")
+            for (i in arr)
+                if (i != "pointer" && i != "dynamic" && i != "array")
+                    return i
+        }
         return typeString
     }
 
