@@ -7,6 +7,8 @@
 - preincrement and postincrement (++, --)
 - better printer for cli
 - better definition for virtual functions
+- methods for structures
+- easier alocating for arrays
 
 
 ### v 0.1.6

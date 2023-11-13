@@ -1,8 +1,6 @@
 package compiler.virtual
 
-import AST.ASTNode
-import AST.ASTListNode
-import AST.ASTVariableNode
+import AST.*
 import compiler.Compiler
 import compiler.DefinedType
 import czechtina.grammar.GrammarToken
@@ -17,11 +15,26 @@ interface VirtualFunction {
 
 class NewFunction : VirtualFunction {
     override val name = "new"
-    override fun getReturnType(params: ASTNode?) = when {
+
+    private fun getReturnTypeInternal (params: ASTNode?) = when {
+        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-${params.getType().getPrimitive()}", true, false, false)
         params!!.getType().isStructured -> params.getType().toDynamic()
         else -> DefinedType("dynamic-void",true, false, false)
     }
-    override fun toC(params: ASTNode?) = when {
+
+    override fun getReturnType(params: ASTNode?) = when {
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-${params.nodes[0].getType().getPrimitive()}", true, false, false)
+        else -> getReturnTypeInternal(params)
+    }
+
+
+    override fun toC(params: ASTNode?): String = when {
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> "(${params.nodes[0].getType().getPrimitive()} *)malloc(${params.nodes[1].toC()} * sizeof(${params.nodes[0].getType().getPrimitive()}))"
+        else -> toCInternal(params)
+    }
+
+    private fun toCInternal(params: ASTNode?) = when {
+        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE ->"(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
         params!!.getType().isStructured -> "(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
         else -> "malloc(${params.toC()})"
     }

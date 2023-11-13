@@ -20,7 +20,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     var para4 = NodeID<ASTNode>("paragraph")
     var para5 = NodeID<ASTNode>("paragraph")
     val sentence = NodeID<ASTNode>("sentence")
-    val listexp3 = include(listAble(listOf(exp3, elevatedVariable)))
+    val listexp3 = include(listAble(listOf(exp3, elevatedVariable, types)))
 
 
     elevatedVariable to def(re("\\+\\+"), variables) { (_, e) -> ASTUnaryNode(ASTUnaryTypes.PRE_INCREMENT, e, e.getType()) }
