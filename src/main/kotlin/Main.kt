@@ -1,19 +1,6 @@
-import AST.*
 import compiler.Compiler
-import compiler.Preprocessor
-import cz.j_jzk.klang.input.InputFactory
-import cz.j_jzk.klang.lesana.lesana
-import cz.j_jzk.klang.parse.NodeID
-import cz.j_jzk.klang.prales.useful.list
-import czechtina.*
-import czechtina.header.createCzechtinaDefineFile
-import czechtina.lesana.czechtinaLesana
-import utils.ArgsProvider
-import utils.Filer
-import utils.Printer
-import utils.RemoveFileExtension
+import utils.*
 import java.io.BufferedReader
-import java.io.File
 import java.io.InputStreamReader
 
 fun main(args: Array<String>) {

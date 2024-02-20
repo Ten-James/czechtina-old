@@ -27,6 +27,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
     val structHead = NodeID<ASTStructureNode>("structure header")
     val structure = NodeID<ASTStructureNode>("structure")
 
+
+
     variableDefinition(varDefinition, variables, types)
 
     structHead to def(
@@ -84,6 +86,9 @@ fun czechtinaLesana() = lesana<ASTNode> {
 
     programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, programLines)
 
+
+    program to def(re("package"), re("[a-zA-Z][a-zA-Z0-9]*"), konec) { ASTPackageNode(it.v2) }
+
     // MAIN FUNCTION
     main to def(
         re("main"), blockCode
@@ -109,6 +114,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
             it.v2
         )
     }
+
+
     variables to def(re("[a-zA-Z][a-zA-Z0-9]*")) { ASTVariableNode(it.v1, DefinedType("none")) }
 
 
@@ -125,6 +132,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
         ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdbool"),
         ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "math"),
     ), it.v1) }
+
 
     program to def(program, structure) { (program, structure) -> program.appendStructure(structure) }
     program to def(structure, program) { (structure, program) -> program.appendStructure(structure) }

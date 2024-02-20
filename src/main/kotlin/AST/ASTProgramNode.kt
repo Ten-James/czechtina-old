@@ -2,7 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-class ASTProgramNode(
+open class ASTProgramNode(
     var functions: List<ASTFunctionNode>,
     var imports: List<ASTUnaryNode>,
     var main: ASTFunctionNode?
