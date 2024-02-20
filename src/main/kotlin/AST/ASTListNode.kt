@@ -2,12 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-class ASTListNode : ASTNode {
-    val nodes: List<ASTNode>
-
-    constructor(nodes: List<ASTNode>) : super(DefinedType("")) {
-        this.nodes = nodes
-    }
+class ASTListNode(val nodes: List<ASTNode>) : ASTNode(DefinedType("")) {
 
     override fun getType(): DefinedType {
         val types = nodes.map { it.getType() }

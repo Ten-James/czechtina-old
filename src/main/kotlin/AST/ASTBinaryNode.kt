@@ -10,18 +10,9 @@ enum class ASTBinaryTypes {
     TYPE_DEFINITION,
 }
 
-open class ASTBinaryNode : ASTNode {
-    var type:ASTBinaryTypes
-    var left:ASTNode
-    var right:ASTNode
+open class ASTBinaryNode(var type: ASTBinaryTypes, var left: ASTNode, var right: ASTNode) :
+    ASTNode(DefinedType("none")) {
 
-
-
-    constructor(type:ASTBinaryTypes,left:ASTNode, right:ASTNode) : super(DefinedType("none")) {
-        this.type = type
-        this.left = left
-        this.right = right
-    }
 
     override fun retype(map: Map<String, DefinedType>) {
         left.retype(map)

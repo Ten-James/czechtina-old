@@ -3,12 +3,11 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-class ASTStaticArrayDefinitionNode : ASTVarDefinitionNode {
-    var size: String
+class ASTStaticArrayDefinitionNode(type: ASTNode, variable: ASTVariableNode, var size: String) :
+    ASTVarDefinitionNode(variable, type) {
 
-    constructor(type: ASTNode, variable: ASTVariableNode, size: String): super( variable,type) {
+    init {
         variable.addType(type.getType().toArray(size))
-        this.size = size
     }
 
     override fun toString(): String {

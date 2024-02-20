@@ -31,14 +31,10 @@ enum class ASTUnaryTypes {
     PRE_INCREMENT,
     PRE_DECREMENT,
 }
-class ASTUnaryNode : ASTNode {
-    var type:ASTUnaryTypes? = null
-    var data:Any? = null
-
-    constructor(type:ASTUnaryTypes, data:Any, expressionType: DefinedType = DefinedType("none")) : super(expressionType) {
-        this.type = type
-        this.data = data
-    }
+class ASTUnaryNode(type: ASTUnaryTypes, data: Any, expressionType: DefinedType = DefinedType("none")) :
+    ASTNode(expressionType) {
+    var type:ASTUnaryTypes? = type
+    var data:Any? = data
 
     override fun getType(): DefinedType {
         if (type == ASTUnaryTypes.TYPE)

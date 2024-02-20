@@ -17,13 +17,13 @@ class NewFunction : VirtualFunction {
     override val name = "new"
 
     private fun getReturnTypeInternal (params: ASTNode?) = when {
-        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-${params.getType().getPrimitive()}", true, false, false)
+        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE -> params.getType().toDynamic().toHeap();
         params!!.getType().isStructured -> params.getType().toDynamic()
         else -> DefinedType("dynamic-void",true, false, false)
     }
 
     override fun getReturnType(params: ASTNode?) = when {
-        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-pointer-${params.nodes[0].getType().getPrimitive()}", true, false, true)
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-pointer-${params.nodes[0].getType().getPrimitive()}", true, false, false)
         else -> getReturnTypeInternal(params)
     }
 
@@ -38,6 +38,7 @@ class NewFunction : VirtualFunction {
         params!!.getType().isStructured -> "(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
         else -> "malloc(${params.toC()})"
     }
+
 }
 
 class InCFuntion : VirtualFunction {

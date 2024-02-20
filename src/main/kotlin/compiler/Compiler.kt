@@ -372,6 +372,6 @@ object Compiler {
             cCode = "/*\n\t${text.replace("\n", "\n\t")}\n*/\n$cCode"
         }
         File("$buildPath$withoutExtension.c").writeText(cCode)
-        Printer.success("File was compiled into $withoutExtension.c")
+        Printer.success("File was compiled into $buildPath$withoutExtension.c")
     }
 }

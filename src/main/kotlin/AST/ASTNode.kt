@@ -2,7 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-open abstract class ASTNode(var expType: DefinedType) {
+ abstract class ASTNode(var expType: DefinedType) {
 
     abstract fun toC(sideEffect:Boolean = true): String
 

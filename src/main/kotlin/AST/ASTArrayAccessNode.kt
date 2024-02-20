@@ -2,14 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-class ASTArrayAccessNode: ASTVariableNode {
-    var array:ASTVariableNode
-    var index:ASTNode
-
-    constructor(array:ASTVariableNode, index:ASTNode): super("", DefinedType("")) {
-        this.array = array
-        this.index = index
-    }
+class ASTArrayAccessNode(var array: ASTVariableNode, var index: ASTNode) : ASTVariableNode("", DefinedType("")) {
 
     override fun getType(): DefinedType {
         return array.getType().toDereference()

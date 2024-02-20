@@ -64,44 +64,17 @@ class ASTFunctionCallNode : ASTVariableNode {
         val virFun = getVirtualFunction(function.data)
         if (virFun != null)
             return virFun.toC(params)
-        /*
-        if (function.data == "throw")
-            return "printf(${params?.toC()}); exit(1)"
-
-        if (function.data == "inC")
-            return "${(params as ASTUnaryNode).data}"
-
-        if (function.data.equals(czechtina[GrammarToken.TYPE_ADDRESS]!!))
-            return "&${params?.toC()}"
-
-        if (function.data.equals(czechtina[GrammarToken.TYPE_VALUE]!!))
-            return "*(${params?.toC()})"
-
-        if (function.data.equals("new")){
-            if ((params as ASTNode).getType().isStructured) {
-                return "(${(params as ASTNode).getType().toC()})malloc(sizeof(${(params as ASTNode).getType().getPrimitive()}))"
-            }
-        }
-
-        if (function.data.equals("predej")) {
-            val body = "${params?.toC()}"
-            Compiler.variables[Compiler.variables.size-1][params?.toC()!!]!!.dealocated = true
-            return body
-        }
-        if (function.data.equals("const")) {
-            if (params is ASTVariableNode){
-                if (!(params as ASTVariableNode).getType().isPointer())
-                    throw Exception("Const can be applied only to objects")
-                return "${params?.toC()}"
-            }
-            throw Exception("Const can be applied only to variables")
-        }
-        */
 
         var funName = function.data
 
-        if (function is ASTStructureAccessNode)
+        if (function is ASTStructureAccessNode) {
             funName = (function as ASTStructureAccessNode).getFunctionName()
+
+            params = if (params != null)
+                ASTListNode(listOf((function as ASTStructureAccessNode).struct, params!!));
+            else
+                (function as ASTStructureAccessNode).struct;
+        }
 
         if (Compiler.definedFunctions.containsKey(funName)) {
             val paramsTypes = mutableListOf<DefinedType>()

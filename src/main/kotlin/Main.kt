@@ -18,17 +18,7 @@ import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
     if (args.any() { it == "--help" })
-        return println("""Usage: java -jar czechtina.jar [input file].cz [options]
-            |Options:
-            |   --help          Show this help
-            |   --no-compile    Do not compile the output C code, it will be created in the same directory as the input file
-            |   --show-tree     Show the AST tree
-            |   --write-code    Write Code in comment before C code
-            |   --fpeterek      Uses macros from old czechtina.h file
-            |   --friendly      Generate valid C without macros in comment bellow code
-            |   --set-dir       Set dir for file creation
-            |   --debug         Show debug info
-        """.trimMargin())
+        return Printer.printHelp()
 
     ArgsProvider.processArgs(args)
 
@@ -41,7 +31,12 @@ fun main(args: Array<String>) {
     }
 
     //create file with name of input file in current directory
-    val file = args.firstOrNull() ?: return Printer.fatal("No input file specified")
+    val file = args.firstOrNull()
+    if (file == null ){
+        Printer.fatal("No input file specified")
+        println("Try --help for more information")
+        return
+    }
 
     var text = ""
 
@@ -67,8 +62,11 @@ fun main(args: Array<String>) {
         return
     }
 
+    if (ArgsProvider.outputName.isEmpty()) {
+        return
+    }
 
-    val command = "gcc ${Compiler.buildPath}${RemoveFileExtension(file)}.c -o ${Compiler.buildPath}${RemoveFileExtension(file)}"
+    val command = "gcc ${Compiler.buildPath}${RemoveFileExtension(file)}.c -o ${Compiler.buildPath}${ArgsProvider.outputName}"
 
     try {
         val process = ProcessBuilder()
@@ -86,4 +84,6 @@ fun main(args: Array<String>) {
     } catch (e: Exception) {
         e.printStackTrace()
     }
+
+    Printer.success("Compiled $file to ${Compiler.buildPath}${ArgsProvider.outputName}")
 }

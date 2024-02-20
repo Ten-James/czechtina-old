@@ -2,12 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-class ASTProgramLines : ASTNode {
-    var programLines: List<ASTNode> = listOf<ASTNode>()
-
-    constructor(programLines: List<ASTNode>) : super(DefinedType("")) {
-        this.programLines = programLines
-    }
+class ASTProgramLines(var programLines: List<ASTNode>) : ASTNode(DefinedType("")) {
 
 
     override fun toString(): String {

@@ -8,6 +8,21 @@ object Printer {
     private const val yellow = "\u001b[33m"
     private const val green = "\u001b[32m"
 
+    private fun greenwrap (text:String) = "$green$text$reset"
+
+    private val helpText = """
+    Usage: ${greenwrap("czechtina [input file].cz [options] -o [output file]")}
+        |Options:
+        |   ${greenwrap("--help")}         Show this help
+        |   ${greenwrap("--no-compile")}    Do not compile the output C code, it will be created in the same directory as the input file
+        |   ${greenwrap("--show-tree")}     Show the AST tree
+        |   ${greenwrap("--write-code")}    Write Code in comment before C code
+        |   ${greenwrap("--fpeterek")}      Uses macros from old czechtina.h file
+        |   ${greenwrap("--friendly")}      Generate valid C without macros in comment bellow code
+        |   ${greenwrap("--set-dir")}       Set dir for file creation
+        |   ${greenwrap("--debug")}         Show debug info
+    """
+
     private fun infoTEXT(text:String):String = "[INFO]: ${text.replace("\n", "\n[INFO]: ")}"
 
     private fun successTEXT(text:String) = "$green[SUCCESS]: ${text.replace("\n","\\n[SUCCESS]: ")}$reset"
@@ -17,6 +32,11 @@ object Printer {
     private fun warningTEXT(text:String) = "$yellow[WARNING]: ${text.replace("\n","\\n[WARNING]: ")}$reset"
 
     private fun fatalTEXT(text:String) = "$red[FATAL]: ${text.replace("\n","\\n[FATAL]: ")}$reset"
+
+
+    fun printHelp() {
+        println(helpText.trimMargin())
+    }
 
     fun info(text:String) {
         if (ArgsProvider.debug)

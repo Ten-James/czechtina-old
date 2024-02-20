@@ -3,16 +3,8 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-class ASTOperandNode : ASTNode {
-    var operand:String
-    var left: ASTNode
-    var right: ASTNode
-
-    constructor(operand:String, left:ASTNode, right:ASTNode) : super(Compiler.calcBinaryType(left, right, operand)) {
-        this.operand = operand
-        this.left = left
-        this.right = right
-    }
+class ASTOperandNode(var operand: String, var left: ASTNode, var right: ASTNode) :
+    ASTNode(Compiler.calcBinaryType(left, right, operand)) {
 
     override fun getType(): DefinedType {
         return Compiler.calcBinaryType(left, right, operand)
@@ -34,12 +26,12 @@ class ASTOperandNode : ASTNode {
 
     override fun toC(sideEffect:Boolean): String {
         if (operand == "="){
-            val rString = right?.toC()
+            val rString = right.toC();
             expType = Compiler.calcBinaryType(left, right, operand)
-            return "${left?.toC()} = $rString"
+            return "${left.toC()} = $rString"
         }
 
         expType = Compiler.calcBinaryType(left, right, operand)
-        return "${left?.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
+        return "${left.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
     }
 }

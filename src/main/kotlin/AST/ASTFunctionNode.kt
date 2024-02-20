@@ -3,21 +3,16 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-class ASTFunctionNode : ASTNode {
-    var type:ASTUnaryNode
-    var name:String? = null
-    var parameters:List<ASTNode> = listOf<ASTNode>()
-    var body:ASTUnaryNode? = null
+class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List<ASTNode>, body: ASTUnaryNode) :
+    ASTNode(DefinedType("")) {
+    var name:String? = name
+    var body:ASTUnaryNode? = body
 
-    constructor(type:ASTUnaryNode, name:String, parameters:List<ASTNode>, body:ASTUnaryNode) : super(DefinedType("")) {
-        this.type = type
-        this.name = name
-        this.parameters = parameters
-        this.body = body
+    init {
         unscopeBody()
     }
 
-    fun unscopeBody(){
+    private fun unscopeBody(){
         if (body is ASTUnaryNode) {
             (body as ASTUnaryNode).type = ASTUnaryTypes.CURLY_UNSCOPE
         }

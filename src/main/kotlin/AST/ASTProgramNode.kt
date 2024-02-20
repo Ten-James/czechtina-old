@@ -2,18 +2,16 @@ package AST
 
 import compiler.DefinedType
 
-class ASTProgramNode : ASTNode {
-    var imports: List<ASTUnaryNode> = listOf()
-    var functions: List<ASTFunctionNode> = listOf()
+class ASTProgramNode(
+    var functions: List<ASTFunctionNode>,
+    var imports: List<ASTUnaryNode>,
+    var main: ASTFunctionNode?
+) : ASTNode(DefinedType("")) {
     var structures: List<ASTStructureNode> = listOf()
     var typeDefinition = listOf<ASTBinaryNode>()
-    var main: ASTFunctionNode? = null
 
 
-    constructor(functions: List<ASTFunctionNode>, imports: List<ASTUnaryNode>, main: ASTFunctionNode?): super(DefinedType("")) {
-        this.imports = imports
-        this.functions = functions
-        this.main = main
+    init {
         structures = emptyList()
     }
 

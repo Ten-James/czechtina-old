@@ -2,14 +2,7 @@ package AST
 
 import compiler.DefinedType
 
-class ASTRetypeNode: ASTNode {
-    val expression: ASTNode;
-    val type: ASTNode;
-
-    constructor(expression: ASTNode, type: ASTNode): super(DefinedType("")) {
-        this.expression = expression;
-        this.type = type;
-    }
+class ASTRetypeNode(val expression: ASTNode, val type: ASTNode) : ASTNode(DefinedType("")) {
 
     override fun getType(): DefinedType {
         if (expression.getType().isAddress() && !this.type.getType().isAddress())
@@ -34,7 +27,7 @@ class ASTRetypeNode: ASTNode {
     }
 
     override fun toString(): String {
-        return "Retype: ${expression} to ${type}"
+        return "Retype: $expression to $type"
     }
 
     override fun toC(sideEffect:Boolean): String {

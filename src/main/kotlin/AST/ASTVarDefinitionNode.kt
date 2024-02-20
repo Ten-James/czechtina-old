@@ -3,9 +3,8 @@ package AST
 import compiler.Compiler
 import compiler.DefinedType
 
-open class ASTVarDefinitionNode : ASTNode {
-    var variable:ASTVariableNode
-    var type:ASTNode
+open class ASTVarDefinitionNode(variable: ASTVariableNode, var type: ASTNode) : ASTNode(variable.expType) {
+    var variable:ASTVariableNode = variable.addType(type.getType())
 
 
     override fun retype(map: Map<String, DefinedType>) {
@@ -23,11 +22,6 @@ open class ASTVarDefinitionNode : ASTNode {
 
     override fun copy(): ASTVarDefinitionNode {
         return ASTVarDefinitionNode(variable.copy(), type.copy())
-    }
-
-    constructor(variable:ASTVariableNode, type : ASTNode): super(variable.expType) {
-        this.type = type
-        this.variable = variable.addType(type.getType())
     }
 
     override fun toString(): String {

@@ -11,6 +11,16 @@ object ArgsProvider {
     var setDir: Boolean = false
     var debug: Boolean = false
     var dir: String = ""
+    var outputName: String = ""
+
+
+    fun getValueOfArg(arg: String): String? {
+        val index = args.indexOf(arg)
+        if (index != -1 && index != args.size - 1) {
+            return args[index + 1]
+        }
+        return null
+    }
 
     fun processArgs(args: Array<String>) {
         this.args = args
@@ -23,9 +33,11 @@ object ArgsProvider {
         setDir = args.any { it == "--set-dir" }
         debug = args.any { it == "--debug" }
 
-        val setDirIndex = args.indexOf("--set-dir")
-        if (setDirIndex != -1 && setDirIndex != args.size - 1) {
-            dir = args[setDirIndex + 1] + "/"
+        dir = getValueOfArg("--set-dir")  ?: ""
+        if (dir.isNotEmpty() && !dir.endsWith("/")) {
+            dir += "/"
         }
+
+        outputName = getValueOfArg("-o") ?: ""
     }
 }
