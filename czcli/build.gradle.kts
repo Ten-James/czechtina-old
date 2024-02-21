@@ -15,7 +15,7 @@ repositories {
 dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
-    implementation(project("/"))
+    implementation(project(":czechCommon"))
 }
 
 tasks.test {

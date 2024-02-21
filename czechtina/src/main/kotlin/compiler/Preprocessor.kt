@@ -1,7 +1,7 @@
 package compiler
 
 import compiler.Compiler.undefinedFunction
-import utils.GetFileLinkedFilePath
+import GetFileLinkedFilePath
 import java.io.File
 
 object Preprocessor {
@@ -29,8 +29,21 @@ object Preprocessor {
         val bylines = code.trim().lines().map { it.substringBefore("//") }.toTypedArray()
 
         var blocklevel = 0
+        var isBlockComment = false
         for (i in bylines.indices) {
-            if (bylines[i].isBlank())
+            if (isBlockComment) {
+                if (bylines[i].contains("*/")) {
+                    bylines[i] = bylines[i].substringAfter("*/")
+                    isBlockComment = false
+                }
+                else
+                    bylines[i] = ""
+            }
+            else if (bylines[i].contains("/*")) {
+                isBlockComment = true;
+                bylines[i] = bylines[i].substringBefore("/*")
+            }
+            else if (bylines[i].isBlank())
                 continue
             else if (bylines[i].contains("{"))
                 blocklevel += 1

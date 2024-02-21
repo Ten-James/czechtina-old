@@ -1,5 +1,3 @@
-package utils
-
 fun GetFileLinkedFilePath(fromFile:String, name:String):String {
     return GetFolderFromFilePath(fromFile) + AddFileExtension(name)
 }

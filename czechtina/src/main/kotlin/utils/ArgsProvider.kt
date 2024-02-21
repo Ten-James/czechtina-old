@@ -1,5 +1,7 @@
 package utils
 
+import Printer
+
 object ArgsProvider {
     var args: Array<String> = arrayOf()
 
@@ -32,6 +34,9 @@ object ArgsProvider {
         friendly = args.any { it == "--friendly" }
         setDir = args.any { it == "--set-dir" }
         debug = args.any { it == "--debug" }
+        if (debug) {
+            Printer.setDebug();
+        }
 
         dir = getValueOfArg("--set-dir")  ?: ""
         if (dir.isNotEmpty() && !dir.endsWith("/")) {

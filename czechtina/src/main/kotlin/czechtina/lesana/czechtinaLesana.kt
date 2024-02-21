@@ -1,6 +1,7 @@
 package czechtina.lesana
 
 import AST.*
+import Printer
 import compiler.Compiler
 import compiler.DefinedType
 import cz.j_jzk.klang.lesana.lesana
@@ -87,7 +88,6 @@ fun czechtinaLesana() = lesana<ASTNode> {
     programLine(line, variables, types, r_expression, blockCode, endOfLine, varDefinition, programLines)
 
 
-    program to def(re("package"), re("[a-zA-Z][a-zA-Z0-9]*"), konec) { ASTPackageNode(it.v2) }
 
     // MAIN FUNCTION
     main to def(
@@ -99,6 +99,8 @@ fun czechtinaLesana() = lesana<ASTNode> {
            emptyList(), it.v2
        )
     }
+
+    program to def(re("package"), re("[a-zA-Z][a-zA-Z0-9:]*"), konec) { ASTPackageNode(it.v2) }
 
     blockFunction(tFunction, varDefinition, types, programLines, listableDefinition)
     inlineTypedFunction(tFunction, varDefinition, types, r_expression, konec, listableDefinition)
@@ -143,6 +145,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     ignoreRegexes("\\s")
     onUnexpectedToken { err ->
         Compiler.getCurrentCodeLine(err.got.position.character)
+        Printer.info(err.expectedIDs.joinToString(", "))
         if (ArgsProvider.debug) {
             println(err)
         }

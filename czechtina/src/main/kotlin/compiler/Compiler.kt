@@ -6,7 +6,7 @@ import czechtina.grammar.*
 import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import utils.ArgsProvider
-import utils.Printer
+import Printer
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -319,7 +319,7 @@ object Compiler {
             currentCode = code
             tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
         } catch (e:Exception) {
-            Printer.printCurrentErrors(currentErrors)
+            Printer.printCurrentErrors(Compiler.currentCode,currentErrors)
             Printer.fatal("There is syntax error in your code")
             Printer.fatal(e.message!!)
             if (ArgsProvider.debug)

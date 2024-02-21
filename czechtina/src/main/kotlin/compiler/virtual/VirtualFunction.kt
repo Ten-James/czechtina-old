@@ -23,13 +23,15 @@ class NewFunction : VirtualFunction {
     }
 
     override fun getReturnType(params: ASTNode?) = when {
-        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-pointer-${params.nodes[0].getType().getPrimitive()}", true, false, false)
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-${params.nodes[0].getType().getPrimitive()}", true, false, false)
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE_POINTER -> DefinedType("dynamic-${params.nodes[0].getType()}", true, false, false)
         else -> getReturnTypeInternal(params)
     }
 
 
     override fun toC(params: ASTNode?): String = when {
-        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> "(${params.nodes[0].getType().getPrimitive()}**)malloc(${params.nodes[1].toC()} * sizeof(${params.nodes[0].getType().getPrimitive()} *))"
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> "(${params.nodes[0].getType().toC()}*)malloc(${params.nodes[1].toC()} * sizeof(${params.nodes[0].getType().toC()}))"
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE_POINTER -> "(${params.nodes[0].getType().toC()}*)malloc(${params.nodes[1].toC()} * sizeof(${params.nodes[0].getType().toC()}))"
         else -> toCInternal(params)
     }
 

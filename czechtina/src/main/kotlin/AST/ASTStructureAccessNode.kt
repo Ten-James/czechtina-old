@@ -2,7 +2,7 @@ package AST
 
 import compiler.Compiler
 import compiler.DefinedType
-import utils.Printer
+import Printer
 
 class ASTStructureAccessNode: ASTVariableNode {
     var struct:ASTVariableNode
