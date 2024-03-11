@@ -1,6 +1,14 @@
-# Czechtina
+<h1 align="center">
+	<img src="misc/banner.png" alt="CZECHTINA BANNER">
+</h1>
 
-Current version: 0.1.6
+<hr />
+
+# Czechtina 
+
+Current version: 0.1.6.5
+
+<hr />
 
 Czechtina is programming language based on C and czech language.
 Czechtina should be faster to write than c and with additional features, easier to maintain.
@@ -211,6 +219,16 @@ To get address of variable use virtual Function `adresa`
 
 `new COUNT` => `malloc(COUNT)`
 
+`throw string` => `printf("%s", string); exit(1);`
+
+`print any` => it prints any type
+
+`print any, any, any` => it prints any type
+
+`println any` => it prints any type with new line
+
+`inC string` => to write C code
+
 #### Arrays
 `VAR_NAME: pole<TYP>`
 `VAR_NAME: pole<TYP, count>`
@@ -231,7 +249,7 @@ To get address of variable use virtual Function `adresa`
 
 ## Old Table for czecheader (czechtina.h)
 
-[Table here](table.md)
+[Table here](misc/table.md)
 
 ## Building compiler
 
@@ -250,7 +268,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - **--no-compile** - Do not compile the output C code, it will be created in the same directory as the input file
 - **--show-tree** - Show the AST tree
 - **--write-code** - Write Code in comment before C code
-- **--debug** - Show debug info
+- **--debug** - Show debug utils
 - **--fpeterek** - Uses macros from old czechtina.h file
 - **--friendly** - Generate valid C without macros in comment bellow code
 - **--set-dir** - Set dir for file creation
