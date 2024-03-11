@@ -2,7 +2,17 @@ package AST
 
 import java.util.*
 
-class ASTPackageNode(var packageName: String) : ASTProgramNode(emptyList(), emptyList(), null) {
+class ASTPackageNode(var packageName: String) : ASTProgramNode(emptyList(),
+    listOf(
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdio"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdlib"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "malloc"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "string"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "stdbool"),
+        ASTUnaryNode(ASTUnaryTypes.IMPORT_C, "math"),
+    )
+
+        , null) {
 
     fun getPackageNodeName() = packageName.replace("::", "_").uppercase(Locale.getDefault())
 

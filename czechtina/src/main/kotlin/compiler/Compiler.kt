@@ -7,6 +7,9 @@ import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import utils.ArgsProvider
 import Printer
+import RemoveFileExtension
+import RemoveFirstFolder
+import compiler.types.*
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -14,13 +17,14 @@ object Compiler {
     private const val VERSION = "0.1.6.5"
     var isParsed = false
     private var compilingTo = "C"
-    var definedTypes = mutableMapOf<String, DefinedType>()
+    var Types = mutableMapOf<String, Type>()
     var undefinedFunction = mutableListOf<String>()
     var definedFunctions = initDefinedFunction()
     var definedStructures = mutableMapOf<String, DefinedStructure>()
-    var variables = mutableListOf(mutableMapOf<String, DefinedType>())
-    var grammar: Map<GrammarToken,String> = C
-    var buildPath:String = ""
+    var variables = mutableListOf(mutableMapOf<String, Type>())
+    var grammar: Map<GrammarToken, String> = C
+    var buildPath: String = ""
+    var compiledPackages = mutableListOf<String>()
 
     fun typeFromCzechtina(czechType: String): String = when (compilingTo) {
         "C" -> cTypeFromCzechtina(czechType)
@@ -33,19 +37,19 @@ object Compiler {
         grammar = C
     }
 
-    fun addToDefinedTypes(type: String, definedType: DefinedType): Boolean {
-        definedTypes += mapOf(type to definedType)
+    fun addToTypes(type: String, Type: Type): Boolean {
+        Types += mapOf(type to Type)
         return true
     }
 
-    fun tryGetDefinedType(type: String) : DefinedType? {
-        if (definedTypes.containsKey(type))
-            return definedTypes[type]!!
+    fun tryGetType(type: String): Type? {
+        if (Types.containsKey(type))
+            return Types[type]!!
         return null
     }
 
     fun controlDefinedVariables(varName: String): Boolean {
-        if (definedTypes.keys.any { it == varName })
+        if (Types.keys.any { it == varName })
             throw Exception("Variable $varName is defined as type")
         if (definedFunctions.containsKey(varName))
             throw Exception("Variable $varName is defined as function")
@@ -54,7 +58,7 @@ object Compiler {
         return true
     }
 
-    fun setNewVariableType(varName: String, type: DefinedType) {
+    fun setNewVariableType(varName: String, type: Type) {
         if (varName == "")
             return
         Printer.info("Adding variable '$varName' with type $type")
@@ -65,8 +69,10 @@ object Compiler {
         variables[variables.size - 1] += mapOf(varName to type)
     }
 
-    fun setVariableType(varName: String, type: DefinedType) {
-        for (variable in variables.reversed()){
+    fun setVariableType(varName: String, type: Type) {
+        if (type is InvalidType)
+            return
+        for (variable in variables.reversed()) {
             if (variable.containsKey(varName)) {
                 Printer.info("Setting variable '$varName' with type $type")
                 variable[varName] = type
@@ -75,19 +81,17 @@ object Compiler {
         }
     }
 
-    fun getVariableType(varName: String): DefinedType? {
+    fun getVariableType(varName: String): Type? {
         for (variable in variables.reversed())
             if (variable.containsKey(varName))
                 return variable[varName]!!
         return null
     }
 
-    fun isDefined(varName: String) : Boolean {
+    fun isDefined(varName: String): Boolean {
         if (definedFunctions.containsKey(varName))
             return true
-        if (variables.any{ it.containsKey(varName) && it[varName]!!.dealocated })
-            throw Exception("Variable $varName is dealocated")
-        if (variables.any{ it.containsKey(varName) })
+        if (variables.any { it.containsKey(varName) })
             return true
         return false
     }
@@ -97,12 +101,12 @@ object Compiler {
         return ""
     }
 
-    fun scopePop(write:Boolean = false, init: String = "\n\t", end: String = ""): String {
+    fun scopePop(write: Boolean = false, init: String = "\n\t", end: String = ""): String {
         var retVal = init
         if (variables.size == 1)
             throw Exception("Cant pop global scope")
-        variables[variables.size -1].forEach {
-            if (it.value.isDynamic() && !it.value.dealocated)
+        variables[variables.size - 1].forEach {
+            if (it.value is DynamicPointerType || (it.value is DynamicStructureType))
                 retVal += "if(${it.key})free(${it.key});\n\t"
         }
         variables.removeAt(variables.size - 1)
@@ -119,7 +123,7 @@ object Compiler {
         grammar = CZ
     }
 
-    private fun calcTypePriority(type: String) : Int = when (type) {
+    private fun calcTypePriority(type: String): Int = when (type) {
         "none" -> 100
         "string" -> 5
         "double" -> 4
@@ -131,40 +135,52 @@ object Compiler {
         else -> if (type.contains("-")) 0 else throw Exception("Unhandled Type $type")
     }
 
-    fun calcBinaryType(left: ASTNode,  right: ASTNode, operand: String): DefinedType {
+    fun calcBinaryType(left: ASTNode, right: ASTNode, operand: String): Type {
+        /*
         if (left.getType().isTemplate())
-            return DefinedType(left.getType())
+            return left.getType()
         if (right.getType().isTemplate())
-            return DefinedType(right.getType())
+            return right.getType()
+        */
+        val leftType = left.getType()
+        val rightType = right.getType()
         if (operand == "=") {
-            if (left.getType().isConst && isParsed)
-                throw Exception("Cannot change const type of variable $left")
+            //if (left.getType().isConst && isParsed)
+            //    throw Exception("Cannot change const type of variable $left")
             if (left is ASTVariableNode)
-                left.addType(right.getType())
-            return DefinedType(right.getType())
+                left.addType(rightType)
+            return rightType
+        }
+        if (Regex(cAndCzechtinaRegex(AllOtherAssignOperators)).matches(operand)) {
+            if (left is ASTVariableNode)
+                left.addType(rightType)
+            return rightType
         }
         if (Regex(cAndCzechtinaRegex(AllComparation)).matches(operand))
-            return DefinedType("bool")
+            return PrimitiveType("bool")
 
-        if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_MINUS))).matches(operand)) {
-            if (left.getType().isAddress() && right.getType().isAddress())
-               return DefinedType("int")
-            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int"))
-                return DefinedType(left.getType())
-            if (left.getType().getPrimitive().contains("int") && right.getType().isAddress())
-                return DefinedType(right.getType())
+        if (Regex(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_MINUS))).matches(operand)) {
+            if (leftType is PointerType && rightType is PointerType)
+                return PrimitiveType("int")
+            if (leftType is PointerType && rightType is PrimitiveType && rightType.toC() == "int")
+                return leftType
+            if (leftType is PrimitiveType && leftType.toC() == "int"  && rightType is PointerType)
+                return rightType
         }
-        if (Regex(cAndCzechtinaRegex(listOf( GrammarToken.OPERATOR_PLUS))).matches(operand)) {
-            if (left.getType().isAddress() && right.getType().getPrimitive().contains("int")){
-                return DefinedType(left.getType())
-            }
-            if (left.getType().getPrimitive().contains("int") && right.getType().isAddress())
-                return DefinedType(right.getType())
+        if (Regex(cAndCzechtinaRegex(listOf(GrammarToken.OPERATOR_PLUS))).matches(operand)) {
+            if (leftType is PointerType && rightType is PrimitiveType && rightType.toC() == "int")
+                return leftType
+            if (leftType is PrimitiveType && leftType.toC() == "int" && rightType is PointerType)
+                return rightType
         }
+        if (leftType is InvalidType)
+            return  rightType
+        if (rightType is InvalidType)
+            return leftType
 
         try {
-            val leftWeight = calcTypePriority(left.getType().typeString)
-            val rightWeight = calcTypePriority(right.getType().typeString)
+            val leftWeight = calcTypePriority(leftType.toC())
+            val rightWeight = calcTypePriority(rightType.toC())
             val maxW = maxOf(leftWeight, rightWeight)
             val minW = minOf(leftWeight, rightWeight)
 
@@ -176,22 +192,23 @@ object Compiler {
 
 
             if (leftWeight > rightWeight)
-                return DefinedType(left.getType())
-            return DefinedType(right.getType())
+                return leftType
+            return rightType
 
         } catch (e: Exception) {
             println(operand)
-            println(left.getType())
-            println(right.getType())
+            println("$left : $leftType")
+            println("$right : $rightType")
             throw Exception("Error in calcBinaryType: ${e.message}")
         }
     }
 
     override fun toString(): String {
-        return "Compiler(compilingTo='$compilingTo', definedTypes=$definedTypes, definedFunctions=$definedFunctions, variables=$variables,)"
+        return "Compiler(compilingTo='$compilingTo', Types=$Types, definedFunctions=$definedFunctions, variables=$variables,)"
     }
 
-    private fun addFunctionVariants(code:String, tree: ASTProgramNode) : String {
+    private fun addFunctionVariants(code: String, tree: ASTProgramNode): String {
+        /*
         var cCode = code
         while (isAnyUsedFunctionUndefined()) {
             for (function in definedFunctions){
@@ -205,21 +222,17 @@ object Compiler {
                     scopePush()
                     val functionAST = functionASTree.copy()
                     scopePop()
-                    val paramsTypes = mutableListOf<DefinedType>()
+                    val paramsTypes = mutableListOf<Type>()
                     for (param in functionAST.parameters)
                         paramsTypes.add(param.getType())
                     val abstractIndex = fce.validateParams(paramsTypes)
-                    val retypeMap = mutableMapOf<String,DefinedType>()
+                    val retypeMap = mutableMapOf<Type,Type>()
                     for (i in 0 until variant.params.size){
                         val old =fce.variants[abstractIndex].params[i]
-                        val new = DefinedType(variant.params[i])
+                        val new = variant.params[i]
 
-                        if (old.isPointer()){
-                            if (old.typeString.replace("pointer", "dynamic") == new.typeString) {
-                                retypeMap += mapOf(old.typeString to new)
-                                continue
-                            }
-                            if(!old.isConst && new.isConst) {
+                        if (old is PointerType && new is PointerType) {
+                            if (old.toDereference() == new.toDereference()) {
                                 retypeMap += mapOf(old.typeString to new)
                                 continue
                             }
@@ -245,9 +258,10 @@ object Compiler {
                 }
             }
         }
-        return cCode
-    }
+         */
+        return code
 
+    }
 
 
     private fun isAnyUsedFunctionUndefined(): Boolean {
@@ -258,7 +272,7 @@ object Compiler {
     }
 
     val czechtina = czechtinaLesana()
-    fun compileText(text:String): String {
+    fun compileText(text: String): String {
         val preprocessed = Preprocessor.preprocessText(text, "")
         isParsed = false
         val tree: ASTProgramNode?
@@ -272,7 +286,7 @@ object Compiler {
             variables.clear()
             variables.add(mutableMapOf())
             cCode = tree.toC()
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             Printer.warning("Variables: $variables")
             throw e
         }
@@ -282,6 +296,33 @@ object Compiler {
         return cCode
     }
 
+    fun compileTextDefinition(text: String, filePath:String): String {
+        if (compiledPackages.contains(filePath))
+            return ""
+        compiledPackages.add(filePath)
+
+        val preprocessed = Preprocessor.preprocessText(text, "")
+        isParsed = false
+        val tree: ASTProgramNode?
+        var cCode: String
+        try {
+            currentCode = preprocessed
+            tree = czechtina.parse(InputFactory.fromString(preprocessed, "code")) as ASTProgramNode
+            isParsed = true
+            for (function in tree.functions)
+                function.precalculateType()
+            variables.clear()
+            variables.add(mutableMapOf())
+            cCode = tree.toCDeclaration()
+        } catch (e: Exception) {
+            Printer.warning("Variables: $variables")
+            throw e
+        }
+        cCode = addFunctionVariants(cCode, tree)
+        cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
+        cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")
+        return cCode
+    }
 
 
     var currentCode = ""
@@ -295,8 +336,7 @@ object Compiler {
             if (currentCode[i] == '\n') {
                 line++
                 char = 0
-            }
-            else
+            } else
                 char++
         }
 
@@ -308,25 +348,27 @@ object Compiler {
 
 
 
+
     fun compile(text: String, path: String) {
-        Printer.info("Started compiling process -> ${path}")
+
+        Printer.info("Started compiling process -> $path")
         val code = Preprocessor.preprocessText(text, path)
-        val withoutExtension = path.substring(0, path.length - 3)
+        val withoutExtension = RemoveFirstFolder(RemoveFileExtension(path))
         Printer.info(code)
         isParsed = false
         val tree: ASTProgramNode?
         try {
             currentCode = code
             tree = czechtina.parse(InputFactory.fromString(code, "code")) as ASTProgramNode
-        } catch (e:Exception) {
-            Printer.printCurrentErrors(Compiler.currentCode,currentErrors)
+        } catch (e: Exception) {
+            Printer.printCurrentErrors(Compiler.currentCode, currentErrors)
             Printer.fatal("There is syntax error in your code")
             Printer.fatal(e.message!!)
             if (ArgsProvider.debug)
                 e.printStackTrace()
             exitProcess(1)
         }
-        Printer.info("File ${path} has been parsed")
+        Printer.info("File $path has been parsed")
         isParsed = true
 
 
@@ -341,7 +383,7 @@ object Compiler {
 
         try {
             cCode = tree.toC()
-        } catch (e:Exception) {
+        } catch (e: Exception) {
             Printer.fatal(e.message!!)
             if (ArgsProvider.debug)
                 e.printStackTrace()
@@ -366,11 +408,14 @@ object Compiler {
 
         cCode = cCode.lines().filter { !it.contains("CZECHTINA ANCHOR") }.joinToString("\n")
 
-        cCode= "// Czechtina $VERSION\n$cCode"
+        cCode = "// Czechtina $VERSION\n${Preprocessor.prependAfterCompilation.joinToString("\n")}$cCode"
+
+        cCode = Preprocessor.removeDuplicateImport(cCode)
 
         if (ArgsProvider.writeCode) {
             cCode = "/*\n\t${text.replace("\n", "\n\t")}\n*/\n$cCode"
         }
+        Filer.createAllDirsInPath("$buildPath${withoutExtension.substringBeforeLast("/")}")
         File("$buildPath$withoutExtension.c").writeText(cCode)
         Printer.success("File was compiled into $buildPath$withoutExtension.c")
     }

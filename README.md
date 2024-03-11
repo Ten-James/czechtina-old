@@ -268,7 +268,7 @@ java -jar czechtina.jar build/ukol.cz --no-compile --fpeterek --friendly --set-d
 - **--no-compile** - Do not compile the output C code, it will be created in the same directory as the input file
 - **--show-tree** - Show the AST tree
 - **--write-code** - Write Code in comment before C code
-- **--debug** - Show debug info
+- **--debug** - Show debug utils
 - **--fpeterek** - Uses macros from old czechtina.h file
 - **--friendly** - Generate valid C without macros in comment bellow code
 - **--set-dir** - Set dir for file creation

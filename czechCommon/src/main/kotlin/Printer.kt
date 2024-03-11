@@ -1,5 +1,6 @@
 object Printer {
     var debug = false;
+    var whoami = "czechtina"
     private const val red = "\u001b[31m"
     private const val reset = "\u001b[0m"
     private const val yellow = "\u001b[33m"
@@ -28,20 +29,21 @@ object Printer {
         |      ${greenWrap("-n")}           Name of the project
         |      ${greenWrap("-d")}           Directory of the project
         |
+        |   ${greenWrap("info")}            Show info about the project
         |   ${greenWrap("build")}           Build the project
         |   ${greenWrap("run")}             Run the project
         |   ${greenWrap("clean")}           Clean the project
     """.trimIndent()
 
-    private fun infoTEXT(text:String):String = "[INFO]: ${text.replace("\n", "\n[INFO]: ")}"
+    private fun infoTEXT(text:String):String = "[${whoami} - INFO]: ${text.replace("\n", "\n[INFO]: ")}"
 
-    private fun successTEXT(text:String) = "$green[SUCCESS]: ${text.replace("\n","\\n[SUCCESS]: ")}$reset"
+    private fun successTEXT(text:String) = "$green[${whoami} - SUCCESS]: ${text.replace("\n","\\n[SUCCESS]: ")}$reset"
 
-    private fun errTEXT(text:String) = "$red[ERR]: ${text.replace("\n","\\n[ERR]: ")}$reset"
+    private fun errTEXT(text:String) = "$red[${whoami} - ERR]: ${text.replace("\n","\\n[ERR]: ")}$reset"
 
-    private fun warningTEXT(text:String) = "$yellow[WARNING]: ${text.replace("\n","\\n[WARNING]: ")}$reset"
+    private fun warningTEXT(text:String) = "$yellow[${whoami} - WARNING]: ${text.replace("\n","\\n[WARNING]: ")}$reset"
 
-    private fun fatalTEXT(text:String) = "$red[FATAL]: ${text.replace("\n","\\n[FATAL]: ")}$reset"
+    private fun fatalTEXT(text:String) = "$red[${whoami} - FATAL]: ${text.replace("\n","\\n[FATAL]: ")}$reset"
 
 
     fun printHelp() {

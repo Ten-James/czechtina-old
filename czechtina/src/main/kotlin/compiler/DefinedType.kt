@@ -1,6 +1,6 @@
 package compiler
 
-class DefinedType {
+/*class Type {
     var typeString: String
     val isHeap:Boolean
     val isConst:Boolean
@@ -14,7 +14,7 @@ class DefinedType {
         this.isStructured = isStructured
     }
 
-    constructor(DT: DefinedType) {
+    constructor(DT: Type) {
         this.typeString = DT.typeString
         this.isHeap = DT.isHeap
         this.isConst = DT.isConst
@@ -27,25 +27,25 @@ class DefinedType {
         return getPrimitive()
     }
 
-    fun toArray(size: String): DefinedType {
+    fun toArray(size: String): Type {
         if (isPointer() || isDynamic())
             return changeTypeString("array-${this.typeString}-${size}")
         return changeTypeString("array-${this.typeString}-${size}")
     }
 
-    fun toHeap(): DefinedType = DefinedType(typeString, true, isConst, isStructured)
-    fun toConst(): DefinedType = DefinedType(typeString, isHeap, true, isStructured)
-    fun toPointer(): DefinedType = changeTypeString("pointer-$typeString")
+    fun toHeap(): Type = Type(typeString, true, isConst, isStructured)
+    fun toConst(): Type = Type(typeString, isHeap, true, isStructured)
+    fun toPointer(): Type = changeTypeString("pointer-$typeString")
 
 
-    fun toDereference(): DefinedType {
+    fun toDereference(): Type {
         if (!isAddress() && Compiler.isParsed)
             throw Exception("Cannot convert non-pointer type to dereference - $this")
         if (isAddress())
             return changeTypeString(typeString.substring(typeString.indexOf("-")+1))
         return changeTypeString("none")
     }
-    fun toDynamic(): DefinedType {
+    fun toDynamic(): Type {
         if (!isHeap && Compiler.isParsed) {
             println(this)
             throw Exception("Cannot convert non-heap type to dynamic")
@@ -54,8 +54,8 @@ class DefinedType {
     }
 
 
-    fun changeTypeString(newTypeString: String):DefinedType {
-        var newT = DefinedType(this)
+    fun changeTypeString(newTypeString: String):Type {
+        var newT = Type(this)
         newT.typeString = newTypeString
         return newT
     }
@@ -90,22 +90,22 @@ class DefinedType {
 
     override fun toString(): String = "$typeString ${if (isHeap) "Heap " else ""}${if (isConst) "Const " else ""}${if (isStructured) "Struct" else " "}"
 
-    fun unDynamic(): DefinedType {
+    fun unDynamic(): Type {
         if (isDynamic())
             return changeTypeString(typeString.replace("dynamic","pointer"))
-        return DefinedType(this)
+        return Type(this)
     }
 
 
-    fun isCastAbleTo(definedType: DefinedType) : Boolean {
-        if (definedType.typeString == typeString)
+    fun isCastAbleTo(Type: Type) : Boolean {
+        if (Type.typeString == typeString)
             return true
-        if (definedType.isDynamic() && !isDynamic())
+        if (Type.isDynamic() && !isDynamic())
             return false
-        if (!definedType.isDynamic() && isDynamic())
+        if (!Type.isDynamic() && isDynamic())
             return false
-        if (definedType.isAddress() && isAddress())
-            return definedType.getPrimitive() == getPrimitive()
+        if (Type.isAddress() && isAddress())
+            return Type.getPrimitive() == getPrimitive()
         return false
     }
-}
+}*/

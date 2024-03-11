@@ -1,17 +1,17 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.StaticArrayType
 
 class ASTStaticArrayDefinitionNode(type: ASTNode, variable: ASTVariableNode, var size: String) :
     ASTVarDefinitionNode(variable, type) {
 
     init {
-        variable.addType(type.getType().toArray(size))
+        variable.addType(StaticArrayType(type.getType(), size))
     }
 
     override fun toString(): String {
-        return "Static array definition: \ntype=${type.toString().replace("\n","\n\t")}, \nvariable=${variable.toString().replace("\n","\n\t")}, \nsize=${size}"
+        return "Static array definition: \ntype=${type.toString().replace("\n","\n  ")}, \nvariable=${variable.toString().replace("\n","\n  ")}, \nsize=${size}"
     }
 
     override fun copy(): ASTStaticArrayDefinitionNode {

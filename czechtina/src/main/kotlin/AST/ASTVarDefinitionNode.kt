@@ -1,22 +1,22 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.Type
 
 open class ASTVarDefinitionNode(variable: ASTVariableNode, var type: ASTNode) : ASTNode(variable.expType) {
     var variable:ASTVariableNode = variable.addType(type.getType())
 
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         type.retype(map)
         variable.retype(map)
         for (m in map)
-            if (expType.typeString == m.key)
+            if (expType == m.key)
                 expType = m.value
     }
 
 
-    override fun getType(): DefinedType {
+    override fun getType(): Type {
         return variable.getType()
     }
 
@@ -25,7 +25,7 @@ open class ASTVarDefinitionNode(variable: ASTVariableNode, var type: ASTNode) : 
     }
 
     override fun toString(): String {
-        return "Var def for $variable with ${getType()}"
+        return "definintion:\n  $variable: ${getType()}"
     }
 
     override fun toC(sideEffect:Boolean): String = if (Compiler.controlDefinedVariables(variable.data)) variable.toDefineC() else ""

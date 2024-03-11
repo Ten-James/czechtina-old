@@ -1,11 +1,13 @@
 package compiler
 
+import compiler.types.Type
 
-class DefinedStructure(val name:String, val type: DefinedType, var properties: Map<String, DefinedType>, var functions:MutableList<String> = mutableListOf()) {
 
-    fun getPropType(name:String): DefinedType = properties[name] ?: throw Exception("${this.name} doesnt have type $name")
+class DefinedStructure(val name:String, val type: Type, var properties: Map<String, Type>, var functions:MutableList<String> = mutableListOf()) {
 
-    fun addPropType(name: String, type: DefinedType) {
+    fun getPropType(name:String): Type = properties[name] ?: throw Exception("${this.name} doesnt have type $name")
+
+    fun addPropType(name: String, type: Type) {
         if (properties.containsKey(name))
             throw Exception("${this.name} already have type $name")
         properties += mapOf(name to type)

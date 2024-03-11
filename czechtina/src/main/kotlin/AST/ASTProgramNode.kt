@@ -1,12 +1,13 @@
 package AST
 
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.Type
 
 open class ASTProgramNode(
     var functions: List<ASTFunctionNode>,
     var imports: List<ASTUnaryNode>,
     var main: ASTFunctionNode?
-) : ASTNode(DefinedType("")) {
+) : ASTNode(InvalidType()) {
     var structures: List<ASTStructureNode> = listOf()
     var typeDefinition = listOf<ASTBinaryNode>()
 
@@ -36,7 +37,7 @@ open class ASTProgramNode(
         return this
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         functions.forEach { it.retype(map) }
         main?.retype(map)
     }
@@ -64,4 +65,10 @@ open class ASTProgramNode(
                 doubleNewLine(functions.isNotEmpty()) + typeDefinition.joinToString("\n") { it.toC() } +
                 doubleNewLine(typeDefinition.isNotEmpty()) + functions.joinToString("\n\n") { it.toC() } +
                 doubleNewLine(functions.isNotEmpty()) + main?.toC()
+
+    fun toCDeclaration():String =
+        imports.joinToString("\n") { it.toC() } +
+                doubleNewLine(imports.isNotEmpty()) + structures.joinToString("\n") { it.toC() } +
+                doubleNewLine(structures.isNotEmpty()) + functions.joinToString("\n") { it.toCDeclaration() } +
+                doubleNewLine(functions.isNotEmpty()) + typeDefinition.joinToString("\n") { it.toC() }
 }

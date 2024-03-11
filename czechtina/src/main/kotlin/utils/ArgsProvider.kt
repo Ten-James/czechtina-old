@@ -6,6 +6,7 @@ object ArgsProvider {
     var args: Array<String> = arrayOf()
 
     var noCompilation: Boolean = false
+    var useCache: Boolean = false
     var showTree: Boolean = false
     var writeCode: Boolean = false
     var fpeterek: Boolean = false
@@ -34,6 +35,7 @@ object ArgsProvider {
         friendly = args.any { it == "--friendly" }
         setDir = args.any { it == "--set-dir" }
         debug = args.any { it == "--debug" }
+        useCache = args.any { it == "--use-cache" }
         if (debug) {
             Printer.setDebug();
         }

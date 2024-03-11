@@ -1,12 +1,13 @@
 package AST
 
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.Type
 
-class ASTProgramLines(var programLines: List<ASTNode>) : ASTNode(DefinedType("")) {
+class ASTProgramLines(var programLines: List<ASTNode>) : ASTNode(InvalidType()) {
 
 
     override fun toString(): String {
-        return "Lines:\n${programLines.joinToString("").replace("\n", "\n\t")}\n"
+        return "Lines:\n  ${programLines.joinToString("\n\n").replace("\n", "\n  ")}"
     }
 
     override fun copy(): ASTProgramLines {
@@ -15,7 +16,7 @@ class ASTProgramLines(var programLines: List<ASTNode>) : ASTNode(DefinedType("")
         )
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         programLines.forEach { it.retype(map) }
     }
 

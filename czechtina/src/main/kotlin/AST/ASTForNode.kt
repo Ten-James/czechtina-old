@@ -1,7 +1,9 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.PrimitiveType
+import compiler.types.Type
 import czechtina.grammar.GrammarToken
 import czechtina.grammar.czechtina
 
@@ -11,7 +13,7 @@ class ASTForNode : ASTNode {
     var step: ASTNode
     var body: ASTNode
 
-    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) : super(DefinedType("")) {
+    constructor(begin: ASTNode, condition: ASTNode, step: ASTNode, body: ASTNode) : super(InvalidType()) {
         this.begin = begin
         this.condition = condition
         this.step = step
@@ -19,7 +21,7 @@ class ASTForNode : ASTNode {
         unscopeBody()
     }
 
-    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) : super(DefinedType("")) {
+    constructor(variable: ASTVariableNode, type: ASTUnaryNode, min: ASTNode, rangeComparation: String , max: ASTNode, body: ASTNode) : super(InvalidType()) {
         this.begin = ASTUnaryNode(ASTUnaryTypes.SEMICOLON,ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable.addType(type.getType()), min) )
 
 
@@ -30,12 +32,12 @@ class ASTForNode : ASTNode {
         }
 
         this.condition = ASTOperandNode(operand, variable, max)
-        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1, DefinedType("int"))))
+        this.step = ASTOperandNode(czechtina[GrammarToken.OPERATOR_ASSIGN]!!, variable, ASTOperandNode(czechtina[GrammarToken.OPERATOR_PLUS]!!, variable, ASTUnaryNode(ASTUnaryTypes.LITERAL, 1, PrimitiveType("int"))))
         this.body = body
         unscopeBody()
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         begin.retype(map)
         condition.retype(map)
         step.retype(map)
@@ -54,7 +56,7 @@ class ASTForNode : ASTNode {
     }
 
     override fun toString(): String {
-        return "For: \nbegin=${begin.toString().replace("\n","\n\t")}, \ncondition=${condition.toString().replace("\n","\n\t")}, \nstep=${step.toString().replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
+        return "For: \nbegin=${begin.toString().replace("\n","\n  ")}, \ncondition=${condition.toString().replace("\n","\n")}, \nstep=${step.toString().replace("\n","\n  ")}, \nbody=${body.toString().replace("\n","\n  ")}"
     }
 
     override fun toC(sideEffect:Boolean) = "for ${Compiler.scopePush()}(${begin.toC()} ${condition.toC()}; ${step.toC()}) ${body.toC()}"

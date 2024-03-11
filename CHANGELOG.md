@@ -2,6 +2,22 @@
 
 ### v 0.1.6.5
 
+#### Main feature - packages
+
+All czechtina files now can have package name instead of main function syntax is `package <[A-Z:]+>`.
+`::` acts like splitter and makes sub packages.
+
+Things to mind:
+
+- Recursive package files, all files will be compiled just once
+- Dependency checker, czcli will make cache file that compiler uses to include package.
+- if package file is modified all dependency files has to be compiled right now.
+- to use package in other files use syntax: `use <package_name>`, its free to use it anywhere in code. its preprocessor stuff.
+
+
+
+#### Other
+
 - fixing bugs
 - added +=, -=, *=, /=
 - preincrement and postincrement (++, --)
@@ -9,6 +25,13 @@
 - better definition for virtual functions
 - methods for structures
 - easier alocating for arrays
+- function variants are now disabled
+- recreated better type checker
+
+#### CZCLI
+
+- commands `init`, `build`, `run`, `clean` for working with project
+- currently cache and compile only on modified type
 
 
 ### v 0.1.6

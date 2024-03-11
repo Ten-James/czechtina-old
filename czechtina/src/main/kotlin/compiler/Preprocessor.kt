@@ -2,13 +2,38 @@ package compiler
 
 import compiler.Compiler.undefinedFunction
 import GetFileLinkedFilePath
+import generateFileInfo
+import utils.ArgsProvider
 import java.io.File
 
 object Preprocessor {
+    val prependAfterCompilation = mutableListOf<String>()
+
 
     fun addUndefineFile(line: String):String {
         undefinedFunction.add(line.split(" ")[1])
         return ""
+    }
+
+    fun appendUseCode(text:String):String {
+        if (!ArgsProvider.useCache) return text
+        val file = File(".czcache")
+        val cache = generateFileInfo(file.readLines())
+        val lines =text.lines().map {
+            if (it.startsWith("use")) {
+                val packageName = it.split(" ")[1].trim()
+                val files = cache.values.filter { it.packageName == packageName }.map { packagePath ->
+                    val filetext = File(packagePath.path).readText()
+                    prependAfterCompilation.add(Compiler.compileTextDefinition(filetext, packagePath.path))
+                    ""
+                }
+                files.joinToString("\n")
+            }
+            else {
+                it
+            }
+        }
+        return lines.joinToString("\n")
     }
 
     fun preprocessText (text:String, filePath: String): String {
@@ -65,6 +90,30 @@ object Preprocessor {
                 bylines[i] = bylines[i].substringBeforeLast("\\")
         }
 
-        return bylines.joinToString("\n").replace("#\$#CZECHTINAOPEMN\$#\$", "{").replace("#\$#CZECHTINACLOSE\$#\$", "}")
+        return appendUseCode(bylines.joinToString("\n").replace("#\$#CZECHTINAOPEMN\$#\$", "{").replace("#\$#CZECHTINACLOSE\$#\$", "}"))
     }
+
+    fun removeDuplicateImport(text: String):String {
+        val rem = "%@$#@REMOVEME@#%"
+        val imports = mutableListOf<String>()
+        val lines = text.lines().map {
+            if (it.startsWith("#include")) {
+                 if (imports.contains(it)) rem
+                else {
+                    imports.add(it)
+                    it
+                }
+            }
+            else
+                it
+        }
+        return recursiveReplace(lines.filter { it != rem }.joinToString("\n"), "\n\n\n", "\n\n");
+    }
+
+    fun recursiveReplace(text: String, from: String, to: String): String =
+        if (text.contains(from))
+            recursiveReplace(text.replace(from, to),from, to)
+        else
+            text
+
 }

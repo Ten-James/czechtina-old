@@ -1,23 +1,23 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.Type
 
 class ASTOperandNode(var operand: String, var left: ASTNode, var right: ASTNode) :
     ASTNode(Compiler.calcBinaryType(left, right, operand)) {
 
-    override fun getType(): DefinedType {
+    override fun getType(): Type {
         return Compiler.calcBinaryType(left, right, operand)
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         left.retype(map)
         right.retype(map)
         expType = Compiler.calcBinaryType(left, right, operand)
     }
 
     override fun toString(): String {
-        return "'$operand', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}\n"
+        return "Operand: '$operand', \nleft=\n  ${left.toString().replace("\n","\n  ")}, \nright=\n  ${right.toString().replace("\n","\n  ")}"
     }
 
     override fun copy(): ASTOperandNode {
@@ -32,6 +32,6 @@ class ASTOperandNode(var operand: String, var left: ASTNode, var right: ASTNode)
         }
 
         expType = Compiler.calcBinaryType(left, right, operand)
-        return "${left.toC()} ${Compiler.typeFromCzechtina(operand)} ${right?.toC()}"
+        return "${left.toC()} ${Compiler.typeFromCzechtina(operand)} ${right.toC()}"
     }
 }

@@ -1,21 +1,23 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
 import Printer
+import compiler.types.InvalidType
+import compiler.types.StructureType
+import compiler.types.Type
 
 class ASTStructureAccessNode: ASTVariableNode {
     var struct:ASTVariableNode
     var prop:ASTVariableNode
 
-    constructor(struct:ASTNode, prop:ASTVariableNode) : super((struct as ASTVariableNode).data, DefinedType("")) {
+    constructor(struct:ASTNode, prop:ASTVariableNode) : super((struct as ASTVariableNode).data, InvalidType()) {
         this.struct = struct
         this.prop = prop
     }
 
-    override fun getType(): DefinedType {
-        val struct = Compiler.definedStructures[struct.getType().getPrimitive()]
-            ?: return DefinedType("none")
+    override fun getType(): Type {
+        val struct = Compiler.definedStructures[(struct.getType() as StructureType).funcName()]
+            ?: return InvalidType()
 
         if (struct.functions.contains(prop.data))
             return Compiler.definedFunctions["${struct.name}_${prop.data}"]!!.getReturnType(0)
@@ -24,7 +26,7 @@ class ASTStructureAccessNode: ASTVariableNode {
     }
 
     fun getFunctionName(): String {
-        val struct = Compiler.definedStructures[struct.getType().getPrimitive()]
+        val struct = Compiler.definedStructures[(struct.getType() as StructureType).funcName()]
             ?: throw Exception("Cant access to non struct type")
 
         Printer.info("struct: $struct")
@@ -40,26 +42,27 @@ class ASTStructureAccessNode: ASTVariableNode {
     override fun copy(): ASTStructureAccessNode {
         return ASTStructureAccessNode(struct.copy(), prop.copy())
     }
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         struct.retype(map)
         prop.retype(map)
     }
 
-    override fun addType(type: DefinedType): ASTVariableNode {
+    override fun addType(type: Type): ASTVariableNode {
         prop.addType(type)
         return this
     }
 
     override fun toString(): String {
-        return "Struct ACCESS, \narray=${struct.toString().replace("\n","\n\t")}, \nindex=${prop.toString().replace("\n","\n\t")}\n"
+        return "Struct ACCESS, \narray=${struct.toString().replace("\n","\n  ")}, \nindex=${prop.toString().replace("\n","\n  ")}\n"
     }
 
     override fun toC(sideEffect:Boolean): String {
-        if (!struct.getType().isStructured)
-            throw Exception("Cant access to non struct type ${struct.getType()}")
+        val type = struct.getType()
+        if (type !is StructureType)
+            throw Exception("Cant access to non struct type $type")
 
-        if (Compiler.definedStructures[struct.getType().getPrimitive()]!!.functions.contains("${struct.getType().getPrimitive()}_${prop.data}"))
-            return "${struct.getType().getPrimitive()}_${prop.data}(${struct.toC()})"
+        if (Compiler.definedStructures[type.funcName()]!!.functions.contains("${type.funcName()}_${prop.data}"))
+            return "${type.funcName()}_${prop.data}(${struct.toC()})"
 
         return "${struct.toC(false)}->${prop.toC(false)}"
     }

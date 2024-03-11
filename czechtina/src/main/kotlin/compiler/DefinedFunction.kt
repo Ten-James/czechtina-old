@@ -1,23 +1,27 @@
 package compiler
 
-class DefinedFunction(val name: String,val returnType: DefinedType, val virtual: Boolean = false) {
+import compiler.types.Type
+import compiler.types.isCastAbleTo
+
+class DefinedFunction(val name: String,val returnType: Type, val virtual: Boolean = false) {
     val variants: MutableList<DefinedFunctionVariant> = mutableListOf()
 
-    constructor(name: String, returnType: DefinedType, variants: List<DefinedFunctionVariant>, virtual: Boolean = false) : this(name,returnType, virtual) {
+    constructor(name: String, returnType: Type, variants: List<DefinedFunctionVariant>, virtual: Boolean = false) : this(name,returnType, virtual) {
         this.variants.addAll(variants)
     }
 
-    fun getReturnType(variantIndex : Int): DefinedType {
+    fun getReturnType(variantIndex : Int): Type {
         return variants[variantIndex].returnType ?: returnType
     }
 
-    fun validateParams(params: List<DefinedType>): Int {
+    fun validateParams(params: List<Type>): Int {
+
         for (variant in variants) {
             if (variant.params.size != params.size){
                 if (variant.enableArgs) {
                     var same = true
                     for (i in 0 until variant.params.size - 1) {
-                        if (variant.params[i].typeString != params[i].typeString)
+                        if (variant.params[i] != params[i])
                             same = false
                     }
                     if (same) {
@@ -26,19 +30,15 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
                     }
                 }
             }
-            if (variant.params.zip(params).all { it.second.isCastAbleTo(it.first)}) {
-                if (variant.params.zip(params).any{!it.first.isConst && it.second.isConst} ) {
-                    val newName = "${name}_v${variants.size}"
-                    variants.add(DefinedFunctionVariant(newName, variant.params.zip(params).map { DefinedType(it.first.typeString,it.first.isHeap, it.first.isConst || it.second.isConst) }, defined = false, virtual = true))
-                    variants.last().timeUsed++
-                }
+            if (variant.params.zip(params).all { isCastAbleTo(it.second,it.first)}) {
 
                 variant.timeUsed++
                 return variants.indexOf(variant)
             }
         }
+        /*
         for (variant in variants) {
-            val retypeMap = mutableMapOf<String, DefinedType>()
+            val retypeMap = mutableMapOf<String, Type>()
             for (i in 0 until variant.params.size) {
                 val old = variant.params[i]
                 if (old.isPointer()){
@@ -59,13 +59,14 @@ class DefinedFunction(val name: String,val returnType: DefinedType, val virtual:
                 return variants.size-1
             }
         }
-        throw Exception("Function $name with params ${params.joinToString(","){it.typeString}} in [${variants}] not found")
+        */
+        throw Exception("Function $name with params ${params.joinToString(",")} in ${variants} not found")
     }
 
     override fun toString(): String = "\n$name: $returnType $virtual (\n\t${variants.joinToString("\n\t")}\n)"
 }
 
-class DefinedFunctionVariant(val translatedName: String, val params: List<DefinedType>, val returnType: DefinedType? = null, var defined:Boolean = true, val enableArgs: Boolean = false, val virtual: Boolean = false) {
+class DefinedFunctionVariant(val translatedName: String, val params: List<Type>, val returnType: Type? = null, var defined:Boolean = true, val enableArgs: Boolean = false, val virtual: Boolean = false) {
     var timeUsed: Int = 0
 
     override fun toString(): String = "$translatedName(${params.joinToString(",")}): $timeUsed $defined"

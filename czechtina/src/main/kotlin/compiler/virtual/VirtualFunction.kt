@@ -1,15 +1,16 @@
 package compiler.virtual
 
 import AST.*
+import Printer
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.*
 import czechtina.grammar.GrammarToken
 import czechtina.grammar.czechtina
 
 
 interface VirtualFunction {
     val name: String
-    fun getReturnType(params: ASTNode?):DefinedType
+    fun getReturnType(params: ASTNode?): Type
     fun toC(params: ASTNode?):String
 }
 
@@ -17,14 +18,14 @@ class NewFunction : VirtualFunction {
     override val name = "new"
 
     private fun getReturnTypeInternal (params: ASTNode?) = when {
-        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE -> params.getType().toDynamic().toHeap();
-        params!!.getType().isStructured -> params.getType().toDynamic()
-        else -> DefinedType("dynamic-void",true, false, false)
+        params!!.getType() is StructureType -> DynamicStructureType((params.getType() as StructureType).getStructName());
+        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE -> DynamicPointerType(params.getType());
+        else -> DynamicPointerType(VoidType());
     }
 
     override fun getReturnType(params: ASTNode?) = when {
-        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DefinedType("dynamic-${params.nodes[0].getType().getPrimitive()}", true, false, false)
-        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE_POINTER -> DefinedType("dynamic-${params.nodes[0].getType()}", true, false, false)
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE -> DynamicPointerType(params.nodes[0].getType());
+        params is ASTListNode && params.nodes.size == 2 && (params.nodes[0] as ASTUnaryNode).type == ASTUnaryTypes.TYPE_POINTER -> DynamicPointerType(params.nodes[0].getType());
         else -> getReturnTypeInternal(params)
     }
 
@@ -36,8 +37,8 @@ class NewFunction : VirtualFunction {
     }
 
     private fun toCInternal(params: ASTNode?) = when {
-        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE ->"(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
-        params!!.getType().isStructured -> "(${params.getType().getPrimitive()} *)malloc(sizeof(${params.getType().getPrimitive()}))"
+        params!!.getType() is StructureType -> "(${params.getType().toC()})malloc(sizeof(${(params.getType()as StructureType).getStructName()}))"
+        params is ASTUnaryNode && params.type == ASTUnaryTypes.TYPE ->"(${params.getType().toC()} *)malloc(sizeof(${params.getType().toC()}))"
         else -> "malloc(${params.toC()})"
     }
 
@@ -45,38 +46,41 @@ class NewFunction : VirtualFunction {
 
 class InCFuntion : VirtualFunction {
     override val name = "inC"
-    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun getReturnType(params: ASTNode?) = InvalidType()
     override fun toC(params: ASTNode?) = params!!.toC()
 }
 
 class PredejFunction : VirtualFunction {
     override val name = "predej"
-    override fun getReturnType(params: ASTNode?) = (params!! as ASTVariableNode).getType().toDynamic()
+    override fun getReturnType(params: ASTNode?) = DynamicPointerType(((params!! as ASTVariableNode).getType() as PointerType).toDereference())
     override fun toC(params: ASTNode?):String {
         val body = "${params?.toC()}"
-        Compiler.variables[Compiler.variables.size - 1][params?.toC()!!]!!.dealocated = true
+        Compiler.variables[Compiler.variables.size - 1].remove(params?.toC()!!)
         return body
     }
 }
 
 class HodnotaFunction : VirtualFunction {
     override val name = czechtina[GrammarToken.TYPE_VALUE]!!
-    override fun getReturnType(params: ASTNode?) = params!!.getType().toDereference()
+    override fun getReturnType(params: ASTNode?) = when  {
+        params!!.getType() is PointerType -> (params.getType() as PointerType).toDereference()
+        else -> throw Exception("cant use in pointer type")
+    }
     override fun toC(params: ASTNode?) = "*(${params!!.toC()})"
 }
 
 class AdresaFunction : VirtualFunction {
     override val name = czechtina[GrammarToken.TYPE_ADDRESS]!!
-    override fun getReturnType(params: ASTNode?) = params!!.getType().toPointer()
+    override fun getReturnType(params: ASTNode?) = PointerType(params!!.getType())
     override fun toC(params: ASTNode?) = "&${params!!.toC()}"
 }
 
 class ConstFunction: VirtualFunction {
     override val name = "const"
-    override fun getReturnType(params: ASTNode?) = (params!! as ASTVariableNode).getType().toConst()
+    override fun getReturnType(params: ASTNode?) = TODO()
     override fun toC(params: ASTNode?): String {
         if (params is ASTVariableNode){
-            if (!params.getType().isPointer())
+            if (params.getType() !is PointerType)
                 throw Exception("Const can be applied only to objects")
         return params.toC()
     }
@@ -86,36 +90,51 @@ class ConstFunction: VirtualFunction {
 }
 class PrintfFunction: VirtualFunction {
     override val name = "printf"
-    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun getReturnType(params: ASTNode?) = InvalidType()
     override fun toC(params: ASTNode?) = "printf(${params!!.toC()})"
 }
 
 class PrintFunction: VirtualFunction {
     override val name = "print"
-    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun getReturnType(params: ASTNode?) = InvalidType()
     override fun toC(params: ASTNode?) = when {
-        params is ASTListNode -> (params as ASTListNode).nodes.joinToString(";\n") {otherToC(it)} 
+        params is ASTListNode -> params.nodes.joinToString(";\n") {otherToC(it)}
         else -> otherToC(params)
     }
-    fun otherToC(params: ASTNode?) = when {
-        params!!.getType().typeString == "int" -> "printf(\"%d\",${params.toC()})"
-        params.getType().typeString == "bool" -> "(${params.toC()}? puts(\"true\"): puts(\"false\"))"
-        params.getType().typeString == "char" -> "printf(\"%c\",${params.toC()})"
-        params.getType().typeString == "string" -> "puts(${params.toC()})"
-        else -> "/*${params.toC()}*/"
+    fun otherToC(params: ASTNode?):String {
+        val type = params!!.getType()
+
+        if (type is PrimitiveType) {
+            when {
+                type.toC() == "int" -> return "printf(\"%d\",${params.toC()})"
+                type.toC() == "bool" -> return "(${params.toC()}? fputs(\"true\",stdout): fputs(\"false\",stdout))"
+                type.toC() == "char" -> return "printf(\"%c\",${params.toC()})"
+                type.toC() == "string" -> return "fputs(${params.toC()},stdout)"
+                else -> return "/*${params.toC()}*/"
+            }
+        }
+        Printer.err("Invalid print type: $type ${type.toC()}")
+
+        return "/*INVALID PRINT*/"
     }
+}
+
+class TypeOfFunction: VirtualFunction {
+    override val name = "typeof"
+    override fun getReturnType(params: ASTNode?) = PrimitiveType("string")
+    override fun toC(params: ASTNode?) = "\"${params!!.getType()}\""
 }
 
 class PrintlnFunction: VirtualFunction {
     override val name = "println"
-    override fun getReturnType(params: ASTNode?) = DefinedType("none")
-    override fun toC(params: ASTNode?) = PrintFunction().toC(params)+";\nputs(\"\\n\")"
+    override fun getReturnType(params: ASTNode?) = InvalidType()
+    override fun toC(params: ASTNode?) = PrintFunction().toC(params)+";fputs(\"\\n\",stdout)"
 }
 
 
 class ThrowFunction: VirtualFunction {
     override val name = "throw"
-    override fun getReturnType(params: ASTNode?) = DefinedType("none")
+    override fun getReturnType(params: ASTNode?) = InvalidType()
     override fun toC(params: ASTNode?) = "printf(${params?.toC()}); exit(1)"
 }
 
@@ -130,7 +149,8 @@ val AllVirtualFunction = listOf(
     ThrowFunction(),
     PrintfFunction(),
     PrintFunction(),
-    PrintlnFunction()
+    PrintlnFunction(),
+    TypeOfFunction()
 )
 
 fun getVirtualFunction(name: String): VirtualFunction? {

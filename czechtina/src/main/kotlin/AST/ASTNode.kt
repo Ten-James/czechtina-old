@@ -1,18 +1,18 @@
 package AST
 
-import compiler.DefinedType
+import compiler.types.Type
 
- abstract class ASTNode(var expType: DefinedType) {
+abstract class ASTNode(var expType: Type) {
 
     abstract fun toC(sideEffect:Boolean = true): String
 
     abstract fun copy(): ASTNode
 
-    open fun getType(): DefinedType = expType
+    open fun getType(): Type = expType.copy()
 
-    open fun retype(map: Map<String, DefinedType>) {
+    open fun retype(map: Map<Type, Type>) {
         for (m in map)
-            if (expType.typeString == m.key)
+            if (expType == m.key)
                 expType = m.value
     }
 

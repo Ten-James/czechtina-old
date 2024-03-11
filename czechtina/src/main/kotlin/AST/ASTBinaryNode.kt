@@ -1,7 +1,8 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.Type
 import czechtina.grammar.GrammarToken
 
 
@@ -11,10 +12,10 @@ enum class ASTBinaryTypes {
 }
 
 open class ASTBinaryNode(var type: ASTBinaryTypes, var left: ASTNode, var right: ASTNode) :
-    ASTNode(DefinedType("none")) {
+    ASTNode(InvalidType()) {
 
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         left.retype(map)
         right.retype(map)
     }
@@ -24,7 +25,7 @@ open class ASTBinaryNode(var type: ASTBinaryTypes, var left: ASTNode, var right:
     }
 
     override fun toString(): String {
-        return "'$type', \nleft=${left.toString().replace("\n","\n\t")}, \nright=${right.toString().replace("\n","\n\t")}\n"
+        return "Binary: '$type', \nleft=\n  ${left.toString().replace("\n","\n  ")}, \nright=\n  ${right.toString().replace("\n","\n  ")}"
     }
 
     override fun toC(sideEffect:Boolean): String = when (type) {

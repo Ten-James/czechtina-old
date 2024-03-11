@@ -1,7 +1,8 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.Type
 import czechtina.grammar.GrammarToken
 import czechtina.grammar.czechtina
 import compiler.virtual.getVirtualFunction
@@ -12,12 +13,12 @@ class ASTFunctionCallNode : ASTVariableNode {
 
 
 
-    constructor(function:ASTVariableNode, params:ASTNode? = null): super("", DefinedType("none")) {
+    constructor(function:ASTVariableNode, params:ASTNode? = null): super("", InvalidType()) {
         this.function = function
         this.params = params
     }
 
-    override fun getType(): DefinedType {
+    override fun getType(): Type {
         val virFun = getVirtualFunction(function.data)
         if (virFun != null)
             return virFun.getReturnType(params)
@@ -28,7 +29,7 @@ class ASTFunctionCallNode : ASTVariableNode {
             funName = (function as ASTStructureAccessNode).getFunctionName()
 
         if (Compiler.definedFunctions.containsKey(funName)) {
-            val paramsTypes = mutableListOf<DefinedType>()
+            val paramsTypes = mutableListOf<Type>()
 
             if (function is ASTStructureAccessNode)
                 paramsTypes.add((function as ASTStructureAccessNode).struct.getType())
@@ -44,16 +45,16 @@ class ASTFunctionCallNode : ASTVariableNode {
             if (variantIndex != -1)
                 return Compiler.definedFunctions[funName]!!.getReturnType(variantIndex)
         }
-        return DefinedType("none")
+        return InvalidType()
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         function.retype(map)
         params?.retype(map)
     }
 
     override fun toString(): String {
-        return "CALL FUNCTION, \nfunction=${function.toString().replace("\n","\n\t")}, \nparams=${params.toString().replace("\n","\n\t")}\n"
+        return "Function Call:\n  func='${function.toC(false)}',\n  params=${params.toString().replace("\n","\n  ")}"
     }
 
     override fun copy(): ASTFunctionCallNode {
@@ -77,7 +78,7 @@ class ASTFunctionCallNode : ASTVariableNode {
         }
 
         if (Compiler.definedFunctions.containsKey(funName)) {
-            val paramsTypes = mutableListOf<DefinedType>()
+            val paramsTypes = mutableListOf<Type>()
             if (function is ASTStructureAccessNode)
                 paramsTypes.add((function as ASTStructureAccessNode).struct.getType())
             if (params is ASTListNode)

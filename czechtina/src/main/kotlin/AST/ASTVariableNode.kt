@@ -1,64 +1,53 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.DynamicPointerType
+import compiler.types.Type
 
 open class ASTVariableNode : ASTNode {
     val data: String
     val isLocal:Boolean
 
-    constructor(data:String, expressionType: DefinedType, isLocal: Boolean = true) : super(expressionType) {
-        Compiler.setNewVariableType(data, DefinedType(expressionType))
+    constructor(data:String, expressionType: Type, isLocal: Boolean = true) : super(expressionType) {
+        Compiler.setNewVariableType(data, expressionType.copy())
         this.data = data
         this.isLocal = isLocal
 
     }
 
-    override fun retype(map: Map<String, DefinedType>){
+    override fun retype(map: Map<Type, Type>){
         for (m in map)
-            if (expType.typeString == m.key)
-                expType = m.value
+            if (expType == m.key)
+                expType = m.value.copy()
     }
 
     override fun copy(): ASTVariableNode {
         return ASTVariableNode(data, expType, isLocal)
     }
 
-    open fun addType(type: DefinedType ): ASTVariableNode {
-        Compiler.setVariableType(data, DefinedType(type))
+    open fun addType(type: Type ): ASTVariableNode {
+        Compiler.setVariableType(data, type.copy())
         this.expType = type
         return this
     }
 
-    override fun getType(): DefinedType {
-        val defined = Compiler.tryGetDefinedType(data)
+    override fun getType(): Type {
+        val defined = Compiler.tryGetType(data)
         if (defined != null)
-            return defined.unDynamic()
+            return if ( defined is DynamicPointerType ) defined.toUndynamic() else defined.copy();
         val compType = Compiler.getVariableType(data)
         if (compType != null)
-            return compType.unDynamic()
-        return expType.unDynamic()
+            return if ( compType is DynamicPointerType ) compType.toUndynamic() else compType.copy();
+        return (expType as? DynamicPointerType)?.toUndynamic() ?: expType.copy()
     }
 
     override fun toString(): String {
-        return "Variable=$data"
+        return "Variable=$data: ${getType()}"
     }
 
     fun toDefineC(): String {
         if (isLocal && !Compiler.isDefined(data))
-            Compiler.variables[Compiler.variables.size-1] += mapOf(data to DefinedType(expType))
-        if (getType().isArray()){
-            val s = getType().typeString.split("-")
-            val starcount = s.size - 3
-
-            val star = "*".repeat(starcount)
-
-            return "${s[s.size-2]} $star$data[${s[s.size-1]}]"
-        }
-        if (getType().isAddress()){
-            val s = getType().getPrimitive()
-            return "${s} *$data"
-        }
+            Compiler.variables[Compiler.variables.size-1] += mapOf(data to expType.copy())
         return "${getType().toC()} $data"
     }
     override fun toC(sideEffect:Boolean): String = if (Compiler.isDefined(data) || !sideEffect) data else toDefineC()

@@ -86,7 +86,7 @@ class CodeBlockTest {
             #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
             int x;
-            int *p = &x;
+            int* p = &x;
             int h = *(p);
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
@@ -104,7 +104,7 @@ class CodeBlockTest {
         val excepted = """
             #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
-            int x[3] = {1,2,3};
+            int* x = {1,2,3};
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
@@ -121,7 +121,7 @@ class CodeBlockTest {
         val excepted = """
             #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             int main() {
-            int x[3] = {1,2,3};
+            int* x = {1,2,3};
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
@@ -141,8 +141,8 @@ class CodeBlockTest {
             #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             
             int main() {
-            int *x;
-            int *y = x + 3;
+            int* x;
+            int* y = x + 3;
             int z = x - y;
         }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
@@ -161,7 +161,7 @@ class CodeBlockTest {
         val cCode = Compiler.compileText(code)
         val excepted = """
             #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
-            int main() { char *x = (char*)(malloc(5)); char z = x[3]; x[3] = 5; if(x)free(x); }""".trimIndent()
+            int main() { char* x = (char*)(malloc(5)); char z = x[3]; x[3] = 5; if(x)free(x); }""".trimIndent()
         assertEquals(excepted.replace("\\s+".toRegex(), " ").trim(), cCode.replace("\\s+".toRegex(), " ").trim())
     }
 
@@ -170,10 +170,10 @@ class CodeBlockTest {
     fun testHistogramProgram() {
         ArgsProvider.debug = true
         val code = """
-            zpracuj histo:ukazatel<int>,minimum:int { void
-                c:cele = 0
+            zpracuj histo:pointer<int>,minimum:int { void
+                c:int = 0
                 scanf "%d", (adresa c)
-                for i:cele -> 0 do 9 {
+                for i:int -> 0 do 9 {
                     if c == i+minimum{
                         histo[i] = histo[i] + 1
                         vrat
@@ -182,10 +182,10 @@ class CodeBlockTest {
                 histo[9] = histo[9] + 1
             }
             main {
-                t:znak
+                t:char
                 histo:pointer<int> = [0,0,0,0,0,0,0,0,0,0]
                 scanf "%c", (adresa t)
-                if 'v' neni presne t neni presne 'h' {
+                if 'v' != t != 'h' {
                     printf "Neplatny mod vykresleni\n"
                     vrat 1
                 }
@@ -203,9 +203,9 @@ class CodeBlockTest {
         val excepted = """
 #include "stdio.h" #include "stdlib.h" #include "malloc.h" #include "string.h" #include "stdbool.h" #include "math.h"
             
-void zpracuj(int *histo, int minimum); 
+void zpracuj(int* histo, int minimum); 
 
-void zpracuj(int *histo, int minimum) {
+void zpracuj(int* histo, int minimum) {
 	int c = 0;
 	scanf("%d",&c);
 	for  (int i = 0; i < 9; i = i + 1) {
@@ -219,7 +219,7 @@ void zpracuj(int *histo, int minimum) {
 
 int main() {
 	char t;
-	int *histo = {0,0,0,0,0,0,0,0,0,0};
+	int* histo = {0,0,0,0,0,0,0,0,0,0};
 	scanf("%c",&t);
 	if ('v' != t && t != 'h') {
 		printf("Neplatny mod vykresleni\n");

@@ -2,7 +2,7 @@ package czechtina.lesana
 
 import AST.*
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.*
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.grammar.*
@@ -27,8 +27,8 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     elevatedVariable to def(re("--"), variables) { (_, e) -> ASTUnaryNode(ASTUnaryTypes.PRE_DECREMENT, e, e.getType()) }
     elevatedVariable to def(variables, re("\\+\\+")) { (e, _) -> ASTUnaryNode(ASTUnaryTypes.POST_INCREMENT, e, e.getType()) }
     elevatedVariable to def(variables, re("--")) { (e, _) -> ASTUnaryNode(ASTUnaryTypes.POST_DECREMENT, e, e.getType()) }
-    elevatedVariable to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", DefinedType("none")), e) }
-    elevatedVariable to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", DefinedType("none")), e) }
+    elevatedVariable to def(re("@"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("const", InvalidType()), e) }
+    elevatedVariable to def(re("&"), variables) { (_, e) -> ASTFunctionCallNode( ASTVariableNode("predej", InvalidType()), e) }
     elevatedVariable to def(elevatedVariable, re("\\["), sentence, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
     elevatedVariable to def(elevatedVariable, re("\\["), elevatedVariable, re("\\]")) { (v, _, e, _) -> ASTArrayAccessNode(v, e) }
 
@@ -146,7 +146,7 @@ fun expression(variables: NodeID<ASTVariableNode>, types: NodeID<ASTNode>) = les
     para5 to def(elevatedVariable) {it.v1}
 
     elevatedVariable to def(variables) {it.v1}
-    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, DefinedType("array-${it.v2.nodes[0].getType().typeString}-${it.v2.nodes.size}")) }
+    exp3 to def (re("\\["), listexp3, re("\\]")) { ASTUnaryNode(ASTUnaryTypes.ARRAY, it.v2, StaticArrayType(it.v2.nodes[0].getType(),it.v2.nodes.size.toString())) }
 
     sentence to def(re("-"), para5) { ASTUnaryNode(ASTUnaryTypes.MINUS, it.v2, it.v2.getType()) }
 

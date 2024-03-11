@@ -1,10 +1,11 @@
 package AST
 
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.InvalidType
+import compiler.types.Type
 
 class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List<ASTNode>, body: ASTUnaryNode) :
-    ASTNode(DefinedType("")) {
+    ASTNode(InvalidType()) {
     var name:String? = name
     var body:ASTUnaryNode? = body
 
@@ -18,7 +19,7 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
         }
     }
 
-    override fun retype(map: Map<String, DefinedType>) {
+    override fun retype(map: Map<Type, Type>) {
         type.retype(map)
         parameters.forEach { it.retype(map) }
         body?.retype(map)
@@ -26,14 +27,14 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
 
 
     override fun toString(): String {
-        return "Function '$name' : '$type', \nparameters=${parameters.joinToString("").replace("\n","\n\t")}, \nbody=${body.toString().replace("\n","\n\t")}"
+        return "Function '$name': $type, \nparameters=${if (parameters.isEmpty()) { "none" } else {parameters.joinToString("").replace("\n","\n  ")}}, \nbody=${body.toString().replace("\n","\n  ")}"
     }
 
     override fun toC(sideEffect:Boolean): String  {
-        val paramsTypes = mutableListOf<DefinedType>()
+        val paramsTypes = mutableListOf<Type>()
         for (param in parameters)
             paramsTypes.add(param.getType())
-        if (paramsTypes.any{it.isTemplate()})
+        if (paramsTypes.any{ false}) //TODO
             return "//${name}_CZECHTINA ANCHOR\n"
         return "//${name}_CZECHTINA ANCHOR\n${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
     }
@@ -43,13 +44,14 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
     }
 
     fun precalculateType() {
-        if (type.expType.typeString != "none")
+        if (type.expType is InvalidType)
             return
 
         Compiler.scopePush()
         for (param in parameters)
             Compiler.setNewVariableType((param as ASTVarDefinitionNode).variable.data, param.type.getType())
-        type.expType = body!!.getType()
+        if (type.getType() is InvalidType)
+            type.expType = body!!.getType()
         Compiler.scopePop(false)
     }
 
@@ -59,7 +61,7 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
     fun toCDeclarationNoSideEffect(): String = "${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}); ${Compiler.scopePop(false)}"
 
     fun toCDeclaration(): String {
-        val paramsTypes = mutableListOf<DefinedType>()
+        val paramsTypes = mutableListOf<Type>()
         for (param in parameters)
             paramsTypes.add(param.getType())
 
@@ -70,7 +72,7 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
         }
         else
             Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, type.getType(), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes, returnType = type.getType())), virtual = false))
-        if (paramsTypes.any{it.isTemplate()})
+        if (paramsTypes.any{false}) //TODO
             return "//${name}_Declaration_CZECHTINA ANCHOR\n"
 
         return "//${name}_Declaration_CZECHTINA ANCHOR\n"+toCDeclarationNoSideEffect()

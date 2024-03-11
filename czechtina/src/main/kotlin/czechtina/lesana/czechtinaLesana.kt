@@ -3,7 +3,7 @@ package czechtina.lesana
 import AST.*
 import Printer
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.*
 import cz.j_jzk.klang.lesana.lesana
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.grammar.*
@@ -61,26 +61,26 @@ fun czechtinaLesana() = lesana<ASTNode> {
         types,
         endOfLine
     ) { (_, v,_, t,_) ->
-        if (Compiler.definedTypes.contains(v.toC()))
+        if (Compiler.Types.contains(v.toC()))
             throw Exception("Type ${v.toC()} is already defined")
-        else if (Compiler.addToDefinedTypes(v.toC(),t.getType()))
+        else if (Compiler.addToTypes(v.toC(),t.getType()))
             ASTBinaryNode(ASTBinaryTypes.TYPE_DEFINITION, t, v.addType(t.getType()))
         else
             throw Exception("Error")
     }
 
-    types to def(re("@"),types) { (_, t) -> ASTUnaryNode(ASTUnaryTypes.TYPE,t.data!!,t.getType().toConst()) }
+    //types to def(re("@"),types) { (_, t) -> ASTUnaryNode(ASTUnaryTypes.TYPE,t.data!!,t.getType().toConst()) }
 
-    types to def(re("&"),types) { (_, t) -> ASTUnaryNode(ASTUnaryTypes.TYPE,t.data!!,t.getType().toHeap()) }
+    types to def(re("&"),types) { (_, t) -> ASTUnaryNode(ASTUnaryTypes.TYPE,t.data!!,DynamicPointerType((t.getType() as PointerType).toDereference())) }
 
     types to def(re(czechtina[GrammarToken.TYPE_POINTER]!!),
         re("<"),
         types,
         re(">"))
-    { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, t2.getType().toPointer()) }
+    { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, PointerType(t2.getType())) }
 
-    types to def(re(cAndCzechtinaRegex(Alltypes) +"|T[0-9]*|[A-Z][a-zA-Z]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE, if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else it.v1, DefinedType(if (Regex("T[0-9]*").matches(it.v1)) "*${it.v1}" else if (Regex("[A-Z]+").matches(it.v1)) it.v1 else cTypeFromCzechtina(it.v1) )) }
-
+    types to def(re(cAndCzechtinaRegex(Alltypes))) { ASTUnaryNode(ASTUnaryTypes.TYPE,it.v1, PrimitiveType(cTypeFromCzechtina(it.v1))) }
+    types to def(re("[A-Z]+")) { ASTUnaryNode(ASTUnaryTypes.TYPE,it.v1, StructureType(it.v1)) }
 
     val r_expression = include(expression(variables, types))
 
@@ -95,7 +95,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     )
     {
        ASTFunctionNode(
-           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele", DefinedType("int")), it.v1,
+           ASTUnaryNode(ASTUnaryTypes.TYPE, "cele", PrimitiveType("int")), it.v1,
            emptyList(), it.v2
        )
     }
@@ -118,7 +118,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     }
 
 
-    variables to def(re("[a-zA-Z][a-zA-Z0-9]*")) { ASTVariableNode(it.v1, DefinedType("none")) }
+    variables to def(re("[a-zA-Z][a-zA-Z0-9]*")) { ASTVariableNode(it.v1, InvalidType()) }
 
 
     program to def(import, program) { (import, program) -> program.appendImport(import) }

@@ -24,7 +24,7 @@ class V0165TEST {
             int b = 0;
             b += 1;
             ++b;
-            int *c = (int**)malloc(5 * sizeof(int *));
+            int* c = (int*)malloc(5 * sizeof(int));
             if(c)free(c);
         }""".trimIndent()
         Assertions.assertEquals(

@@ -39,7 +39,7 @@ fun LesanaBuilder<ASTNode>.rangedTypedFor(
     r_expression,
     blockCode
 )
-{ (_, v, _, t, _, min, def, max, block) -> ASTForNode(v, t, min, def, max, block) }
+{ (_, v, _, t, _, min, def, max, block) -> ASTForNode(v.addType(t.getType()), t, min, def, max, block) }
 
 fun LesanaBuilder<ASTNode>.inlineCodedFor(
     line: NodeID<ASTNode>,

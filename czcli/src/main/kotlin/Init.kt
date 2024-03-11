@@ -10,7 +10,7 @@ fun Init(defaultName: String?, defaultPath:String?) {
 
     path = (if (path.isNullOrEmpty()) name else if (!path.endsWith("/")) "$path/$name" else "$path$name")
 
-    createDir(path ?: "")
+    createDir(path)
     createDir("$path/src")
 
     // create file main.cz in src
@@ -25,10 +25,10 @@ fun Init(defaultName: String?, defaultPath:String?) {
 
     createFile("$path/.buildczech", """
         // This is the build file of the project
-        output = "$name"
-        buildDir = "build"
-        main = "src/main.cz"
-        src = "src"
+        output = $name
+        buildDir = build
+        main = src/main.cz
+        src = src
         
     """.trimIndent())
 

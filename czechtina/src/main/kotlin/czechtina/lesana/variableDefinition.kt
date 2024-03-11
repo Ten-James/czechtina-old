@@ -2,7 +2,7 @@ package czechtina.lesana
 
 import AST.*
 import compiler.Compiler
-import compiler.DefinedType
+import compiler.types.*
 import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.parse.NodeID
 import czechtina.grammar.GrammarToken
@@ -20,7 +20,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re("<"),
         types,
         re(">")
-    ) { (v, _, _, _, t, _) -> ASTStaticArrayDefinitionNode(t, v.addType(t.getType().toArray("")), "") }
+    ) { (v, _, _, _, t, _) -> ASTStaticArrayDefinitionNode(t, v.addType(StaticArrayType(t.getType(),"")), "") }
 
     varDefinition to def(
         variables,
@@ -31,7 +31,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re(","),
         re("[0-9]+"),
         re(">")
-    ) { (v, _, _, _, t, _, s, _) -> ASTStaticArrayDefinitionNode(t, v.addType(t.getType().toArray(s)), s) }
+    ) { (v, _, _, _, t, _, s, _) -> ASTStaticArrayDefinitionNode(t, v.addType( StaticArrayType(t.getType(),s)), s) }
 
 
     varDefinition to def(
@@ -46,9 +46,9 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
         variables
     ) { (v, _, t) ->
-        if (Compiler.definedTypes.contains(t.data)) ASTVarDefinitionNode(
-            v.addType(Compiler.tryGetDefinedType(t.data) ?: throw Exception("ERROR")),
+        if (Compiler.Types.contains(t.data)) ASTVarDefinitionNode(
+            v.addType(Compiler.tryGetType(t.data) ?: throw Exception("ERROR")),
             t
-        ) else throw Exception("[${Compiler.definedTypes}]:Variable ${t.toC()}/is not defined as an type")
+        ) else throw Exception("[${Compiler.Types}]:Variable ${t.toC()}/is not defined as an type")
     }
 }
