@@ -16,13 +16,12 @@ open class ASTVariableNode : ASTNode {
     }
 
     override fun retype(map: Map<Type, Type>){
-        for (m in map)
-            if (expType == m.key)
-                expType = m.value.copy()
+        expType = expType.reType(map)
+        Compiler.setVariableType(data, expType)
     }
 
     override fun copy(): ASTVariableNode {
-        return ASTVariableNode(data, expType, isLocal)
+        return ASTVariableNode(data, expType.copy(), isLocal)
     }
 
     open fun addType(type: Type ): ASTVariableNode {

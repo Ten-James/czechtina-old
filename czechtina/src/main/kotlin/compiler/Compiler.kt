@@ -3,7 +3,6 @@ package compiler
 import AST.*
 import cz.j_jzk.klang.input.InputFactory
 import czechtina.grammar.*
-import czechtina.header.createCzechtinaDefineFile
 import czechtina.lesana.czechtinaLesana
 import utils.ArgsProvider
 import Printer
@@ -14,8 +13,8 @@ import java.io.File
 import kotlin.system.exitProcess
 
 object Compiler {
-    private const val VERSION = "0.1.6.5"
-    var isParsed = false
+    private const val VERSION = "0.1.7.0"
+    private var isParsed = false
     private var compilingTo = "C"
     var Types = mutableMapOf<String, Type>()
     var undefinedFunction = mutableListOf<String>()
@@ -24,11 +23,10 @@ object Compiler {
     var variables = mutableListOf(mutableMapOf<String, Type>())
     var grammar: Map<GrammarToken, String> = C
     var buildPath: String = ""
-    var compiledPackages = mutableListOf<String>()
+    private var compiledPackages = mutableListOf<String>()
 
     fun typeFromCzechtina(czechType: String): String = when (compilingTo) {
         "C" -> cTypeFromCzechtina(czechType)
-        "CZ" -> czTypeFromCzechtina(czechType)
         else -> ""
     }
 
@@ -61,7 +59,7 @@ object Compiler {
     fun setNewVariableType(varName: String, type: Type) {
         if (varName == "")
             return
-        Printer.info("Adding variable '$varName' with type $type")
+        Printer.lowInfo("Adding variable '$varName' with type $type")
         if (variables[variables.size - 1].containsKey(varName)) {
             setVariableType(varName, type)
             return
@@ -74,7 +72,7 @@ object Compiler {
             return
         for (variable in variables.reversed()) {
             if (variable.containsKey(varName)) {
-                Printer.info("Setting variable '$varName' with type $type")
+                Printer.lowInfo("Setting variable '$varName' with type $type")
                 variable[varName] = type
                 return
             }
@@ -118,10 +116,6 @@ object Compiler {
     }
 
 
-    fun setToCZ() {
-        compilingTo = "CZ"
-        grammar = CZ
-    }
 
     private fun calcTypePriority(type: String): Int = when (type) {
         "none" -> 100
@@ -136,12 +130,12 @@ object Compiler {
     }
 
     fun calcBinaryType(left: ASTNode, right: ASTNode, operand: String): Type {
-        /*
-        if (left.getType().isTemplate())
+
+        if (left.getType().isGeneric())
             return left.getType()
-        if (right.getType().isTemplate())
+        if (right.getType().isGeneric())
             return right.getType()
-        */
+
         val leftType = left.getType()
         val rightType = right.getType()
         if (operand == "=") {
@@ -208,7 +202,6 @@ object Compiler {
     }
 
     private fun addFunctionVariants(code: String, tree: ASTProgramNode): String {
-        /*
         var cCode = code
         while (isAnyUsedFunctionUndefined()) {
             for (function in definedFunctions){
@@ -217,6 +210,7 @@ object Compiler {
                     continue
                 val variants = listOf(fce.variants).flatten().filter { !it.defined && it.timeUsed > 0 }
                 for (variant in variants){
+                    Printer.info("writing Function ${variant}")
                     val functionASTree = tree.functions.find { it.name == function.key }
                         ?: throw Exception("Function ${function.key} not found")
                     scopePush()
@@ -230,36 +224,31 @@ object Compiler {
                     for (i in 0 until variant.params.size){
                         val old =fce.variants[abstractIndex].params[i]
                         val new = variant.params[i]
-
                         if (old is PointerType && new is PointerType) {
                             if (old.toDereference() == new.toDereference()) {
-                                retypeMap += mapOf(old.typeString to new)
+                                retypeMap += mapOf(old to new)
                                 continue
                             }
                         }
-
-
-                        if (!old.isTemplate())
-                            continue
-                        retypeMap += mapOf(old.getTemplate() to new)
                     }
                     functionAST.name = variant.translatedName
-                    functionAST.retype(retypeMap)
+                    functionAST.retype(variant.retypeMap.plus(retypeMap))
+
+                    Printer.info("-------------------")
+                    Printer.info(variant.retypeMap.plus(retypeMap).toString())
+                    Printer.info("-------------------")
 
                     if (!variant.virtual) {
+                        Printer.info("Trying to replace, '//${function.key}_Declaration_CZECHTINA ANCHOR'")
                         cCode = cCode.replace("//${function.key}_Declaration_CZECHTINA ANCHOR", "//${function.key}_Declaration_CZECHTINA ANCHOR\n${functionAST.toCDeclarationNoSideEffect()}")
                         cCode = cCode.replace("//${function.key}_CZECHTINA ANCHOR", "//${function.key}_CZECHTINA ANCHOR\n${functionAST.toCNoSideEffect()}")
-                    }
-                    else {
-                        functionAST.toCNoSideEffect()
                     }
 
                     variant.defined = true
                 }
             }
         }
-         */
-        return code
+        return cCode
 
     }
 
@@ -350,7 +339,6 @@ object Compiler {
 
 
     fun compile(text: String, path: String) {
-
         Printer.info("Started compiling process -> $path")
         val code = Preprocessor.preprocessText(text, path)
         val withoutExtension = RemoveFirstFolder(RemoveFileExtension(path))
@@ -379,7 +367,7 @@ object Compiler {
         variables.clear()
         variables.add(mutableMapOf())
 
-        var cCode = ""
+        var cCode: String
 
         try {
             cCode = tree.toC()
@@ -392,17 +380,6 @@ object Compiler {
 
         cCode = addFunctionVariants(cCode, tree)
 
-        if (compilingTo == "CZ") {
-            cCode = "#define \"czechtina.h\"\n$cCode"
-            createCzechtinaDefineFile()
-        }
-
-        if (ArgsProvider.friendly) {
-            if (compilingTo != "C") {
-                setToC()
-                cCode += "\n/*\n ${tree.toC()} \n*/"
-            }
-        }
 
         cCode = cCode.replace("#\$#CZECHTINAMEZERA\$#\$", " ")
 
@@ -418,5 +395,7 @@ object Compiler {
         Filer.createAllDirsInPath("$buildPath${withoutExtension.substringBeforeLast("/")}")
         File("$buildPath$withoutExtension.c").writeText(cCode)
         Printer.success("File was compiled into $buildPath$withoutExtension.c")
+
+
     }
 }

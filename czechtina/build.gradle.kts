@@ -19,6 +19,9 @@ dependencies {
     implementation("org.json:json:20230618")
     testImplementation(kotlin("test"))
 
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.2.0")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.2.0")
+
     implementation("cz.j_jzk.klang:klang:1.0-rc3")
     implementation("cz.j_jzk.klang:klang-prales:1.0-rc3")
     implementation(project(":czechCommon"))

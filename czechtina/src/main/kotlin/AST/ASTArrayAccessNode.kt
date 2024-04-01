@@ -1,5 +1,7 @@
 package AST
 
+import Printer
+import compiler.Compiler
 import compiler.types.InvalidType
 import compiler.types.PointerType
 import compiler.types.Type
@@ -7,7 +9,11 @@ import compiler.types.Type
 class ASTArrayAccessNode(var array: ASTVariableNode, var index: ASTNode) : ASTVariableNode("", InvalidType()) {
 
     override fun getType(): Type {
-        return if (array.getType() is PointerType) (array.getType() as PointerType).toDereference() else throw Exception("Invalid")
+        return if (array.getType() is PointerType) (array.getType() as PointerType).toDereference() else
+        {
+            Printer.info(Compiler.toString());
+            throw Exception("Invalid, ${array} cant be accessed as array")
+        }
     }
 
     override fun copy(): ASTArrayAccessNode {

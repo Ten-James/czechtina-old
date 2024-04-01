@@ -5,4 +5,8 @@ class InvalidType: Type(){
     override fun toString(): String = "InvalidType"
 
     override fun copy(): Type = InvalidType()
+
+    override fun reType(map: Map<Type, Type>): Type {
+        return this
+    }
 }

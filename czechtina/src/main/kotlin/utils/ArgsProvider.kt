@@ -9,8 +9,6 @@ object ArgsProvider {
     var useCache: Boolean = false
     var showTree: Boolean = false
     var writeCode: Boolean = false
-    var fpeterek: Boolean = false
-    var friendly: Boolean = false
     var setDir: Boolean = false
     var debug: Boolean = false
     var dir: String = ""
@@ -31,8 +29,6 @@ object ArgsProvider {
         noCompilation = args.any { it == "--no-compile" }
         showTree = args.any { it == "--show-tree" }
         writeCode = args.any { it == "--write-code" }
-        fpeterek = args.any { it == "--fpeterek" }
-        friendly = args.any { it == "--friendly" }
         setDir = args.any { it == "--set-dir" }
         debug = args.any { it == "--debug" }
         useCache = args.any { it == "--use-cache" }

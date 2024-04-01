@@ -37,7 +37,7 @@ enum class ASTUnaryTypes {
 class ASTUnaryNode(type: ASTUnaryTypes, data: Any, expressionType: Type = InvalidType()) :
     ASTNode(expressionType) {
     var type: ASTUnaryTypes? = type
-    var data: Any? = data
+    var data: Any = data
 
     override fun getType(): Type {
         if (type == ASTUnaryTypes.RETURN && super.getType() is InvalidType)
@@ -67,17 +67,14 @@ class ASTUnaryNode(type: ASTUnaryTypes, data: Any, expressionType: Type = Invali
         if (data is ASTNode)
             (data as ASTNode).retype(map)
         if (type == ASTUnaryTypes.TYPE) {
-            for (m in map) {
-                //data = data.toString().replace(m.key, m.value.typeString)
-                if (expType == m.key)
-                    expType = m.value
-            }
+            expType = expType.reType(map)
         }
 
     }
 
     override fun copy(): ASTUnaryNode {
-        return ASTUnaryNode(type!!, data!!, expType)
+        val copiedData = if (data is ASTNode) (data as ASTNode).copy() else data
+        return ASTUnaryNode(type!!, copiedData, expType.copy())
     }
 
     override fun toC(sideEffect: Boolean): String = when (type) {

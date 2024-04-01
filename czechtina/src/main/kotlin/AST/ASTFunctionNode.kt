@@ -1,6 +1,7 @@
 package AST
 
 import compiler.Compiler
+import compiler.types.GenericType
 import compiler.types.InvalidType
 import compiler.types.Type
 
@@ -34,7 +35,7 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
         val paramsTypes = mutableListOf<Type>()
         for (param in parameters)
             paramsTypes.add(param.getType())
-        if (paramsTypes.any{ false}) //TODO
+        if (paramsTypes.any{ it.isGeneric()})
             return "//${name}_CZECHTINA ANCHOR\n"
         return "//${name}_CZECHTINA ANCHOR\n${type.toC()}${Compiler.scopePush()} ${name}(${parameters.joinToString(", ") { it.toC() }}) ${body?.toC()}"
     }
@@ -63,16 +64,20 @@ class ASTFunctionNode(var type: ASTUnaryNode, name: String, var parameters: List
     fun toCDeclaration(): String {
         val paramsTypes = mutableListOf<Type>()
         for (param in parameters)
-            paramsTypes.add(param.getType())
+            if (param is ASTVarDefinitionNode)
+                paramsTypes.add(param.type.getType())
+            else
+                paramsTypes.add(param.getType())
+
 
         if (Compiler.definedFunctions.containsKey(name!!)) {
             val newName = "${name}_v${Compiler.definedFunctions[name!!]!!.variants.size}"
-            Compiler.definedFunctions[name!!]!!.variants.add(compiler.DefinedFunctionVariant(newName, paramsTypes, returnType = type.getType()))
+            Compiler.definedFunctions[name!!]!!.variants.add(compiler.DefinedFunctionVariant(newName, paramsTypes, returnType = type.getType(), retypeMap = mapOf()))
             name = newName;
         }
         else
-            Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, type.getType(), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes, returnType = type.getType())), virtual = false))
-        if (paramsTypes.any{false}) //TODO
+            Compiler.definedFunctions += mapOf(name!! to compiler.DefinedFunction(name!!, type.getType(), listOf(compiler.DefinedFunctionVariant(name!!, paramsTypes, returnType = type.getType(), retypeMap = mapOf())), virtual = false))
+        if (paramsTypes.any{it.isGeneric()})
             return "//${name}_Declaration_CZECHTINA ANCHOR\n"
 
         return "//${name}_Declaration_CZECHTINA ANCHOR\n"+toCDeclarationNoSideEffect()

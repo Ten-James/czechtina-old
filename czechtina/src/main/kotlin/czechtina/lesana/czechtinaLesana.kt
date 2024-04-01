@@ -80,6 +80,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     { (_, _, t2, _) -> ASTUnaryNode(ASTUnaryTypes.TYPE_POINTER, t2, PointerType(t2.getType())) }
 
     types to def(re(cAndCzechtinaRegex(Alltypes))) { ASTUnaryNode(ASTUnaryTypes.TYPE,it.v1, PrimitiveType(cTypeFromCzechtina(it.v1))) }
+    types to def(re("T[0-9]*")) { ASTUnaryNode(ASTUnaryTypes.TYPE,it.v1, GenericType(it.v1)) }
     types to def(re("[A-Z]+")) { ASTUnaryNode(ASTUnaryTypes.TYPE,it.v1, StructureType(it.v1)) }
 
     val r_expression = include(expression(variables, types))
@@ -146,7 +147,7 @@ fun czechtinaLesana() = lesana<ASTNode> {
     onUnexpectedToken { err ->
         Compiler.getCurrentCodeLine(err.got.position.character)
         Printer.info(err.expectedIDs.joinToString(", "))
-        if (ArgsProvider.debug) {
+        if (Printer.debug) {
             println(err)
         }
         throw Exception( "CZECHTINA ERROR")

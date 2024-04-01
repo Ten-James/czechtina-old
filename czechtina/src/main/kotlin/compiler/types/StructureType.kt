@@ -14,6 +14,12 @@ open class StructureType(private val name: String): Type() {
             return other.name == name
         return super.equals(other)
     }
+
+    override fun reType(map: Map<Type, Type>): Type {
+        if (map.containsKey(this))
+            return map[this]!!
+        return this
+    }
 }
 
 class DynamicStructureType(private val name: String): StructureType(name) {

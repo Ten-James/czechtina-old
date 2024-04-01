@@ -10,10 +10,21 @@ open class PointerType(private val addressing: Type): Type() {
 
     override fun copy(): Type = PointerType(addressing.copy());
 
+    override fun isGeneric() = addressing.isGeneric();
+
     override fun equals(other: Any?): Boolean {
         if (other is PointerType)
             return addressing == other.addressing
         return super.equals(other)
+    }
+
+    override fun reType(map: Map<Type, Type>): Type {
+        val newAddressing = addressing.reType(map);
+        if (map.containsKey(this))
+            return map[this]!!
+        if (newAddressing != addressing)
+            return PointerType(newAddressing);
+        return this;
     }
 }
 

@@ -9,9 +9,6 @@ fun main(args: Array<String>) {
 
     ArgsProvider.processArgs(args)
 
-    if (ArgsProvider.fpeterek) {
-        Compiler.setToCZ()
-    }
 
     if (ArgsProvider.setDir) {
         Compiler.buildPath= ArgsProvider.dir

@@ -10,9 +10,7 @@ open class ASTVarDefinitionNode(variable: ASTVariableNode, var type: ASTNode) : 
     override fun retype(map: Map<Type, Type>) {
         type.retype(map)
         variable.retype(map)
-        for (m in map)
-            if (expType == m.key)
-                expType = m.value
+        expType = expType.reType(map)
     }
 
 

@@ -11,9 +11,7 @@ abstract class ASTNode(var expType: Type) {
     open fun getType(): Type = expType.copy()
 
     open fun retype(map: Map<Type, Type>) {
-        for (m in map)
-            if (expType == m.key)
-                expType = m.value
+        expType = expType.reType(map)
     }
 
 }

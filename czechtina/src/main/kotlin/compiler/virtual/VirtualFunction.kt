@@ -47,7 +47,7 @@ class NewFunction : VirtualFunction {
 class InCFuntion : VirtualFunction {
     override val name = "inC"
     override fun getReturnType(params: ASTNode?) = InvalidType()
-    override fun toC(params: ASTNode?) = params!!.toC()
+    override fun toC(params: ASTNode?): String = (params as ASTUnaryNode).data.toString() ?: ""
 }
 
 class PredejFunction : VirtualFunction {
@@ -107,12 +107,17 @@ class PrintFunction: VirtualFunction {
         if (type is PrimitiveType) {
             when {
                 type.toC() == "int" -> return "printf(\"%d\",${params.toC()})"
+                type.toC() == "double" -> return "printf(\"%f\",${params.toC()})"
                 type.toC() == "bool" -> return "(${params.toC()}? fputs(\"true\",stdout): fputs(\"false\",stdout))"
                 type.toC() == "char" -> return "printf(\"%c\",${params.toC()})"
                 type.toC() == "string" -> return "fputs(${params.toC()},stdout)"
                 else -> return "/*${params.toC()}*/"
             }
         }
+        if (type is PointerType) {
+            return "printf(\"%x\",${params.toC()})"
+        }
+
         Printer.err("Invalid print type: $type ${type.toC()}")
 
         return "/*INVALID PRINT*/"

@@ -1,5 +1,6 @@
 object Printer {
     var debug = false;
+    var level = 1;
     var whoami = "czechtina"
     private const val red = "\u001b[31m"
     private const val reset = "\u001b[0m"
@@ -15,8 +16,6 @@ object Printer {
         |   ${greenWrap("--no-compile")}    Do not compile the output C code, it will be created in the same directory as the input file
         |   ${greenWrap("--show-tree")}     Show the AST tree
         |   ${greenWrap("--write-code")}    Write Code in comment before C code
-        |   ${greenWrap("--fpeterek")}      Uses macros from old czechtina.h file
-        |   ${greenWrap("--friendly")}      Generate valid C without macros in comment bellow code
         |   ${greenWrap("--set-dir")}       Set dir for file creation
         |   ${greenWrap("--debug")}         Show debug info
     """
@@ -35,15 +34,15 @@ object Printer {
         |   ${greenWrap("clean")}           Clean the project
     """.trimIndent()
 
-    private fun infoTEXT(text:String):String = "[${whoami} - INFO]: ${text.replace("\n", "\n[INFO]: ")}"
+    private fun infoTEXT(text:String):String = "[${whoami} - INFO]: ${text.replace("\n", "\n[${whoami} - INFO]: ")}"
 
-    private fun successTEXT(text:String) = "$green[${whoami} - SUCCESS]: ${text.replace("\n","\\n[SUCCESS]: ")}$reset"
+    private fun successTEXT(text:String) = "$green[${whoami} - SUCCESS]: ${text.replace("\n","\\n[${whoami} - SUCCESS]: ")}$reset"
 
-    private fun errTEXT(text:String) = "$red[${whoami} - ERR]: ${text.replace("\n","\\n[ERR]: ")}$reset"
+    private fun errTEXT(text:String) = "$red[${whoami} - ERR]: ${text.replace("\n","\\n[${whoami} - ERR]: ")}$reset"
 
-    private fun warningTEXT(text:String) = "$yellow[${whoami} - WARNING]: ${text.replace("\n","\\n[WARNING]: ")}$reset"
+    private fun warningTEXT(text:String) = "$yellow[${whoami} - WARNING]: ${text.replace("\n","\\n[${whoami} - WARNING]: ")}$reset"
 
-    private fun fatalTEXT(text:String) = "$red[${whoami} - FATAL]: ${text.replace("\n","\\n[FATAL]: ")}$reset"
+    private fun fatalTEXT(text:String) = "$red[${whoami} - FATAL]: ${text.replace("\n","\\n[${whoami} - FATAL]: ")}$reset"
 
 
     fun printHelp() {
@@ -55,6 +54,11 @@ object Printer {
 
     fun info(text:String) {
         if (debug)
+            println(infoTEXT(text))
+    }
+
+    fun lowInfo(text:String) {
+        if (debug && level == 0)
             println(infoTEXT(text))
     }
 

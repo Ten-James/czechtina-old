@@ -13,4 +13,10 @@ class PrimitiveType(private val name: String): Type() {
             return name == other.name
         return super.equals(other)
     }
+
+    override fun reType(map: Map<Type, Type>): Type {
+        if (map.containsKey(this))
+            return map[this]!!
+        return this
+    }
 }

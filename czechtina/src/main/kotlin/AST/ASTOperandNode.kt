@@ -13,7 +13,7 @@ class ASTOperandNode(var operand: String, var left: ASTNode, var right: ASTNode)
     override fun retype(map: Map<Type, Type>) {
         left.retype(map)
         right.retype(map)
-        expType = Compiler.calcBinaryType(left, right, operand)
+        //expType = Compiler.calcBinaryType(left, right, operand)
     }
 
     override fun toString(): String {

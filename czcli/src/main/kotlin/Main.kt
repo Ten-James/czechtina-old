@@ -60,6 +60,35 @@ fun main(args: Array<String>) {
         shouldReturn = true
     }
 
+    if (args.any { it == "make-test" }) {
+        val name = getValueOfArg(args,"-n")
+        val file = File("$name.md")
+        if (file.exists()) {
+            Printer.fatal("Test with name $name already exists")
+            return
+        }
+        file.createNewFile()
+        file.writeText(
+            """
+            # $name test
+            
+            ```
+            main {
+                // Your code here
+            }
+            ```
+            
+            ```c
+            int main() {
+            
+            }
+            ```
+            
+            """.trimIndent()
+        )
+        return
+    }
+
     if (shouldReturn) {
         DependencyFile.writeDependencies()
         return

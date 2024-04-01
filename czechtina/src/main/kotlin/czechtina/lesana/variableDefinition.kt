@@ -5,7 +5,9 @@ import compiler.Compiler
 import compiler.types.*
 import cz.j_jzk.klang.lesana.LesanaBuilder
 import cz.j_jzk.klang.parse.NodeID
+import cz.j_jzk.klang.prales.useful.list
 import czechtina.grammar.GrammarToken
+import czechtina.grammar.cAndCzechtinaRegex
 import czechtina.grammar.czechtina
 
 fun LesanaBuilder<ASTNode>.variableDefinition(
@@ -16,7 +18,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
     varDefinition to def(
         variables,
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
-        re(czechtina[GrammarToken.TYPE_ARRAY]!!),
+        re(cAndCzechtinaRegex(listOf(GrammarToken.TYPE_ARRAY))),
         re("<"),
         types,
         re(">")
@@ -25,7 +27,7 @@ fun LesanaBuilder<ASTNode>.variableDefinition(
     varDefinition to def(
         variables,
         re(czechtina[GrammarToken.KEYWORD_VAR_DEFINITION]!!),
-        re(czechtina[GrammarToken.TYPE_ARRAY]!!),
+        re(cAndCzechtinaRegex(listOf(GrammarToken.TYPE_ARRAY))),
         re("<"),
         types,
         re(","),
